@@ -81,6 +81,7 @@ export const Register = () => {
 
       // 3. Registration complete, redirect to their dashboard
       localStorage.setItem('userFullName', formData.fullName || 'User');
+      localStorage.setItem('userRole', formData.role);
       if (formData.role === 'CR') navigate('/cr');
       else navigate('/student');
 
@@ -254,4 +255,5 @@ export const Register = () => {
     </div>
   );
 };
+
 

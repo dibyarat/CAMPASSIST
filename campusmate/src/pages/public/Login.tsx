@@ -29,6 +29,7 @@ export const Login = () => {
       const profile = await apiClient('/users/me');
       
       localStorage.setItem('userFullName', profile.profile?.fullName || 'User');
+      localStorage.setItem('userRole', profile.role);
       if (profile.role === 'CR') navigate('/cr');
       else if (profile.role === 'DEVELOPER') navigate('/developer');
       else navigate('/student');
@@ -143,3 +144,4 @@ export const Login = () => {
     </div>
   );
 };
+

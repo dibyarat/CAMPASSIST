@@ -68,7 +68,11 @@ const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: st
   );
 };
 
-const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode, role?: string }) => { const userName = localStorage.getItem('userFullName') || 'Student'; const [isSidebarOpen, setIsSidebarOpen] = React.useState(false); const [isCollapsed, setIsCollapsed] = React.useState(false);
+const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode, role?: string }) => {
+  const userName = localStorage.getItem('userFullName') || 'Student';
+  const actualRole = localStorage.getItem('userRole') || 'STUDENT';
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
   return (
     <div className="flex h-screen bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 font-sans text-slate-900 overflow-hidden">
       {/* Mobile Sidebar Overlay */}
@@ -168,6 +172,13 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             <button onClick={() => setIsCollapsed(false)} className="w-full flex items-center justify-center p-2 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition">
               <ChevronRight size={24} />
             </button>
+          )}
+
+          {actualRole === 'CR' && (
+            <Link to={role === 'student' ? '/cr' : '/student'} className={`flex items-center gap-3 py-3 rounded-xl transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${role === 'student' ? 'text-purple-600 bg-purple-50 hover:bg-purple-100' : 'text-blue-600 bg-blue-50 hover:bg-blue-100'}`}>
+              <ArrowRightLeft size={20} className="shrink-0" />
+              {!isCollapsed && <span>{role === 'student' ? 'Switch to CR Mode' : 'Switch to Student Mode'}</span>}
+            </Link>
           )}
 
           <Link to="/" className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
