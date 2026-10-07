@@ -30,6 +30,16 @@ export const Users = () => {
     }
   };
 
+    const handleDeleteUser = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+    try {
+      await apiClient(/users/ + id, { method: 'DELETE' });
+      fetchData(); // Refresh list
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
   const handleSaveRole = async () => {
     if (!editUser) return;
     try {
@@ -84,13 +94,16 @@ export const Users = () => {
                   <td className="py-4 px-4 text-slate-600">
                     {user.crAssignment?.section?.name || user.student?.section?.name || '-'}
                   </td>
-                  <td className="py-4 px-4 text-right">
+                                    <td className="py-4 px-4 text-right flex justify-end gap-2">
                      <button onClick={() => {
                         setEditUser(user);
                         setEditRole(user.role);
                         setEditSectionId(user.crAssignment?.sectionId || user.student?.sectionId || '');
                      }} className="p-2 text-slate-400 hover:text-blue-600 transition bg-slate-50 rounded-lg hover:bg-blue-50">
                        <Edit2 size={16} />
+                     </button>
+                     <button onClick={() => handleDeleteUser(user.id)} className="p-2 text-slate-400 hover:text-rose-600 transition bg-slate-50 rounded-lg hover:bg-rose-50">
+                       <Trash2 size={16} />
                      </button>
                   </td>
                 </tr>
@@ -138,3 +151,4 @@ export const Users = () => {
     </div>
   );
 };
+
