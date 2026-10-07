@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag } from 'lucide-react';
+import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag } from 'lucide-react';
 
 // Public
 import { Landing } from './pages/public/Landing';
@@ -42,6 +42,7 @@ import { Submissions as CrSubmissions } from './pages/cr/Submissions';
 // Developer Pages
 import { Dashboard as DevDashboard } from './pages/developer/Dashboard';
 import { Users as DevUsers } from './pages/developer/Users';
+import { DeveloperInstitutions as DevInstitutions } from './pages/developer/Institutions';
 import { Sections as DevSections } from './pages/developer/Sections';
 import { Subjects as DevSubjects } from './pages/developer/Subjects';
 import { Timetable as DevTimetable } from './pages/developer/Timetable';

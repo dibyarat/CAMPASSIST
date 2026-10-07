@@ -53,7 +53,8 @@ export class UsersService {
       include: {
         profile: true,
         student: true,
-        crAssignment: { include: { section: true } }
+        crAssignment: { include: { section: true } },
+          Institution: true
       }
     });
   }
