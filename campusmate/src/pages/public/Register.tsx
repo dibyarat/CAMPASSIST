@@ -10,6 +10,7 @@ export const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [institutions, setInstitutions] = useState<any[]>([]);
+    const [sections, setSections] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchInstitutions = async () => {
@@ -28,7 +29,26 @@ export const Register = () => {
         console.error('Failed to fetch institutions', err);
       }
     };
+
+    const fetchSections = async () => {
+      try {
+        const res = await fetch('https://campassist.onrender.com/api/v1/sections');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setSections(data);
+            if (data.length > 0) {
+              setFormData(prev => ({ ...prev, section: data[0].name }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch sections', err);
+      }
+    };
+
     fetchInstitutions();
+    fetchSections();
   }, []);
   
   const [formData, setFormData] = useState({
@@ -257,6 +277,7 @@ export const Register = () => {
     </div>
   );
 };
+
 
 
 
