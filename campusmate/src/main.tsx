@@ -10,17 +10,27 @@ import ReactDOM from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+  info: React.ErrorInfo | null;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, info: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
     this.setState({ error, info });
   }
 
