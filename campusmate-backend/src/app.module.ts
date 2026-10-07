@@ -32,6 +32,7 @@ import { NotificationsService } from './notifications/notifications.service';
 import { StudyosService } from './studyos/studyos.service';
 import { MapService } from './map/map.service';
 import { AuditService } from './audit/audit.service';
+import { AuditController } from './audit/audit.controller';
 import { InstitutionsModule } from './institutions/institutions.module';
 
 @Module({
@@ -71,3 +72,4 @@ import { InstitutionsModule } from './institutions/institutions.module';
   ],
 })
 export class AppModule {}
+
