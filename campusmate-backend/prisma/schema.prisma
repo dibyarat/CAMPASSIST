@@ -129,7 +129,7 @@ model User {
 model Profile {
   id         String  @id @default(uuid())
   userId     String  @unique
-  user       User    @relation(fields: [userId], references: [id])
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName   String
   avatarUrl  String?
   studentId  String  @unique
@@ -154,7 +154,7 @@ model Profile {
 model Student {
   id     String @id @default(uuid())
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Backreferences for student-specific data
   attendanceRecords  AttendanceRecord[]
@@ -165,7 +165,7 @@ model Student {
 model CrAssignment {
   id        String       @id @default(uuid())
   userId    String       @unique
-  user      User         @relation(fields: [userId], references: [id])
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
   sectionId String
   section   Section      @relation(fields: [sectionId], references: [id])
   termId    String
@@ -450,7 +450,7 @@ model PollVote {
   optionId String
   option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   userId   String
-  user     User       @relation(fields: [userId], references: [id])
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -464,7 +464,7 @@ model PollVote {
 model AuditLog {
   id         String  @id @default(uuid())
   userId     String?
-  user       User?   @relation(fields: [userId], references: [id])
+  user       User? @relation(fields: [userId], references: [id], onDelete: Cascade)
   userRole   String?
   action     String
   entityType String
@@ -491,7 +491,7 @@ model SystemSetting {
 model Notification {
   id                String   @id @default(uuid())
   recipientId       String
-  user              User     @relation("UserNotifications", fields: [recipientId], references: [id])
+  user              User @relation("UserNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
   type              String // ATTENDANCE_REMINDER, CLASS_CANCELLED, etc.
   title             String
   message           String
@@ -549,3 +549,5 @@ model LabRecord {
   subjectId    String
   createdAt    DateTime @default(now())
 }
+
+
