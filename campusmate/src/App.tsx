@@ -169,13 +169,6 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <ChevronRight size={24} />
             </button>
           )}
-          
-          {(role === 'student' || role === 'cr') && (
-            <Link to={role === 'student' ? '/cr' : role === 'cr' ? '/developer' : '/student'} className={`flex items-center gap-3 py-3 rounded-xl transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${role === 'student' ? 'text-purple-600 bg-purple-50 hover:bg-purple-100' : 'text-blue-600 bg-blue-50 hover:bg-blue-100'}`}>
-              <ArrowRightLeft size={20} className="shrink-0" />
-              {!isCollapsed && <span>{role === 'student' ? 'Switch to CR Mode' : role === 'cr' ? 'Switch to Developer Mode' : 'Switch to Student Mode'}</span>}
-            </Link>
-          )}
 
           <Link to="/" className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
             <LogOut size={20} className="shrink-0" />
@@ -279,6 +272,7 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
 
 
 
