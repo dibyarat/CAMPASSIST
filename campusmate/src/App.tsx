@@ -129,7 +129,6 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">My Board</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/announcements`} icon={Bell}>Announcements</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/cancellations`} icon={MapPin}>Cancellations</SidebarLink>
               
@@ -155,7 +154,6 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/subjects`} icon={Bookmark}>Subjects</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/rooms`} icon={MapPin}>Rooms & Facilities</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/resources`} icon={UploadCloud}>Resources</SidebarLink>
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">System</div>}

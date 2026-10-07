@@ -4,7 +4,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
 
-@Controller('api/v1/institutions')
+@Controller('institutions')
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}
