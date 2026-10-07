@@ -5,13 +5,13 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('sections')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
 export class SectionsController {
   constructor(private readonly sectionsService: SectionsService) {}
 
   @Post()
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
-  create(@Body() createSectionDto: { name: string; departmentId: string; semesterId: string }) {
+  create(@Body() createSectionDto: { name: string; departmentName: string; semesterName: string }) {
     return this.sectionsService.create(createSectionDto);
   }
 
@@ -21,15 +21,16 @@ export class SectionsController {
   }
 
   @Post('assign-cr')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   assignCr(@Body() assignCrDto: { userId: string; sectionId: string; termId: string }) {
     return this.sectionsService.assignCr(assignCrDto);
   }
 
   @Delete('assign-cr/:id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   removeCr(@Param('id') assignmentId: string) {
     return this.sectionsService.removeCrAssignment(assignmentId);
   }
 }
-

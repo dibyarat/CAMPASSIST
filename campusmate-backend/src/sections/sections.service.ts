@@ -5,8 +5,34 @@ import { PrismaService } from '../common/prisma.service';
 export class SectionsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { name: string; departmentId: string; semesterId: string }) {
-    return this.prisma.section.create({ data });
+  async create(data: { name: string; departmentName: string; semesterName: string }) {
+    // Upsert Department
+    let department = await this.prisma.department.findFirst({
+      where: { name: data.departmentName }
+    });
+    if (!department) {
+      department = await this.prisma.department.create({
+        data: { name: data.departmentName, code: data.departmentName.substring(0,3).toUpperCase() }
+      });
+    }
+
+    // Upsert Semester
+    let semester = await this.prisma.semester.findFirst({
+      where: { name: data.semesterName }
+    });
+    if (!semester) {
+      semester = await this.prisma.semester.create({
+        data: { name: data.semesterName, number: parseInt(data.semesterName.replace(/[^0-9]/g, '')) || Math.floor(Math.random() * 1000) }
+      });
+    }
+
+    return this.prisma.section.create({
+      data: {
+        name: data.name,
+        departmentId: department.id,
+        semesterId: semester.id
+      }
+    });
   }
 
   async findAll() {
@@ -33,3 +59,4 @@ export class SectionsService {
     });
   }
 }
+
