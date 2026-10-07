@@ -9,6 +9,17 @@ export const Sections = () => {
   const [newSection, setNewSection] = useState({ name: '', departmentName: '', semesterName: '' });
   const [submitting, setSubmitting] = useState(false);
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this section?')) return;
+    try {
+      await apiClient(`/sections/${id}`, { method: 'DELETE' });
+      await fetchSections();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete section');
+    }
+  };
+
   const fetchSections = async () => {
     try {
       const data = await apiClient('/sections');
@@ -114,3 +125,4 @@ export const Sections = () => {
     </div>
   );
 };
+
