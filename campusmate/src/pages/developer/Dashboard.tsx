@@ -28,7 +28,7 @@ export const Dashboard = () => {
           .slice(0, 5)
           .map((u: any) => ({
             user: u.profile?.fullName || 'Unknown User',
-            action: Registered as  + u.role,
+            action: `Registered as ${u.role}`,
             time: new Date(u.createdAt).toLocaleDateString(),
             status: 'Success'
           }));
@@ -126,7 +126,7 @@ export const Dashboard = () => {
                     <td className="p-4 text-slate-600">{log.action}</td>
                     <td className="p-4 text-slate-400">{log.time}</td>
                     <td className="p-4">
-                      <span className={px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-600}>
+                      <span className={`px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-600`}>
                         {log.status}
                       </span>
                     </td>
