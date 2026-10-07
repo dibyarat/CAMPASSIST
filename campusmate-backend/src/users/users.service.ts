@@ -52,7 +52,7 @@ export class UsersService {
     return this.prisma.user.findMany({
       include: {
         profile: true,
-        student: { include: { section: true } },
+        student: true,
         crAssignment: { include: { section: true } }
       }
     });
