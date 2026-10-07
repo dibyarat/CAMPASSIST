@@ -65,7 +65,8 @@ export const Users = () => {
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500">Name</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500">Email</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500">Role</th>
-                <th className="py-3 px-4 text-sm font-semibold text-slate-500">Institution</th>`n                <th className="py-3 px-4 text-sm font-semibold text-slate-500">Section</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-500">Institution</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-500">Section</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500 text-right">Actions</th>
               </tr>
             </thead>
@@ -73,13 +74,14 @@ export const Users = () => {
               {users.map((user, i) => (
                 <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                   <td className="py-4 px-4 font-medium text-slate-800">{user.profile?.fullName || 'N/A'}</td>
-                  <td className="py-4 px-4 text-slate-600">{user.Institution?.code || "-"}</td>`n                  <td className="py-4 px-4 text-slate-600">{user.email}</td>
+                  <td className="py-4 px-4 text-slate-600">{user.email}</td>
                   <td className="py-4 px-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${user.role === 'DEVELOPER' ? 'bg-rose-100 text-rose-700' : user.role === 'CR' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                       {user.role}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-slate-600">{user.Institution?.code || "-"}</td>`n                  <td className="py-4 px-4 text-slate-600">
+                  <td className="py-4 px-4 text-slate-600">{user.Institution?.code || "-"}</td>
+                  <td className="py-4 px-4 text-slate-600">
                     {user.crAssignment?.section?.name || user.student?.section?.name || '-'}
                   </td>
                   <td className="py-4 px-4 text-right">
