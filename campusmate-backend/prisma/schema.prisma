@@ -1,0 +1,551 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  STUDENT
+  CR
+  DEVELOPER
+}
+
+enum StudentType {
+  HOSTELLER
+  DAY_SCHOLAR
+}
+
+enum RoomStatus {
+  FREE_BY_TIMETABLE
+  OCCUPIED_BY_TIMETABLE
+  REPORTED_FREE
+  UNKNOWN_STALE
+  MAINTENANCE
+}
+
+enum AttendanceState {
+  PRESENT
+  ABSENT
+  NOT_UPDATED
+  UNKNOWN
+  REQUESTED
+}
+
+enum SubmissionType {
+  ASSIGNMENT
+  LAB_RECORD
+  PRACTICAL_FILE
+  PROJECT
+  VIVA_FILE
+  PRINTED_FORM
+  DOCUMENT
+  OTHER
+}
+
+enum SubmissionStatus {
+  NOT_SUBMITTED
+  SUBMITTED
+  SUBMITTED_DIGITALLY
+  SUBMITTED_PHYSICALLY
+  COLLECTED
+  WITH_FACULTY
+  RETURNED
+  REJECTED_CORRECTION_REQUIRED
+  UNKNOWN
+}
+
+enum ReminderCategory {
+  EXAM
+  VIVA
+  ASSIGNMENT
+  LAB
+  PROJECT
+  FEE
+  EVENT
+  REGISTRATION
+  SCHOLARSHIP
+  DOCUMENT
+  ATTENDANCE
+  OTHER
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+enum ReminderSchedule {
+  ONE_DAY
+  TWELVE_HOURS
+  THREE_HOURS
+  ONE_HOUR
+  CUSTOM
+}
+
+enum TargetAudience {
+  COLLEGE
+  DEPARTMENT
+  SEMESTER
+  SECTION
+  INDIVIDUAL
+}
+
+// ------------------------------
+// IDENTITY
+// ------------------------------
+
+model Institution {
+  id        String    @id @default(uuid())
+  name      String
+  code      String    @unique
+  users     User[]
+  sections  Section[]
+  createdAt DateTime  @default(now())
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile       Profile?
+  crAssignment  CrAssignment?
+  student       Student?
+  pollVotes     PollVote[]
+  auditLogs     AuditLog[]
+  notifications Notification[] @relation("UserNotifications")
+  Institution   Institution?   @relation(fields: [institutionId], references: [id])
+  institutionId String?
+}
+
+model Profile {
+  id         String  @id @default(uuid())
+  userId     String  @unique
+  user       User    @relation(fields: [userId], references: [id])
+  fullName   String
+  avatarUrl  String?
+  studentId  String  @unique
+  rollNumber String?
+  department String?
+  semester   String?
+  section    String?
+
+  studentType StudentType @default(DAY_SCHOLAR)
+  hostelName  String?
+  hostelBlock String?
+  hostelRoom  String?
+
+  github    String?
+  linkedin  String?
+  portfolio String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Backreferences for student-specific data
+  attendanceRecords  AttendanceRecord[]
+  attendanceRequests AttendanceRequest[]
+  submissions        Submission[]
+}
+
+model CrAssignment {
+  id        String       @id @default(uuid())
+  userId    String       @unique
+  user      User         @relation(fields: [userId], references: [id])
+  sectionId String
+  section   Section      @relation(fields: [sectionId], references: [id])
+  termId    String
+  term      AcademicTerm @relation(fields: [termId], references: [id])
+
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  isActive  Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, sectionId, isActive])
+}
+
+// ------------------------------
+// ACADEMIC MASTER
+// ------------------------------
+
+model Department {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  code     String    @unique
+  sections Section[]
+}
+
+model Semester {
+  id       String    @id @default(uuid())
+  number   Int       @unique
+  name     String
+  sections Section[]
+}
+
+model Section {
+  institutionId String?
+  institution   Institution? @relation(fields: [institutionId], references: [id])
+  id            String       @id @default(uuid())
+  name          String
+  departmentId  String
+  department    Department   @relation(fields: [departmentId], references: [id])
+  semesterId    String
+  semester      Semester     @relation(fields: [semesterId], references: [id])
+
+  crAssignments CrAssignment[]
+  subjects      SubjectSection[]
+  timetable     TimetableEntry[]
+}
+
+model Subject {
+  id          String           @id @default(uuid())
+  code        String           @unique
+  name        String
+  credits     Int
+  type        String // Theory, Practical
+  sections    SubjectSection[]
+  timetable   TimetableEntry[]
+  exams       Exam[]
+  submissions Submission[]
+}
+
+model SubjectSection {
+  subjectId String
+  sectionId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  section   Section @relation(fields: [sectionId], references: [id])
+
+  @@id([subjectId, sectionId])
+}
+
+model AcademicTerm {
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isCurrent Boolean  @default(false)
+
+  crAssignments CrAssignment[]
+  timetable     TimetableEntry[]
+  exams         Exam[]
+}
+
+// ------------------------------
+// TIMETABLE
+// ------------------------------
+
+model TimetableEntry {
+  id        String       @id @default(uuid())
+  subjectId String
+  subject   Subject      @relation(fields: [subjectId], references: [id])
+  sectionId String
+  section   Section      @relation(fields: [sectionId], references: [id])
+  roomId    String?
+  room      Room?        @relation(fields: [roomId], references: [id])
+  termId    String
+  term      AcademicTerm @relation(fields: [termId], references: [id])
+
+  facultyRef String?
+  dayOfWeek  Int // 0 = Sunday, 1 = Monday, etc.
+  startTime  String // HH:mm
+  endTime    String // HH:mm
+  status     String  @default("ACTIVE") // ACTIVE, CANCELLED
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ------------------------------
+// ROOMS
+// ------------------------------
+
+model Room {
+  id         String     @id @default(uuid())
+  roomNumber String     @unique
+  building   String?
+  block      String?
+  floor      String?
+  capacity   Int        @default(0)
+  isAC       Boolean    @default(false)
+  isLab      Boolean    @default(false)
+  equipment  String?
+  status     RoomStatus @default(FREE_BY_TIMETABLE)
+  notes      String?
+
+  timetable   TimetableEntry[]
+  roomReports RoomReport[]
+  exams       Exam[]
+}
+
+model RoomReport {
+  id         String     @id @default(uuid())
+  roomId     String
+  room       Room       @relation(fields: [roomId], references: [id])
+  reportedBy String
+  status     RoomStatus
+  notes      String?
+  createdAt  DateTime   @default(now())
+}
+
+// ------------------------------
+// ATTENDANCE
+// ------------------------------
+
+model AttendanceRecord {
+  id         String          @id @default(uuid())
+  studentId  String
+  student    Student         @relation(fields: [studentId], references: [id])
+  subjectRef String // Subject Code
+  date       DateTime
+  state      AttendanceState
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model AttendanceRequest {
+  id          String    @id @default(uuid())
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id])
+  subjectRef  String
+  sessionDate DateTime
+  reason      String
+  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED, RESOLVED
+  reviewerId  String?
+  reviewNote  String?
+  resolvedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AttendanceRule {
+  id            String  @id @default(uuid())
+  targetPercent Float   @default(75.0)
+  active        Boolean @default(true)
+}
+
+// ------------------------------
+// EXAMS
+// ------------------------------
+
+model Exam {
+  id        String       @id @default(uuid())
+  subjectId String
+  subject   Subject      @relation(fields: [subjectId], references: [id])
+  roomId    String?
+  room      Room?        @relation(fields: [roomId], references: [id])
+  termId    String
+  term      AcademicTerm @relation(fields: [termId], references: [id])
+
+  examType  String
+  date      DateTime
+  startTime String
+  endTime   String
+  notes     String?
+  status    String   @default("SCHEDULED")
+
+  seatings ExamSeating[]
+}
+
+model ExamSeating {
+  id          String  @id @default(uuid())
+  examId      String
+  exam        Exam    @relation(fields: [examId], references: [id])
+  rollNumber  String
+  studentId   String?
+  studentName String?
+  roomHall    String
+  seat        String
+  row         String?
+  column      String?
+
+  @@unique([examId, rollNumber])
+  @@unique([examId, roomHall, seat])
+}
+
+// ------------------------------
+// PRODUCTIVITY
+// ------------------------------
+
+model Submission {
+  id        String  @id @default(uuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  title         String
+  type          SubmissionType
+  status        SubmissionStatus @default(NOT_SUBMITTED)
+  deadline      DateTime?
+  submittedDate DateTime?
+  facultyRef    String?
+  isDigital     Boolean          @default(false)
+  fileReference String?
+  note          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reminder {
+  id          String           @id @default(uuid())
+  category    ReminderCategory
+  priority    Priority         @default(NORMAL)
+  schedule    ReminderSchedule
+  target      TargetAudience
+  title       String
+  description String?
+  dueDate     DateTime
+  creatorId   String
+
+  createdAt DateTime @default(now())
+}
+
+model Poll {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  target      TargetAudience
+  status      String         @default("ACTIVE")
+  creatorId   String
+  startDate   DateTime       @default(now())
+  endDate     DateTime?
+
+  options PollOption[]
+  votes   PollVote[]
+}
+
+model PollOption {
+  id     String @id @default(uuid())
+  pollId String
+  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  text   String
+
+  votes PollVote[]
+}
+
+model PollVote {
+  id       String     @id @default(uuid())
+  pollId   String
+  poll     Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId String
+  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User       @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([pollId, userId]) // Enforce 1 vote per user per poll
+}
+
+// ------------------------------
+// SYSTEM
+// ------------------------------
+
+model AuditLog {
+  id         String  @id @default(uuid())
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id])
+  userRole   String?
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  status     String
+  ipAddress  String?
+
+  timestamp DateTime @default(now())
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+// ------------------------------
+// NOTIFICATIONS
+// ------------------------------
+
+model Notification {
+  id                String   @id @default(uuid())
+  recipientId       String
+  user              User     @relation("UserNotifications", fields: [recipientId], references: [id])
+  type              String // ATTENDANCE_REMINDER, CLASS_CANCELLED, etc.
+  title             String
+  message           String
+  relatedEntityType String?
+  relatedEntityId   String?
+  isRead            Boolean  @default(false)
+  createdAt         DateTime @default(now())
+}
+
+model Announcement {
+  id          String    @id @default(uuid())
+  title       String
+  content     String
+  target      String // COLLEGE, DEPARTMENT, SECTION
+  priority    Priority  @default(NORMAL)
+  creatorId   String
+  isPublished Boolean   @default(true)
+  publishDate DateTime  @default(now())
+  expiryDate  DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// ------------------------------
+// STUDYOS & RESOURCES
+// ------------------------------
+
+model AcademicResource {
+  id            String   @id @default(uuid())
+  title         String
+  type          String // LAB_PDF, ASSIGNMENT_FORMAT
+  subjectId     String?
+  fileReference String
+  uploaderId    String
+  createdAt     DateTime @default(now())
+}
+
+model StudyOSResource {
+  id            String   @id @default(uuid())
+  title         String
+  subjectId     String?
+  category      String
+  fileReference String
+  uploaderId    String
+  createdAt     DateTime @default(now())
+}
+
+model LabRecord {
+  id           String   @id @default(uuid())
+  experimentNo Int
+  name         String
+  aim          String?
+  procedure    String?
+  code         String?
+  output       String?
+  subjectId    String
+  createdAt    DateTime @default(now())
+}

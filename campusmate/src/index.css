@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  /* Logo color palette */
+  --brand-cyan: #0ea5e9;
+  --brand-blue: #3b82f6;
+  --brand-purple: #8b5cf6;
+  --brand-pink: #f43f5e;
+  --brand-navy: #0f172a;
+  
+  --gradient-primary: linear-gradient(to right, #0ea5e9, #8b5cf6, #ec4899);
+  --gradient-secondary: linear-gradient(to right, #3b82f6, #8b5cf6);
+  
+  --font-family: 'Inter', system-ui, sans-serif;
+  
+  --bg-primary: #f4f7fb;
+  --bg-card: #ffffff;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  
+  --border-color: #e2e8f0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base utility for gradient text */
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Background gradient utility */
+.bg-gradient-primary {
+  background: var(--gradient-primary);
+}
+
