@@ -41,6 +41,10 @@ export class SectionsService {
     });
   }
 
+  async remove(id: string) {
+    return this.prisma.section.delete({ where: { id } });
+  }
+
   async assignCr(data: { userId: string; sectionId: string; termId: string }) {
     return this.prisma.crAssignment.create({
       data: {
@@ -59,4 +63,5 @@ export class SectionsService {
     });
   }
 }
+
 

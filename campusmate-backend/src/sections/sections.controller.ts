@@ -27,6 +27,13 @@ export class SectionsController {
     return this.sectionsService.assignCr(assignCrDto);
   }
 
+  @Delete(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @Roles('DEVELOPER')
+  remove(@Param('id') id: string) {
+    return this.sectionsService.remove(id);
+  }
+
   @Delete('assign-cr/:id')
   @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
@@ -34,3 +41,4 @@ export class SectionsController {
     return this.sectionsService.removeCrAssignment(assignmentId);
   }
 }
+
