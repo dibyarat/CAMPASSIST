@@ -2,10 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@n
 import { InstitutionsService } from './institutions.service';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
 
 @Controller('api/v1/institutions')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(SupabaseAuthGuard, RolesGuard)
 export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}
 
