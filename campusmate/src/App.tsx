@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react
 import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag } from 'lucide-react';
 
 // Public
+import { AnalyticsTracker } from './utils/AnalyticsTracker';
+import { trackEvent } from './utils/analytics';
 import { Landing } from './pages/public/Landing';
 import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
@@ -181,7 +183,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             </Link>
           )}
 
-          <Link to="/" className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+          <Link to="/" onClick={() => trackEvent('logout')} className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
             <LogOut size={20} className="shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </Link>
@@ -223,6 +225,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
 export default function App() {
   return (
     <BrowserRouter>
+      <AnalyticsTracker />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
@@ -283,6 +286,8 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+
 
 
 

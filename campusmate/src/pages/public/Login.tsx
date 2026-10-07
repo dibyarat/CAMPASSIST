@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
@@ -30,6 +31,7 @@ export const Login = () => {
       
       localStorage.setItem('userFullName', profile.profile?.fullName || 'User');
       localStorage.setItem('userRole', profile.role);
+      trackEvent('login', { method: 'email', role: profile.role });
       if (profile.role === 'CR') navigate('/cr');
       else if (profile.role === 'DEVELOPER') navigate('/developer');
       else navigate('/student');
@@ -144,4 +146,5 @@ export const Login = () => {
     </div>
   );
 };
+
 

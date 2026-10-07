@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2 } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
@@ -82,6 +83,7 @@ export const Register = () => {
       // 3. Registration complete, redirect to their dashboard
       localStorage.setItem('userFullName', formData.fullName || 'User');
       localStorage.setItem('userRole', formData.role);
+      trackEvent('signup', { method: 'email', role: formData.role });
       if (formData.role === 'CR') navigate('/cr');
       else navigate('/student');
 
@@ -255,5 +257,6 @@ export const Register = () => {
     </div>
   );
 };
+
 
 
