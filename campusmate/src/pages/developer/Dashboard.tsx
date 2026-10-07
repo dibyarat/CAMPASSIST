@@ -4,8 +4,7 @@ import { apiClient } from '../../services/apiClient';
 
 export const Dashboard = () => {
   const [stats, setStats] = useState({ users: 0, sections: 0, institutions: 0 });
-  const [logs, setLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
   const [health, setHealth] = useState({ responseTime: 0, dbStatus: 'Optimal' });
 
   useEffect(() => {
@@ -27,18 +26,7 @@ export const Dashboard = () => {
           institutions: institutionsData.length || 0
         });
 
-        // Generate logs from recent user registrations
-        const recentUsers = [...usersData]
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .slice(0, 5)
-          .map((u: any) => ({
-            user: u.profile?.fullName || 'Unknown User',
-            action: `Registered as ${u.role}`,
-            time: new Date(u.createdAt).toLocaleDateString(),
-            status: 'Success'
-          }));
         
-        setLogs(recentUsers);
 
       } catch (err) {
         console.error("Failed to fetch dashboard stats", err);
@@ -107,39 +95,7 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-slate-900">Recent System Activity</h3>
-              <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">View All</button>
-            </div>
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="bg-slate-50 text-slate-500">
-                  <th className="font-semibold p-4">User / System</th>
-                  <th className="font-semibold p-4">Action</th>
-                  <th className="font-semibold p-4">Time</th>
-                  <th className="font-semibold p-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {logs.length === 0 && (
-                  <tr><td colSpan={4} className="p-4 text-center text-slate-500">No recent activity found.</td></tr>
-                )}
-                {logs.map((log, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition">
-                    <td className="p-4 font-bold text-slate-900">{log.user}</td>
-                    <td className="p-4 text-slate-600">{log.action}</td>
-                    <td className="p-4 text-slate-400">{log.time}</td>
-                    <td className="p-4">
-                      <span className={`px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-600`}>
-                        {log.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+
         </div>
 
         {/* Right Column */}
@@ -192,5 +148,6 @@ export const Dashboard = () => {
     </div>
   );
 };
+
 
 

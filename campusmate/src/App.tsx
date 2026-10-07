@@ -51,7 +51,6 @@ import { Timetable as DevTimetable } from './pages/developer/Timetable';
 import { Rooms as DevRooms } from './pages/developer/Rooms';
 import { Attendance as DevAttendance } from './pages/developer/Attendance';
 import { Resources as DevResources } from './pages/developer/Resources';
-import { Audit as DevAudit } from './pages/developer/Audit';
 import logoIcon from './assets/logo-icon.png';
 
 const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: string, icon: any, children: React.ReactNode, isCollapsed?: boolean }) => {
@@ -163,7 +162,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/resources`} icon={UploadCloud}>Resources</SidebarLink>
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">System</div>}
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/audit`} icon={FileText}>Audit Logs</SidebarLink>
+
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/settings`} icon={Users}>Settings</SidebarLink>
             </>
           )}
@@ -276,16 +275,17 @@ export default function App() {
           <Route path="/developer/subjects" element={<MainLayout role="developer"><DevSubjects /></MainLayout>} />
           <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
           <Route path="/developer/rooms" element={<MainLayout role="developer"><DevRooms /></MainLayout>} />
-          <Route path="/developer/attendance" element={<MainLayout role="developer"><DevAttendance /></MainLayout>} />
-          <Route path="/developer/resources" element={<MainLayout role="developer"><DevResources /></MainLayout>} />
-          <Route path="/developer/audit" element={<MainLayout role="developer"><DevAudit /></MainLayout>} />
-          <Route path="/developer/settings" element={<MainLayout role="developer"><StudentSettings /></MainLayout>} />
+                    <Route path="/developer/resources" element={<MainLayout role="developer"><DevResources /></MainLayout>} />
+                    <Route path="/developer/settings" element={<MainLayout role="developer"><StudentSettings /></MainLayout>} />
         
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   );
 }
+
+
+
 
 
 

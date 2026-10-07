@@ -5,20 +5,49 @@ import { apiClient } from '../../services/apiClient';
 export const Rooms = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [newRoom, setNewRoom] = useState({ roomNumber: '', building: '', capacity: 60, isLab: false });
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchRooms = async () => {
+    try {
+      const data = await apiClient('/rooms');
+      setRooms(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Failed to load rooms", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const data = await apiClient('/rooms');
-        setRooms(data);
-      } catch (error) {
-        console.error("Failed to load rooms", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRooms();
   }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await apiClient('/rooms', { method: 'POST', body: JSON.stringify({...newRoom, capacity: parseInt(newRoom.capacity as any)}) });
+      setShowModal(false);
+      setNewRoom({ roomNumber: '', building: '', capacity: 60, isLab: false });
+      fetchRooms();
+    } catch (err) {
+      alert('Failed to add room');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure?')) return;
+    try {
+      await apiClient(/rooms/+id, { method: 'DELETE' });
+      fetchRooms();
+    } catch (err) {
+      alert('Failed to delete room');
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-10">
@@ -27,22 +56,42 @@ export const Rooms = () => {
           <h1 className="text-2xl font-bold text-slate-900">Room Management</h1>
           <p className="text-slate-500 font-medium mt-1">Manage physical classrooms, labs, and capacities.</p>
         </div>
-        <button className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-slate-800 transition">
+        <button onClick={() => setShowModal(true)} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 hover:bg-slate-800 transition">
           <Plus size={18} /> Add Room
         </button>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input type="text" placeholder="Search room number..." className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Add New Room</h2>
+            <form onSubmit={handleAdd} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Room Number</label>
+                <input required type="text" value={newRoom.roomNumber} onChange={e => setNewRoom({...newRoom, roomNumber: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Building</label>
+                <input type="text" value={newRoom.building} onChange={e => setNewRoom({...newRoom, building: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Capacity</label>
+                <input required type="number" value={newRoom.capacity} onChange={e => setNewRoom({...newRoom, capacity: e.target.value as any})} className="w-full px-3 py-2 border rounded-xl" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={newRoom.isLab} onChange={e => setNewRoom({...newRoom, isLab: e.target.checked})} id="isLab" />
+                <label htmlFor="isLab" className="text-sm font-medium text-slate-700">Is Lab</label>
+              </div>
+              <div className="flex gap-3 justify-end mt-6">
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>
+                <button type="submit" disabled={submitting} className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50">Save</button>
+              </div>
+            </form>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white rounded-xl text-slate-600 hover:bg-slate-50 transition">
-            <Filter size={18} /> Filter
-          </button>
         </div>
+      )}
 
+      <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
         <div className="overflow-x-auto">
           {loading ? (
             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" /></div>
@@ -73,8 +122,7 @@ export const Rooms = () => {
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right space-x-2">
-                      <button className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"><Edit2 size={16} /></button>
-                      <button className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition"><Trash2 size={16} /></button>
+                      <button onClick={() => handleDelete(room.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition"><Trash2 size={16} /></button>
                     </td>
                   </tr>
                 ))}
