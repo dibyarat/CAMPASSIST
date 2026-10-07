@@ -264,7 +264,7 @@ export default function App() {
         
                   {/* Developer Routes */}
           <Route path="/developer" element={<MainLayout role="developer"><DevDashboard /></MainLayout>} />
-          <Route path="/developer/users" element={<MainLayout role="developer"><DevUsers /></MainLayout>} />
+          <Route path="/developer/users" element={<MainLayout role="developer"><DevUsers /></MainLayout>} />`n          <Route path="/developer/institutions" element={<MainLayout role="developer"><DevInstitutions /></MainLayout>} />
           <Route path="/developer/sections" element={<MainLayout role="developer"><DevSections /></MainLayout>} />
           <Route path="/developer/subjects" element={<MainLayout role="developer"><DevSubjects /></MainLayout>} />
           <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
