@@ -6,16 +6,21 @@ export const Dashboard = () => {
   const [stats, setStats] = useState({ users: 0, sections: 0, institutions: 0 });
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [health, setHealth] = useState({ responseTime: 0, dbStatus: 'Optimal' });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [usersData, sectionsData, institutionsData] = await Promise.all([
+        const startTime = performance.now();
+        const [usersData, sectionsData, institutionsData, healthData] = await Promise.all([
           apiClient('/users'),
           apiClient('/sections'),
-          apiClient('/institutions')
+          apiClient('/institutions'),
+          apiClient('/health')
         ]);
         
+        const endTime = performance.now();
+        setHealth({ responseTime: Math.round(endTime - startTime), dbStatus: healthData.services.database === 'connected' ? 'Optimal' : 'Critical' });
         setStats({
           users: usersData.length || 0,
           sections: sectionsData.length || 0,
@@ -165,7 +170,7 @@ export const Dashboard = () => {
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
                   <span>API Response Time</span>
-                  <span className="text-emerald-400">Stable</span>
+                  <span className="text-emerald-400">{health.responseTime}ms</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
                   <div className="w-1/4 h-full bg-emerald-400"></div>
@@ -174,7 +179,7 @@ export const Dashboard = () => {
               <div>
                 <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
                   <span>Database Load</span>
-                  <span className="text-emerald-400">Optimal</span>
+                  <span className="text-emerald-400">{health.dbStatus}</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
                   <div className="w-[12%] h-full bg-emerald-400"></div>
@@ -187,4 +192,5 @@ export const Dashboard = () => {
     </div>
   );
 };
+
 
