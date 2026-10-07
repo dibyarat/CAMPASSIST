@@ -14,6 +14,10 @@ export class RoomsService {
     return this.prisma.room.findMany();
   }
 
+  async remove(id: string) {
+    return this.prisma.room.delete({ where: { id } });
+  }
+
   async updateStatus(id: string, status: RoomStatus, reportedBy: string, notes?: string) {
     const room = await this.prisma.room.findUnique({ where: { id } });
     if (!room) throw new NotFoundException('Room not found');
@@ -44,3 +48,4 @@ export class RoomsService {
     });
   }
 }
+

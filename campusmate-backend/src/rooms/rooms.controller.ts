@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -27,6 +27,12 @@ export class RoomsController {
     return this.roomsService.getAvailableRooms();
   }
 
+  @Delete(':id')
+  @Roles('DEVELOPER')
+  remove(@Param('id') id: string) {
+    return this.roomsService.remove(id);
+  }
+
   @Patch(':id/report')
   @Roles('CR', 'DEVELOPER')
   reportRoomStatus(
@@ -37,4 +43,5 @@ export class RoomsController {
     return this.roomsService.updateStatus(roomId, data.status, user.id, data.notes);
   }
 }
+
 

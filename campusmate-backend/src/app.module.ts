@@ -31,12 +31,11 @@ import { PollsService } from './polls/polls.service';
 import { NotificationsService } from './notifications/notifications.service';
 import { StudyosService } from './studyos/studyos.service';
 import { MapService } from './map/map.service';
-import { AuditService } from './audit/audit.service';
-import { AuditController } from './audit/audit.controller';
 import { InstitutionsModule } from './institutions/institutions.module';
+import { SubjectsModule } from './subjects/subjects.module';
 
 @Module({
-  imports: [InstitutionsModule],
+  imports: [InstitutionsModule, SubjectsModule],
   controllers: [
     AppController,
     HealthController,
@@ -56,7 +55,6 @@ import { InstitutionsModule } from './institutions/institutions.module';
   providers: [
     AppService,
     PrismaService,
-    AuditService,
     UsersService,
     AttendanceService,
     DepartmentsService,
@@ -72,4 +70,6 @@ import { InstitutionsModule } from './institutions/institutions.module';
   ],
 })
 export class AppModule {}
+
+
 
