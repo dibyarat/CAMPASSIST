@@ -56,7 +56,7 @@ export const Register = () => {
     email: '',
     password: '',
     rollNumber: '',
-    section: 'CS-A',
+    section: '',
     role: 'STUDENT',
     institutionCode: ''
   });
@@ -247,14 +247,16 @@ export const Register = () => {
                     <MapPin className="h-5 w-5 text-slate-400" />
                   </div>
                   <select
-                    name="section"
-                    value={formData.section}
+                      name="section"
+                      required
+                      value={formData.section}
                     onChange={handleChange}
                     className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
                   >
-                    <option value="CS-A">CS-A</option>
-                    <option value="CS-B">CS-B</option>
-                    <option value="IT-A">IT-A</option>
+                    <option value="">Select a section...</option>
+                      {sections.map(sec => (
+                        <option key={sec.id} value={sec.name}>{sec.name}</option>
+                      ))}
                   </select>
                 </div>
               </div>
@@ -277,6 +279,9 @@ export const Register = () => {
     </div>
   );
 };
+
+
+
 
 
 
