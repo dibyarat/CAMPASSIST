@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient';
 
-const BASE_URL = 'http://localhost:3000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://campassist.onrender.com/api/v1';
 
 export const apiClient = async (endpoint: string, options: RequestInit = {}) => {
   // Grab the current active session from Supabase
