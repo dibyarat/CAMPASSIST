@@ -90,10 +90,8 @@ export class UsersService {
       include: { profile: true }
     });
   }
+
+  async deleteUser(id: string) {
+    return this.prisma.user.delete({ where: { id } });
+  }
 }
-
-
-
-
-
-
