@@ -11,6 +11,7 @@ export class UsersService {
     if (institutionCode) {
       const inst = await this.prisma.institution.findUnique({ where: { code: institutionCode } });
       if (inst) institutionId = inst.id;
+      else throw new NotFoundException('Invalid Institution Code');
     }
 
     const user = await this.prisma.user.upsert({
