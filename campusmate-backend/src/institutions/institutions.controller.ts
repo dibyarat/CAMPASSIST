@@ -5,11 +5,11 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
 
 @Controller('institutions')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
 export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}
 
   @Post()
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   create(@Body() createInstitutionDto: any) {
     return this.institutionsService.create(createInstitutionDto);
@@ -21,17 +21,20 @@ export class InstitutionsController {
   }
 
   @Get(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   findOne(@Param('id') id: string) {
     return this.institutionsService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   update(@Param('id') id: string, @Body() updateInstitutionDto: any) {
     return this.institutionsService.update(id, updateInstitutionDto);
   }
 
   @Delete(':id')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   remove(@Param('id') id: string) {
     return this.institutionsService.remove(id);
