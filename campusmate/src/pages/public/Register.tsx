@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2 } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
 
@@ -8,6 +8,27 @@ export const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [institutions, setInstitutions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchInstitutions = async () => {
+      try {
+        const res = await fetch('https://campassist.onrender.com/api/v1/institutions');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            setInstitutions(data);
+            if (data.length > 0) {
+              setFormData(prev => ({ ...prev, institutionCode: data[0].code }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch institutions', err);
+      }
+    };
+    fetchInstitutions();
+  }, []);
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -157,18 +178,23 @@ export const Register = () => {
               <div>
                 <label className="block text-sm font-medium text-slate-700">Institution Code</label>
                 <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-400" />
-                  </div>
-                  <input
-                    name="institutionCode"
-                    type="text"
-                    required
-                    value={formData.institutionCode}
-                    onChange={handleChange}
-                    className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="e.g. HARVARD-CS"
-                  />
+                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Building2 className="h-5 w-5 text-slate-400" />
+                </div>
+                <select
+                  name="institutionCode"
+                  required
+                  value={formData.institutionCode}
+                  onChange={handleChange}
+                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
+                >
+                  {institutions.length === 0 && <option value="">Loading institutions...</option>}
+                  {institutions.map(inst => (
+                    <option key={inst.id} value={inst.code}>
+                      {inst.name} ({inst.code})
+                    </option>
+                  ))}
+                </select>
                 </div>
               </div>
 
@@ -228,3 +254,4 @@ export const Register = () => {
     </div>
   );
 };
+
