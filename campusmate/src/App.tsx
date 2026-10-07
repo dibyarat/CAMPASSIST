@@ -148,6 +148,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-2">Overview</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}`} icon={LayoutDashboard}>Dashboard</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/users`} icon={Users}>Users</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/institutions`} icon={Building2}>Institutions</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/sections`} icon={FileText}>Sections</SidebarLink>
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Management</div>}
@@ -264,7 +265,8 @@ export default function App() {
         
                   {/* Developer Routes */}
           <Route path="/developer" element={<MainLayout role="developer"><DevDashboard /></MainLayout>} />
-          <Route path="/developer/users" element={<MainLayout role="developer"><DevUsers /></MainLayout>} />`n          <Route path="/developer/institutions" element={<MainLayout role="developer"><DevInstitutions /></MainLayout>} />
+          <Route path="/developer/users" element={<MainLayout role="developer"><DevUsers /></MainLayout>} />
+          <Route path="/developer/institutions" element={<MainLayout role="developer"><DevInstitutions /></MainLayout>} />
           <Route path="/developer/sections" element={<MainLayout role="developer"><DevSections /></MainLayout>} />
           <Route path="/developer/subjects" element={<MainLayout role="developer"><DevSubjects /></MainLayout>} />
           <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
