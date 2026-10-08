@@ -110,7 +110,7 @@ export const Sections = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="py-3 px-4 text-sm font-semibold text-slate-500">Section ID</th>
+                  <th className="py-3 px-4 text-sm font-semibold text-slate-500">Section Name</th>
                   <th className="py-3 px-4 text-sm font-semibold text-slate-500">Department</th>
                   <th className="py-3 px-4 text-sm font-semibold text-slate-500">Semester</th>
                 </tr>
@@ -121,8 +121,8 @@ export const Sections = () => {
                 ) : sections.map((sec, i) => (
                   <tr key={i} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                     <td className="py-4 px-4 font-bold text-slate-900">{sec.name}</td>
-                    <td className="py-4 px-4 text-slate-600">{sec.department?.name || '-'}</td>
-                    <td className="py-4 px-4 text-slate-600">{sec.semester?.name || '-'}</td>
+                    <td className="py-4 px-4 text-slate-600">{sec.department?.name || '-'} ({sec.department?.code || '-'})</td>
+                    <td className="py-4 px-4 text-slate-600">{sec.semester?.name || '-'} (Sem {sec.semester?.number || '-'})</td>
                   </tr>
                 ))}
               </tbody>
