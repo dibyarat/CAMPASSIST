@@ -1,0 +1,57 @@
+﻿import { lazy } from 'react';
+
+export const StudentDashboard = lazy(() => import('./pages/student/Dashboard').then(module => ({ default: module.Dashboard })));
+export const StudentTimetable = lazy(() => import('./pages/student/Timetable').then(module => ({ default: module.Timetable })));
+export const StudentAttendance = lazy(() => import('./pages/student/Attendance').then(module => ({ default: module.Attendance })));
+export const StudentAttendancePlanner = lazy(() => import('./pages/student/AttendancePlanner').then(module => ({ default: module.AttendancePlanner })));
+export const StudentSgpaCgpa = lazy(() => import('./pages/student/SgpaCgpa').then(module => ({ default: module.SgpaCgpa })));
+export const StudentFindRoom = lazy(() => import('./pages/student/FindRoom').then(module => ({ default: module.FindRoom })));
+export const StudentStudyOS = lazy(() => import('./pages/student/StudyOS').then(module => ({ default: module.StudyOS })));
+export const StudentSubmissions = lazy(() => import('./pages/student/Submissions').then(module => ({ default: module.Submissions })));
+export const StudentContacts = lazy(() => import('./pages/student/Contacts').then(module => ({ default: module.Contacts })));
+export const StudentNotifications = lazy(() => import('./pages/student/Notifications').then(module => ({ default: module.Notifications })));
+export const StudentRequests = lazy(() => import('./pages/student/Requests').then(module => ({ default: module.Requests })));
+export const StudentPolls = lazy(() => import('./pages/student/Polls').then(module => ({ default: module.Polls })));
+export const StudentReminderCenter = lazy(() => import('./pages/student/ReminderCenter').then(module => ({ default: module.ReminderCenter })));
+export const StudentExamSchedule = lazy(() => import('./pages/student/ExamSchedule').then(module => ({ default: module.ExamSchedule })));
+export const StudentExamSeat = lazy(() => import('./pages/student/ExamSeat').then(module => ({ default: module.ExamSeat })));
+export const StudentEvents = lazy(() => import('./pages/student/Events').then(module => ({ default: module.Events })));
+export const StudentCollegeMap = lazy(() => import('./pages/student/CollegeMap').then(module => ({ default: module.CollegeMap })));
+export const StudentOffers = lazy(() => import('./pages/student/Offers').then(module => ({ default: module.Offers })));
+export const StudentSettings = lazy(() => import('./pages/student/Settings').then(module => ({ default: module.Settings })));
+export const StudentAcademicPdfs = lazy(() => import('./pages/student/AcademicPdfs').then(module => ({ default: module.AcademicPdfs })));
+export const StudentProfile = lazy(() => import('./pages/student/Profile').then(module => ({ default: module.Profile })));
+
+export const CrDashboard = lazy(() => import('./pages/cr/Dashboard').then(module => ({ default: module.Dashboard })));
+export const CrTimetable = lazy(() => import('./pages/cr/Timetable').then(module => ({ default: module.Timetable })));
+export const CrAttendance = lazy(() => import('./pages/cr/Attendance').then(module => ({ default: module.Attendance })));
+export const CrAnnouncements = lazy(() => import('./pages/cr/Announcements').then(module => ({ default: module.Announcements })));
+export const CrCancellations = lazy(() => import('./pages/cr/Cancellations').then(module => ({ default: module.Cancellations })));
+export const CrReports = lazy(() => import('./pages/cr/Reports').then(module => ({ default: module.Reports })));
+export const CrPolls = lazy(() => import('./pages/cr/Polls').then(module => ({ default: module.Polls })));
+export const CrReminders = lazy(() => import('./pages/cr/Reminders').then(module => ({ default: module.Reminders })));
+export const CrSubmissions = lazy(() => import('./pages/cr/Submissions').then(module => ({ default: module.Submissions })));
+
+export const DevDashboard = lazy(() => import('./pages/developer/Dashboard').then(module => ({ default: module.Dashboard })));
+export const DevUsers = lazy(() => import('./pages/developer/Users').then(module => ({ default: module.Users })));
+export const DevInstitutions = lazy(() => import('./pages/developer/Institutions').then(module => ({ default: module.DeveloperInstitutions })));
+export const DevSections = lazy(() => import('./pages/developer/Sections').then(module => ({ default: module.Sections })));
+export const DevSubjects = lazy(() => import('./pages/developer/Subjects').then(module => ({ default: module.Subjects })));
+export const DevTimetable = lazy(() => import('./pages/developer/Timetable').then(module => ({ default: module.Timetable })));
+export const DevRooms = lazy(() => import('./pages/developer/Rooms').then(module => ({ default: module.Rooms })));
+export const DevAttendance = lazy(() => import('./pages/developer/Attendance').then(module => ({ default: module.Attendance })));
+export const DevResources = lazy(() => import('./pages/developer/Resources').then(module => ({ default: module.Resources })));
+export const DevEvents = lazy(() => import('./pages/developer/Events').then(module => ({ default: module.Events })));
+export const DevOffers = lazy(() => import('./pages/developer/Offers').then(module => ({ default: module.Offers })));
+export const DevMap = lazy(() => import('./pages/developer/Map').then(module => ({ default: module.Map })));
+export const DevContacts = lazy(() => import('./pages/developer/Contacts').then(module => ({ default: module.Contacts })));
+export const DevExams = lazy(() => import('./pages/developer/Exams').then(module => ({ default: module.Exams })));
+export const DevPDFs = lazy(() => import('./pages/developer/PDFs').then(module => ({ default: module.PDFs })));
+export const DevStudents = lazy(() => import('./pages/developer/Students').then(module => ({ default: module.Students })));
+export const DevSettings = lazy(() => import('./pages/developer/Settings').then(module => ({ default: module.Settings })));
+export const DevDepartments = lazy(() => import('./pages/developer/Departments').then(module => ({ default: module.Departments })));
+export const DevSemesters = lazy(() => import('./pages/developer/Semesters').then(module => ({ default: module.Semesters })));
+
+export const Landing = lazy(() => import('./pages/public/Landing').then(module => ({ default: module.Landing })));
+export const Login = lazy(() => import('./pages/public/Login').then(module => ({ default: module.Login })));
+export const Register = lazy(() => import('./pages/public/Register').then(module => ({ default: module.Register })));

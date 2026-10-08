@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag } from 'lucide-react';
 
@@ -6,68 +6,14 @@ import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashbo
 import { AnalyticsTracker } from './utils/AnalyticsTracker';
 import { trackEvent } from './utils/analytics';
 import { supabase } from './services/supabaseClient';
-import { Landing } from './pages/public/Landing';
-import { Login } from './pages/public/Login';
-import { Register } from './pages/public/Register';
-
-// Student Pages
-import { Dashboard as StudentDashboard } from './pages/student/Dashboard';
-import { Timetable as StudentTimetable } from './pages/student/Timetable';
-import { Attendance as StudentAttendance } from './pages/student/Attendance';
-import { AttendancePlanner as StudentAttendancePlanner } from './pages/student/AttendancePlanner';
-import { SgpaCgpa as StudentSgpaCgpa } from './pages/student/SgpaCgpa';
-import { FindRoom as StudentFindRoom } from './pages/student/FindRoom';
-import { StudyOS as StudentStudyOS } from './pages/student/StudyOS';
-import { Submissions as StudentSubmissions } from './pages/student/Submissions';
-import { Contacts as StudentContacts } from './pages/student/Contacts';
-import { Notifications as StudentNotifications } from './pages/student/Notifications';
-import { Requests as StudentRequests } from './pages/student/Requests';
-import { Polls as StudentPolls } from './pages/student/Polls';
-import { ReminderCenter as StudentReminderCenter } from './pages/student/ReminderCenter';
-import { ExamSchedule as StudentExamSchedule } from './pages/student/ExamSchedule';
-import { ExamSeat as StudentExamSeat } from './pages/student/ExamSeat';
-import { Events as StudentEvents } from './pages/student/Events';
-import { CollegeMap as StudentCollegeMap } from './pages/student/CollegeMap';
-
-import { Offers as StudentOffers } from './pages/student/Offers';
-import { Settings as StudentSettings } from './pages/student/Settings';
-
-// CR Pages
-import { Dashboard as CrDashboard } from './pages/cr/Dashboard';
-import { Timetable as CrTimetable } from './pages/cr/Timetable';
-import { Attendance as CrAttendance } from './pages/cr/Attendance';
-import { Announcements as CrAnnouncements } from './pages/cr/Announcements';
-import { Cancellations as CrCancellations } from './pages/cr/Cancellations';
-import { Reports as CrReports } from './pages/cr/Reports';
-import { Polls as CrPolls } from './pages/cr/Polls';
-import { Reminders as CrReminders } from './pages/cr/Reminders';
-import { Submissions as CrSubmissions } from './pages/cr/Submissions';
-
-// Developer Pages
-import { Dashboard as DevDashboard } from './pages/developer/Dashboard';
-import { Users as DevUsers } from './pages/developer/Users';
-import { DeveloperInstitutions as DevInstitutions } from './pages/developer/Institutions';
-import { Sections as DevSections } from './pages/developer/Sections';
-import { Subjects as DevSubjects } from './pages/developer/Subjects';
-import { Timetable as DevTimetable } from './pages/developer/Timetable';
-import { Rooms as DevRooms } from './pages/developer/Rooms';
-import { Attendance as DevAttendance } from './pages/developer/Attendance';
-import { Resources as DevResources } from './pages/developer/Resources';
-import { Events as DevEvents } from './pages/developer/Events';
-import { Offers as DevOffers } from './pages/developer/Offers';
-import { Map as DevMap } from './pages/developer/Map';
-
-import { AcademicPdfs as StudentAcademicPdfs } from './pages/student/AcademicPdfs';
-import { Profile as StudentProfile } from './pages/student/Profile';
-import { Contacts as DevContacts } from './pages/developer/Contacts';
-import { Exams as DevExams } from './pages/developer/Exams';
-import { PDFs as DevPDFs } from './pages/developer/PDFs';
-import { Students as DevStudents } from './pages/developer/Students';
-import { Settings as DevSettings } from './pages/developer/Settings';
-import { Departments as DevDepartments } from './pages/developer/Departments';
-import { Semesters as DevSemesters } from './pages/developer/Semesters';
-
-import logoIcon from './assets/logo-icon.png';
+import { RouteFallback } from './routeFallback';
+import {
+  Landing, Login, Register,
+  StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile,
+  CrDashboard, CrTimetable, CrAttendance, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
+  DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters
+} from './lazyRoutes';
+import logoMark from './assets/logo-mark.svg';
 
 const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: string, icon: any, children: React.ReactNode, isCollapsed?: boolean }) => {
   const location = useLocation();
@@ -144,11 +90,11 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
       <div className={`fixed lg:static inset-y-0 left-0 bg-white border-r border-slate-200 flex flex-col z-30 transform transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${isCollapsed ? 'w-20' : 'w-72'}`}>
         <div className={'h-16 flex items-center border-b border-slate-100 justify-between lg:justify-start cursor-pointer select-none ' + (isCollapsed ? 'px-4 justify-center' : 'px-6')} onClick={() => setIsCollapsed(!isCollapsed)}>
           <div className="hidden lg:flex items-center gap-2 overflow-hidden">
-            <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain hover:scale-105 transition-transform" />
+            <img src={logoMark} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain hover:scale-105 transition-transform" />
             {!isCollapsed && <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>}
           </div>
           <Link to="/" className="flex lg:hidden items-center gap-2 overflow-hidden">
-            <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain" />
+            <img src={logoMark} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain" />
             <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>
           </Link>
           <div className="flex items-center gap-2 lg:hidden">
@@ -291,7 +237,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnalyticsTracker />
-      <Routes>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -363,7 +310,8 @@ export default function App() {
                   <Route path="/developer/*" element={<Navigate to="/developer" replace />} />
         
         <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

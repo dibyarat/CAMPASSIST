@@ -1,17 +1,26 @@
 import { supabase } from './supabaseClient';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://campassist.onrender.com/api/v1';
+let sessionLookupPromise: Promise<string | undefined> | undefined;
+
+const getAccessToken = async () => {
+  if (sessionLookupPromise) return sessionLookupPromise;
+
+  sessionLookupPromise = (async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) return session.access_token;
+
+    const { data } = await supabase.auth.refreshSession();
+    return data?.session?.access_token;
+  })().finally(() => {
+    sessionLookupPromise = undefined;
+  });
+
+  return sessionLookupPromise;
+};
 
 export const apiClient = async (endpoint: string, options: RequestInit = {}) => {
-  // Grab the current active session from Supabase
-  let { data: { session } } = await supabase.auth.getSession();
-  let token = session?.access_token;
-  
-  // Robust fallback: if session is missing but user is logged in, try to refresh
-  if (!token) {
-    const { data } = await supabase.auth.refreshSession();
-    token = data?.session?.access_token;
-  }
+  let token = await getAccessToken();
   
   // Final nuclear fallback: read local storage manually
   if (!token) {

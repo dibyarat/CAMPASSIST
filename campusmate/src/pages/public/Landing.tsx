@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GraduationCap, BookOpen, Calendar, MapPin, BarChart3, Bell, ArrowRight } from 'lucide-react';
-import logoIcon from '../../assets/logo-icon.png';
+import logoMark from '../../assets/logo-mark.svg';
 
 export const Landing = () => {
   return (
@@ -10,7 +10,7 @@ export const Landing = () => {
       <header className="bg-white/60 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={logoIcon} alt="CampAssist Logo" className="w-9 h-9 object-contain" />
+            <img src={logoMark} alt="CampAssist Logo" className="w-9 h-9 object-contain" />
             <span className="brand-wordmark font-extrabold text-2xl tracking-tight">CampAssist</span>
           </div>
           <nav className="hidden md:flex gap-8 font-medium text-slate-600">
