@@ -4,36 +4,13 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://campassist.onrend
 
 export const apiClient = async (endpoint: string, options: RequestInit = {}) => {
   // Grab the current active session from Supabase
-  let { data: { session } } = await supabase.auth.getSession();
-  let token = session?.access_token;
+  const { data: { session } } = await supabase.auth.getSession();
   
-  // Robust fallback: if session is missing but user is logged in, try to refresh
-  if (!token) {
-    const { data } = await supabase.auth.refreshSession();
-    token = data?.session?.access_token;
-  }
-  
-  // Final nuclear fallback: read local storage manually
-  if (!token) {
-    try {
-      const authKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-      if (authKey) {
-        const stored = JSON.parse(localStorage.getItem(authKey) || '{}');
-        if (stored.access_token) token = stored.access_token;
-      }
-    } catch(e) {}
-  }
-  
-  if (!token) {
-    const keys = Object.keys(localStorage).join(', ');
-    throw new Error('Local Token is null! Keys: ' + keys);
-  }
-
   const headers = new Headers(options.headers || {});
   
   // Only inject the Bearer token if the user is authenticated
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+  if (session?.access_token) {
+    headers.set('Authorization', `Bearer ${session.access_token}`);
   }
   
   headers.set('Content-Type', 'application/json');
