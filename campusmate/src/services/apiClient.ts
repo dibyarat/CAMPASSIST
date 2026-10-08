@@ -24,6 +24,11 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
     } catch(e) {}
   }
   
+  if (!token) {
+    const keys = Object.keys(localStorage).join(', ');
+    throw new Error('Local Token is null! Keys: ' + keys);
+  }
+
   const headers = new Headers(options.headers || {});
   
   // Only inject the Bearer token if the user is authenticated
