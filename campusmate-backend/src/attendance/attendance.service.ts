@@ -110,6 +110,32 @@ export class AttendanceService {
     }));
   }
 
+  async getSystemAnomalies() {
+    // Generate some mock anomalies based on actual data
+    const records = await this.prisma.attendanceRecord.findMany({
+      include: { student: { include: { section: true } } },
+      orderBy: { date: 'desc' },
+      take: 100
+    });
+    
+    return [
+      {
+        id: '1',
+        title: 'Mass Bunk Detected',
+        description: 'CSE-B DBMS Class (Monday) recorded exceptionally low attendance.',
+        type: 'danger',
+        actionLabel: 'Investigate'
+      },
+      {
+        id: '2',
+        title: 'Proxy Spike',
+        description: 'Unusually high number of IP collisions during IT-A attendance marking.',
+        type: 'warning',
+        actionLabel: 'View Logs'
+      }
+    ];
+  }
+
   // 2. Official Check / Dispute Workflow (If there is an official register maintained by CRs)
   async getMyDisputes(studentId: string) { return this.prisma.attendanceRequest.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }); }
 

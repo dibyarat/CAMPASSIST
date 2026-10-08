@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
-import { X, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Plus, Loader2 } from 'lucide-react';
+import { apiClient } from '../../services/apiClient';
 
 export const SgpaCgpa = () => {
   const [activeTab, setActiveTab] = useState<'SGPA' | 'CGPA' | 'Grade Calculator'>('SGPA');
+  const [records, setRecords] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient('/grades/my-records')
+      .then(setRecords)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -30,63 +40,51 @@ export const SgpaCgpa = () => {
 
         {activeTab === 'SGPA' && (
           <div className="px-4">
-            <table className="w-full text-left mb-4">
-              <thead>
-                <tr className="text-slate-500 text-sm border-b border-slate-100">
-                  <th className="font-semibold pb-3 w-1/2">Subject</th>
-                  <th className="font-semibold pb-3 text-center">Credits</th>
-                  <th className="font-semibold pb-3 text-center">Grade</th>
-                  <th className="font-semibold pb-3 w-10"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {[
-                  { name: 'Database Systems', cred: '4', grade: 'A+' },
-                  { name: 'Computer Networks', cred: '4', grade: 'A' },
-                  { name: 'Operating Systems', cred: '4', grade: 'B+' },
-                  { name: 'Mathematics', cred: '3', grade: 'A+' },
-                ].map((row, i) => (
-                  <tr key={i}>
-                    <td className="py-4 pr-4">
-                      <input type="text" value={row.name} className="w-full p-2.5 rounded-lg border border-slate-200 text-sm font-medium outline-none bg-slate-50 text-slate-700" readOnly />
-                    </td>
-                    <td className="py-4 px-2">
-                      <select className="w-full p-2.5 rounded-lg border border-slate-200 text-sm font-medium outline-none bg-slate-50 text-slate-700 text-center appearance-none">
-                        <option>{row.cred}</option>
-                      </select>
-                    </td>
-                    <td className="py-4 px-2">
-                      <select className="w-full p-2.5 rounded-lg border border-slate-200 text-sm font-medium outline-none bg-slate-50 text-slate-700 text-center appearance-none">
-                        <option>{row.grade}</option>
-                      </select>
-                    </td>
-                    <td className="py-4 pl-4 text-center">
-                      <button className="text-slate-400 hover:text-rose-500 transition">
-                        <X size={18} />
-                      </button>
-                    </td>
-                  </tr>
+            {loading ? (
+              <div className="py-10 text-center"><Loader2 className="animate-spin text-blue-500 mx-auto" /></div>
+            ) : records.length === 0 ? (
+              <div className="py-10 text-center text-slate-500">No academic records found. Add them through the developer portal or university sync.</div>
+            ) : (
+              <div className="space-y-10">
+                {records.map((record) => (
+                  <div key={record.id} className="border border-slate-100 rounded-xl p-6 shadow-sm bg-white">
+                    <h3 className="font-bold text-lg text-slate-800 mb-4">{record.term?.name || 'Unknown Term'}</h3>
+                    <table className="w-full text-left mb-6">
+                      <thead>
+                        <tr className="text-slate-500 text-sm border-b border-slate-100">
+                          <th className="font-semibold pb-3 w-1/2">Subject</th>
+                          <th className="font-semibold pb-3 text-center">Credits</th>
+                          <th className="font-semibold pb-3 text-center">Grade</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {record.grades.map((g: any) => (
+                          <tr key={g.id}>
+                            <td className="py-4 pr-4">
+                              <div className="text-sm font-medium text-slate-700">{g.subject?.name || 'Unknown'}</div>
+                              <div className="text-xs text-slate-400">{g.subject?.code}</div>
+                            </td>
+                            <td className="py-4 px-2 text-center text-sm font-medium text-slate-700">{g.credits}</td>
+                            <td className="py-4 px-2 text-center text-sm font-bold text-blue-600">{g.grade}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    
+                    <div className="flex justify-end items-center gap-6 border-t border-slate-100 pt-4">
+                      <div className="text-right">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Total Credits</p>
+                        <p className="text-lg font-bold text-slate-700">{record.totalCredits}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Term SGPA</p>
+                        <p className="text-3xl font-extrabold text-emerald-500">{record.sgpa?.toFixed(2) || 'N/A'}</p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-            
-            <button className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition px-2 mb-10">
-              <Plus size={16} /> Add Subject
-            </button>
-
-            <div className="flex flex-col items-center justify-center border-t border-slate-100 pt-8 pb-4">
-              <h2 className="text-5xl font-extrabold text-emerald-500 mb-2">8.36</h2>
-              <p className="font-semibold text-slate-500 tracking-widest uppercase">SGPA</p>
-            </div>
-
-            <div className="flex justify-between items-center mt-8 px-4 border-t border-slate-100 pt-6">
-              <button className="px-8 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition">
-                Clear
-              </button>
-              <button className="px-12 py-2.5 bg-gradient-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition">
-                Calculate
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>

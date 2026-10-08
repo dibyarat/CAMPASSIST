@@ -41,9 +41,10 @@ import { AcademicTermsController } from './academic-terms/academic-terms.control
 import { AcademicTermsService } from './academic-terms/academic-terms.service';
 import { InstitutionsModule } from './institutions/institutions.module';
 import { SubjectsModule } from './subjects/subjects.module';
+import { GradesModule } from './grades/grades.module';
 
 @Module({
-  imports: [InstitutionsModule, SubjectsModule],
+  imports: [InstitutionsModule, SubjectsModule, GradesModule],
   controllers: [
     AppController,
     HealthController,

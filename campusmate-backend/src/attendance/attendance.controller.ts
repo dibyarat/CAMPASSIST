@@ -36,6 +36,12 @@ export class AttendanceController {
     return this.attendanceService.getSystemAttendanceOverview();
   }
 
+  @Get('anomalies')
+  @Roles('DEVELOPER')
+  getSystemAnomalies() {
+    return this.attendanceService.getSystemAnomalies();
+  }
+
   // --- 2. Official Checks / Disputes (CR Workflow) ---
 
   @Get('my-disputes')

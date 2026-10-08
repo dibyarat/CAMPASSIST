@@ -4,11 +4,18 @@ import { apiClient } from '../../services/apiClient';
 
 export const Attendance = () => {
   const [students, setStudents] = useState<any[]>([]);
+  const [anomalies, setAnomalies] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient('/attendance/overview')
-      .then(setStudents)
+    Promise.all([
+      apiClient('/attendance/overview'),
+      apiClient('/attendance/anomalies')
+    ])
+      .then(([overviewData, anomaliesData]) => {
+        setStudents(overviewData);
+        setAnomalies(anomaliesData);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -73,16 +80,19 @@ export const Attendance = () => {
               <h3 className="font-bold">System Anomalies</h3>
             </div>
             <div className="space-y-3">
-              <div className="p-3 bg-white rounded-xl border border-rose-100 shadow-sm">
-                <p className="text-sm font-semibold text-slate-800 mb-1">Mass Bunk Detected</p>
-                <p className="text-xs text-slate-500 mb-2">CSE-B DBMS Class (Monday) recorded 12% attendance.</p>
-                <button className="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg w-full">Investigate</button>
-              </div>
-              <div className="p-3 bg-white rounded-xl border border-amber-100 shadow-sm">
-                <p className="text-sm font-semibold text-slate-800 mb-1">Proxy Spike</p>
-                <p className="text-xs text-slate-500 mb-2">Unusually high number of IP collisions during IT-A attendance marking.</p>
-                <button className="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg w-full">View Logs</button>
-              </div>
+              {loading ? (
+                <div className="p-4 text-center"><Loader2 className="animate-spin text-rose-500 mx-auto" /></div>
+              ) : anomalies.length === 0 ? (
+                <div className="p-4 text-center text-rose-500/70 text-sm">No active anomalies detected.</div>
+              ) : anomalies.map((anomaly) => (
+                <div key={anomaly.id} className={`p-3 bg-white rounded-xl border shadow-sm ${anomaly.type === 'danger' ? 'border-rose-100' : 'border-amber-100'}`}>
+                  <p className="text-sm font-semibold text-slate-800 mb-1">{anomaly.title}</p>
+                  <p className="text-xs text-slate-500 mb-2">{anomaly.description}</p>
+                  <button className={`text-xs font-bold px-3 py-1.5 rounded-lg w-full ${anomaly.type === 'danger' ? 'text-rose-600 bg-rose-50' : 'text-amber-600 bg-amber-50'}`}>
+                    {anomaly.actionLabel}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

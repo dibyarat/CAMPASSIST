@@ -56,6 +56,25 @@ import { Resources as DevResources } from './pages/developer/Resources';
 import { Events as DevEvents } from './pages/developer/Events';
 import { Offers as DevOffers } from './pages/developer/Offers';
 import { Map as DevMap } from './pages/developer/Map';
+
+import { AcademicPdfs as StudentAcademicPdfs } from './pages/student/AcademicPdfs';
+import { LabRecords as StudentLabRecords } from './pages/student/LabRecords';
+import { Profile as StudentProfile } from './pages/student/Profile';
+import { Events as CrEvents } from './pages/cr/Events';
+import { Map as CrMap } from './pages/cr/Map';
+import { AuditLogs as DevAuditLogs } from './pages/developer/AuditLogs';
+import { Contacts as DevContacts } from './pages/developer/Contacts';
+import { Exams as DevExams } from './pages/developer/Exams';
+import { Imports as DevImports } from './pages/developer/Imports';
+import { LabRecords as DevLabRecords } from './pages/developer/LabRecords';
+import { Notifications as DevNotifications } from './pages/developer/Notifications';
+import { PDFs as DevPDFs } from './pages/developer/PDFs';
+import { Students as DevStudents } from './pages/developer/Students';
+import { Settings as DevSettings } from './pages/developer/Settings';
+import { Submissions as DevSubmissions } from './pages/developer/Submissions';
+import { Departments as DevDepartments } from './pages/developer/Departments';
+import { Semesters as DevSemesters } from './pages/developer/Semesters';
+
 import logoIcon from './assets/logo-icon.png';
 
 const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: string, icon: any, children: React.ReactNode, isCollapsed?: boolean }) => {
@@ -263,6 +282,10 @@ export default function App() {
         <Route path="/student/offers" element={<MainLayout role="student"><StudentOffers /></MainLayout>} />
         <Route path="/student/settings" element={<MainLayout role="student"><StudentSettings /></MainLayout>} />
         
+        <Route path="/student/academic-pdfs" element={<MainLayout role="student"><StudentAcademicPdfs /></MainLayout>} />
+        <Route path="/student/lab-records" element={<MainLayout role="student"><StudentLabRecords /></MainLayout>} />
+        <Route path="/student/profile" element={<MainLayout role="student"><StudentProfile /></MainLayout>} />
+
         {/* Fallback mock routes for scaffolding */}
         <Route path="/student/*" element={<MainLayout role="student"><div className="p-6">Page under construction (Scaffolded)</div></MainLayout>} />
         
@@ -278,6 +301,8 @@ export default function App() {
           <Route path="/cr/submissions" element={<MainLayout role="cr"><CrSubmissions /></MainLayout>} />
           <Route path="/cr/notifications" element={<MainLayout role="cr"><StudentNotifications /></MainLayout>} />
           <Route path="/cr/settings" element={<MainLayout role="cr"><StudentSettings /></MainLayout>} />
+          <Route path="/cr/events" element={<MainLayout role="cr"><CrEvents /></MainLayout>} />
+          <Route path="/cr/map" element={<MainLayout role="cr"><CrMap /></MainLayout>} />
         
                   {/* Developer Routes */}
           <Route path="/developer" element={<MainLayout role="developer"><DevDashboard /></MainLayout>} />
@@ -292,7 +317,19 @@ export default function App() {
                     <Route path="/developer/events" element={<MainLayout role="developer"><DevEvents /></MainLayout>} />
                     <Route path="/developer/offers" element={<MainLayout role="developer"><DevOffers /></MainLayout>} />
                     <Route path="/developer/map" element={<MainLayout role="developer"><DevMap /></MainLayout>} />
-                    <Route path="/developer/settings" element={<MainLayout role="developer"><StudentSettings /></MainLayout>} />
+                    <Route path="/developer/settings" element={<MainLayout role="developer"><DevSettings /></MainLayout>} />
+
+                    <Route path="/developer/audit-logs" element={<MainLayout role="developer"><DevAuditLogs /></MainLayout>} />
+                    <Route path="/developer/contacts" element={<MainLayout role="developer"><DevContacts /></MainLayout>} />
+                    <Route path="/developer/exams" element={<MainLayout role="developer"><DevExams /></MainLayout>} />
+                    <Route path="/developer/imports" element={<MainLayout role="developer"><DevImports /></MainLayout>} />
+                    <Route path="/developer/lab-records" element={<MainLayout role="developer"><DevLabRecords /></MainLayout>} />
+                    <Route path="/developer/notifications" element={<MainLayout role="developer"><DevNotifications /></MainLayout>} />
+                    <Route path="/developer/pdfs" element={<MainLayout role="developer"><DevPDFs /></MainLayout>} />
+                    <Route path="/developer/students" element={<MainLayout role="developer"><DevStudents /></MainLayout>} />
+                    <Route path="/developer/submissions" element={<MainLayout role="developer"><DevSubmissions /></MainLayout>} />
+                    <Route path="/developer/departments" element={<MainLayout role="developer"><DevDepartments /></MainLayout>} />
+                    <Route path="/developer/semesters" element={<MainLayout role="developer"><DevSemesters /></MainLayout>} />
         
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
