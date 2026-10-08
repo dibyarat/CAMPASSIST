@@ -81,6 +81,35 @@ export class AttendanceService {
     };
   }
 
+  async getSystemAttendanceOverview() {
+    const records = await this.prisma.attendanceRecord.findMany({
+      include: { student: { include: { user: { include: { profile: true } }, section: true } } },
+      orderBy: { date: 'desc' }
+    });
+
+    const grouped = new Map<string, { student: any; attended: number; total: number; subjects: Set<string> }>();
+    for (const record of records) {
+      const current = grouped.get(record.studentId) || { student: record.student, attended: 0, total: 0, subjects: new Set<string>() };
+      if (record.state === AttendanceState.PRESENT) {
+        current.attended++;
+        current.total++;
+      } else if (record.state === AttendanceState.ABSENT) {
+        current.total++;
+        current.subjects.add(record.subjectRef);
+      }
+      grouped.set(record.studentId, current);
+    }
+
+    return Array.from(grouped.values()).map(({ student, attended, total, subjects }) => ({
+      id: student.id,
+      name: student.user.profile?.fullName || student.user.email,
+      section: student.section?.name || student.user.profile?.section || 'Unassigned',
+      percentage: total > 0 ? (attended / total) * 100 : 0,
+      criticalSubjects: Array.from(subjects),
+      status: total > 0 && attended / total < 0.75 ? 'LOW_ATTENDANCE' : 'MONITORING'
+    }));
+  }
+
   // 2. Official Check / Dispute Workflow (If there is an official register maintained by CRs)
   async getMyDisputes(studentId: string) { return this.prisma.attendanceRequest.findMany({ where: { studentId }, orderBy: { createdAt: 'desc' } }); }
 
@@ -99,7 +128,7 @@ export class AttendanceService {
   async resolveRequest(requestId: string, crSectionId: string, status: 'APPROVED' | 'REJECTED') {
     const req = await this.prisma.attendanceRequest.findUnique({ where: { id: requestId }, include: { student: { include: { user: { include: { profile: true } } } } } });
     if (!req) throw new NotFoundException('Request not found');
-    if (req.student.user.profile?.section !== crSectionId) throw new ForbiddenException('Student is not in your section');
+    if (req.student.sectionId !== crSectionId) throw new ForbiddenException('Student is not in your section');
     return this.prisma.attendanceRequest.update({ where: { id: requestId }, data: { status, resolvedAt: new Date() } });
   }
 
@@ -107,9 +136,7 @@ export class AttendanceService {
     // Find requests for students belonging to the CR's section
     return this.prisma.attendanceRequest.findMany({
       where: {
-        student: {
-          user: { profile: { section: crSectionId } } // Relies on profile.section string matching
-        },
+        student: { sectionId: crSectionId },
         status: 'PENDING'
       },
       include: { student: { include: { user: { include: { profile: true } } } } }

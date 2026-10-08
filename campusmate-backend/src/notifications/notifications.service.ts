@@ -52,7 +52,10 @@ export class NotificationsService {
     const cr = await this.prisma.user.findUnique({ where: { id: crUserId }, include: { crAssignment: true } });
     if (!cr || !cr.crAssignment || !cr.crAssignment.isActive) throw new Error('Not an active CR');
     
-    const studentsInSection = await this.prisma.profile.findMany({ where: { section: cr.crAssignment.sectionId } });
+    const studentsInSection = await this.prisma.student.findMany({
+      where: { sectionId: cr.crAssignment.sectionId },
+      select: { userId: true }
+    });
     
     const notifications = studentsInSection.map((s: any) => ({
       recipientId: s.userId,

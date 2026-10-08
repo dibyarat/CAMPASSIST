@@ -12,6 +12,18 @@ export class RemindersService {
     });
   }
 
+  findRelevant(user: any) {
+    return this.prisma.reminder.findMany({
+      where: {
+        OR: [
+          { creatorId: user.id },
+          ...(user.student?.sectionId ? [{ sectionId: user.student.sectionId }] : [])
+        ]
+      },
+      orderBy: { dueDate: 'asc' }
+    });
+  }
+
   create(creatorId: string, data: {
     category: string;
     priority?: string;
@@ -27,6 +39,29 @@ export class RemindersService {
         priority: (data.priority || 'NORMAL') as any,
         schedule: (data.schedule || 'CUSTOM') as any,
         target: 'INDIVIDUAL',
+        title: data.title,
+        description: data.description,
+        dueDate: new Date(data.dueDate)
+      }
+    });
+  }
+
+  createForSection(creatorId: string, sectionId: string, data: {
+    category: string;
+    priority?: string;
+    schedule?: string;
+    title: string;
+    description?: string;
+    dueDate: string;
+  }) {
+    return this.prisma.reminder.create({
+      data: {
+        creatorId,
+        sectionId,
+        category: data.category as any,
+        priority: (data.priority || 'NORMAL') as any,
+        schedule: (data.schedule || 'CUSTOM') as any,
+        target: 'SECTION',
         title: data.title,
         description: data.description,
         dueDate: new Date(data.dueDate)

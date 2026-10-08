@@ -42,7 +42,7 @@ export const Subjects = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure?')) return;
     try {
-      await apiClient(/subjects/+id, { method: 'DELETE' });
+      await apiClient(`/subjects/${id}`, { method: 'DELETE' });
       fetchSubjects();
     } catch (err) {
       alert('Failed to delete subject');

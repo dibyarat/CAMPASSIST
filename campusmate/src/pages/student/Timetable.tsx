@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Loader2, MapPin, AlertCircle, Info } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const Timetable = () => {
   const [timetable, setTimetable] = useState<any[]>([]);
@@ -9,9 +10,9 @@ export const Timetable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userProfile = await apiClient('/users/me');
+        const [userProfile, currentTerm] = await Promise.all([apiClient('/users/me'), academicTermService.getCurrent()]);
         if (userProfile.student?.sectionId) {
-          const tt = await apiClient(`/timetable/section/${userProfile.student.sectionId}/term/TERM-1`);
+          const tt = await apiClient(`/timetable/section/${userProfile.student.sectionId}/term/${currentTerm.id}`);
           setTimetable(tt);
         }
       } catch (error) {

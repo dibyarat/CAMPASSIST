@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarDays, Clock, MapPin, Loader2 } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const ExamSchedule = () => {
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [term, setTerm] = useState('TERM-1');
+  const [term, setTerm] = useState('');
 
   useEffect(() => {
     const fetchExams = async () => {
       try {
         setLoading(true);
-        const data = await apiClient(`/exams/term/${term}`);
+        const currentTerm = await academicTermService.getCurrent();
+        setTerm(currentTerm.id);
+        const data = await apiClient(`/exams/term/${currentTerm.id}`);
         setExams(data);
       } catch (error) {
         console.error("Failed to load exams", error);
@@ -20,7 +23,7 @@ export const ExamSchedule = () => {
       }
     };
     fetchExams();
-  }, [term]);
+  }, []);
 
   return (
     <div className="max-w-5xl space-y-6 pb-10">
@@ -29,11 +32,10 @@ export const ExamSchedule = () => {
         <div className="flex items-center gap-2">
            <select 
              value={term}
-             onChange={(e) => setTerm(e.target.value)}
+             disabled
              className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 bg-white/60 backdrop-blur-xl hover:bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500"
            >
-             <option value="TERM-1">Term 1</option>
-             <option value="TERM-2">Term 2</option>
+             <option value={term}>{term || 'Loading term...'}</option>
            </select>
         </div>
       </div>

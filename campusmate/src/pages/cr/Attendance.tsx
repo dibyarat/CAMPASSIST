@@ -54,10 +54,10 @@ export const Attendance = () => {
           <div key={req.id} className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-                {req.student?.profile?.fullName?.charAt(0) || 'S'}
+                {req.student?.user?.profile?.fullName?.charAt(0) || 'S'}
               </div>
               <div>
-                <h3 className="font-semibold text-slate-800">{req.student?.profile?.fullName || 'Student'} ({req.student?.profile?.rollNumber})</h3>
+                <h3 className="font-semibold text-slate-800">{req.student?.user?.profile?.fullName || 'Student'} ({req.student?.user?.profile?.rollNumber})</h3>
                 <p className="text-sm text-slate-500 mt-0.5">Subject: {req.subjectRef}</p>
                 <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                   <Clock size={12} /> Date: {new Date(req.sessionDate).toLocaleDateString()}

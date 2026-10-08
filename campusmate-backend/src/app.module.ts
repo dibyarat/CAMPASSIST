@@ -37,6 +37,8 @@ import { EventsController } from './events/events.controller';
 import { OffersController } from './offers/offers.controller';
 import { EventsService } from './events/events.service';
 import { OffersService } from './offers/offers.service';
+import { AcademicTermsController } from './academic-terms/academic-terms.controller';
+import { AcademicTermsService } from './academic-terms/academic-terms.service';
 import { InstitutionsModule } from './institutions/institutions.module';
 import { SubjectsModule } from './subjects/subjects.module';
 
@@ -59,7 +61,8 @@ import { SubjectsModule } from './subjects/subjects.module';
     MapController,
     RemindersController,
     EventsController,
-    OffersController
+    OffersController,
+    AcademicTermsController
   ],
   providers: [
     AppService,
@@ -78,7 +81,8 @@ import { SubjectsModule } from './subjects/subjects.module';
     MapService,
     RemindersService,
     EventsService,
-    OffersService
+    OffersService,
+    AcademicTermsService
   ],
 })
 export class AppModule {}

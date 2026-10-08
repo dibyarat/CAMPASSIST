@@ -15,7 +15,7 @@ export const ReminderCenter = () => {
   const loadReminders = async () => {
     setLoading(true);
     try {
-      setReminders(await reminderService.listMine());
+      setReminders(await reminderService.listRelevant());
     } catch (error) {
       console.error('Failed to load reminders', error);
     } finally {

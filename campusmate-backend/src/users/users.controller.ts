@@ -41,7 +41,7 @@ export class UsersController {
   }
 
   @Get('cr')
-  @Roles('DEVELOPER', 'STUDENT')
+  @Roles('DEVELOPER', 'STUDENT', 'CR')
   getAllCrs() {
     return this.usersService.getAllUsersByRole('CR');
   }

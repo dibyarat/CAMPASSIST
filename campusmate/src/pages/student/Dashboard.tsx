@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, MapPin, Bell, FileText, ChevronRight, GraduationCap, User, PlayCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -12,11 +13,11 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userProfile = await apiClient('/users/me');
+        const [userProfile, currentTerm] = await Promise.all([apiClient('/users/me'), academicTermService.getCurrent()]);
         setProfile(userProfile);
 
         if (userProfile.student?.sectionId) {
-          const tt = await apiClient(`/timetable/section/${userProfile.student.sectionId}/term/TERM-1`);
+          const tt = await apiClient(`/timetable/section/${userProfile.student.sectionId}/term/${currentTerm.id}`);
           // Filter for today only
           const todayInt = new Date().getDay(); // 1=Mon, 5=Fri
           setTimetable(tt.filter((t: any) => t.dayOfWeek === todayInt));

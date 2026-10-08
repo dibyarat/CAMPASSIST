@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Plus, XCircle, Clock, Loader2, MapPin, Save, X } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const Timetable = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -15,14 +16,15 @@ export const Timetable = () => {
     dayOfWeek: 1,
     startTime: '09:00',
     endTime: '10:00',
-    termId: 'TERM-1'
+    termId: ''
   });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userProfile = await apiClient('/users/me');
+        const [userProfile, currentTerm] = await Promise.all([apiClient('/users/me'), academicTermService.getCurrent()]);
         setProfile(userProfile);
+        setFormData(current => ({ ...current, termId: currentTerm.id }));
 
         const [subs, rms] = await Promise.all([
           apiClient('/timetable/subjects'),
@@ -32,7 +34,7 @@ export const Timetable = () => {
         setRooms(rms);
 
         if (userProfile.crAssignment?.sectionId) {
-          const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/TERM-1`);
+          const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/${currentTerm.id}`);
           setTimetable(tt);
         }
       } catch (error) {
@@ -77,7 +79,7 @@ export const Timetable = () => {
         body: JSON.stringify(formData)
       });
       if (profile?.crAssignment?.sectionId) {
-        const tt = await apiClient(`/timetable/section/${profile.crAssignment.sectionId}/term/TERM-1`);
+        const tt = await apiClient(`/timetable/section/${profile.crAssignment.sectionId}/term/${formData.termId}`);
         setTimetable(tt);
       }
       setShowAddModal(false);

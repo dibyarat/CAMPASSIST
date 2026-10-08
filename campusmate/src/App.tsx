@@ -5,6 +5,7 @@ import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashbo
 // Public
 import { AnalyticsTracker } from './utils/AnalyticsTracker';
 import { trackEvent } from './utils/analytics';
+import { supabase } from './services/supabaseClient';
 import { Landing } from './pages/public/Landing';
 import { Login } from './pages/public/Login';
 import { Register } from './pages/public/Register';
@@ -139,6 +140,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">My Board</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance Disputes</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/announcements`} icon={Bell}>Announcements</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/cancellations`} icon={MapPin}>Cancellations</SidebarLink>
               
@@ -164,6 +166,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/subjects`} icon={Bookmark}>Subjects</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/rooms`} icon={MapPin}>Rooms & Facilities</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/resources`} icon={UploadCloud}>Resources</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/offers`} icon={Tag}>Offers</SidebarLink>
@@ -190,7 +193,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             </Link>
           )}
 
-          <Link to="/" onClick={() => trackEvent('logout')} className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+          <Link to="/" onClick={async (event) => { event.preventDefault(); await supabase.auth.signOut(); localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
             <LogOut size={20} className="shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </Link>
@@ -210,10 +213,10 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition relative">
+            <Link to={`/${role}/notifications`} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition relative" title="Notifications">
               <Bell size={18} />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-            </button>
+            </Link>
             <Link to={`/${role}/settings`} className="flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-full pr-4 transition cursor-pointer">
               <img src={`https://ui-avatars.com/api/?name=${userName}&background=3B82F6&color=fff`} alt="Avatar" className="w-8 h-8 rounded-full" />
               <span className="text-sm font-semibold">{userName.split(" ")[0]}</span>
@@ -284,6 +287,7 @@ export default function App() {
           <Route path="/developer/subjects" element={<MainLayout role="developer"><DevSubjects /></MainLayout>} />
           <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
           <Route path="/developer/rooms" element={<MainLayout role="developer"><DevRooms /></MainLayout>} />
+          <Route path="/developer/attendance" element={<MainLayout role="developer"><DevAttendance /></MainLayout>} />
                     <Route path="/developer/resources" element={<MainLayout role="developer"><DevResources /></MainLayout>} />
                     <Route path="/developer/events" element={<MainLayout role="developer"><DevEvents /></MainLayout>} />
                     <Route path="/developer/offers" element={<MainLayout role="developer"><DevOffers /></MainLayout>} />

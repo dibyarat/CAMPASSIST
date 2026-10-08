@@ -15,7 +15,8 @@ export class SupabaseAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.headers.authorization?.split('Bearer ')[1];
+    const authorization = request.headers.authorization;
+    const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : undefined;
     
     if (!token) {
       throw new UnauthorizedException('Authentication token is missing');
@@ -31,7 +32,11 @@ export class SupabaseAuthGuard implements CanActivate {
     // Fetch the actual CampusMate role from DB, never trust frontend claims
     const dbUser = await this.prisma.user.findUnique({
       where: { id: user.id },
-      include: { crAssignment: true }
+      include: {
+        profile: true,
+        student: true,
+        crAssignment: true
+      }
     });
     
     if (!dbUser) { request.user = { id: user.id }; return true; }

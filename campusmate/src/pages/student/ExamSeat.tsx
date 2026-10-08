@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Map, Users, Loader2, Info } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const ExamSeat = () => {
   const [exams, setExams] = useState<any[]>([]);
@@ -13,7 +14,8 @@ export const ExamSeat = () => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const data = await apiClient('/exams/term/TERM-1');
+        const currentTerm = await academicTermService.getCurrent();
+        const data = await apiClient(`/exams/term/${currentTerm.id}`);
         setExams(data);
         if (data.length > 0) setSelectedExamId(data[0].id);
       } catch (error) {

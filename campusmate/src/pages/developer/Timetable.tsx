@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, UploadCloud, Download, AlertTriangle, Loader2 } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const Timetable = () => {
   const [sections, setSections] = useState<any[]>([]);
@@ -8,13 +9,13 @@ export const Timetable = () => {
   const [timetable, setTimetable] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Hardcoding termId for now, but in reality this would be dynamic or selected
-  const termId = 'TERM-1'; 
+  const [termId, setTermId] = useState('');
 
   useEffect(() => {
     const fetchSections = async () => {
       try {
-        const data = await apiClient('/sections');
+        const [data, currentTerm] = await Promise.all([apiClient('/sections'), academicTermService.getCurrent()]);
+        setTermId(currentTerm.id);
         setSections(data);
         if (data.length > 0) setSelectedSection(data[0].id);
       } catch (error) {
@@ -25,7 +26,7 @@ export const Timetable = () => {
   }, []);
 
   useEffect(() => {
-    if (!selectedSection) return;
+    if (!selectedSection || !termId) return;
     const fetchTimetable = async () => {
       setLoading(true);
       try {

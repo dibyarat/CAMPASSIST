@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, Clock, Loader2, MapPin } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
+import { academicTermService } from '../../services/academicTermService';
 
 export const Cancellations = () => {
   const [cancellations, setCancellations] = useState<any[]>([]);
@@ -9,9 +10,9 @@ export const Cancellations = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userProfile = await apiClient('/users/me');
+        const [userProfile, currentTerm] = await Promise.all([apiClient('/users/me'), academicTermService.getCurrent()]);
         if (userProfile.crAssignment?.sectionId) {
-          const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/TERM-1`);
+          const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/${currentTerm.id}`);
           setCancellations(tt.filter((t: any) => t.status === 'CANCELLED'));
         }
       } catch (error) {

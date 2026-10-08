@@ -30,6 +30,12 @@ export class AttendanceController {
     return this.attendanceService.getMyAttendanceStats(user.student.id);
   }
 
+  @Get('overview')
+  @Roles('DEVELOPER')
+  getSystemAttendanceOverview() {
+    return this.attendanceService.getSystemAttendanceOverview();
+  }
+
   // --- 2. Official Checks / Disputes (CR Workflow) ---
 
   @Get('my-disputes')
@@ -49,8 +55,6 @@ export class AttendanceController {
     return this.attendanceService.submitDisputeRequest(user.student.id, data);
   }
 
-  @Get('cr-queue')
-  @Roles('CR')
   @Patch('cr-queue/:id')
   @Roles('CR')
   resolveRequest(@Param('id') id: string, @Body('status') status: 'APPROVED' | 'REJECTED', @CurrentUser() user: any) {
@@ -58,6 +62,8 @@ export class AttendanceController {
     return this.attendanceService.resolveRequest(id, user.crAssignment.sectionId, status);
   }
 
+  @Get('cr-queue')
+  @Roles('CR')
   getRequestsQueue(@CurrentUser() user: any) {
     if (!user.crAssignment || !user.crAssignment.isActive) {
       throw new ForbiddenException('No active CR assignment found');

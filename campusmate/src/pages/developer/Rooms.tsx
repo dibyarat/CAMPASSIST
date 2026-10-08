@@ -42,7 +42,7 @@ export const Rooms = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure?')) return;
     try {
-      await apiClient(/rooms/+id, { method: 'DELETE' });
+      await apiClient(`/rooms/${id}`, { method: 'DELETE' });
       fetchRooms();
     } catch (err) {
       alert('Failed to delete room');
