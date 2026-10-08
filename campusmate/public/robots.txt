@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /student/
+Disallow: /cr/
+Disallow: /developer/
+
+Sitemap: https://www.campassist.me/sitemap.xml
