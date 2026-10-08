@@ -6,6 +6,7 @@ export const Users = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const [editUser, setEditUser] = useState<any>(null);
   const [editRole, setEditRole] = useState('STUDENT');
@@ -23,8 +24,9 @@ export const Users = () => {
       ]);
       setUsers(usersData);
       setSections(sectionsData);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setErrorMsg(e.message || String(e));
     } finally {
       setLoading(false);
     }
@@ -68,6 +70,11 @@ export const Users = () => {
       </div>
 
       <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
+        {errorMsg && (
+          <div className="p-4 bg-red-100 text-red-700 font-bold rounded-xl mb-4">
+            API Error: {errorMsg}
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
