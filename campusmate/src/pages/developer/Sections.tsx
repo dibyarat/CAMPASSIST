@@ -4,9 +4,17 @@ import { apiClient } from '../../services/apiClient';
 
 export const Sections = () => {
   const [sections, setSections] = useState<any[]>([]);
+  const [institutions, setInstitutions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [newSection, setNewSection] = useState({ name: "", departmentCode: "", departmentName: "", semesterNumber: 1, semesterName: "" });
+  const [newSection, setNewSection] = useState({
+    name: "",
+    departmentCode: "",
+    departmentName: "",
+    semesterNumber: 1,
+    semesterName: "",
+    institutionId: ""
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const handleDelete = async (id: string) => {
@@ -22,8 +30,12 @@ export const Sections = () => {
 
   const fetchSections = async () => {
     try {
-      const data = await apiClient('/sections');
+      const [data, institutionData] = await Promise.all([
+        apiClient('/sections'),
+        apiClient('/institutions')
+      ]);
       setSections(data);
+      setInstitutions(institutionData);
     } catch (error) {
       console.error("Failed to load sections", error);
     } finally {
@@ -41,10 +53,13 @@ export const Sections = () => {
     try {
       await apiClient('/sections', {
         method: 'POST',
-        body: JSON.stringify(newSection)
+        body: JSON.stringify({
+          ...newSection,
+          institutionId: newSection.institutionId || null
+        })
       });
       setShowModal(false);
-      setNewSection({ name: "", departmentCode: "", departmentName: "", semesterNumber: 1, semesterName: "" });
+      setNewSection({ name: "", departmentCode: "", departmentName: "", semesterNumber: 1, semesterName: "", institutionId: "" });
       await fetchSections();
     } catch (err) {
       console.error(err);
@@ -90,6 +105,15 @@ export const Sections = () => {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Semester Name (e.g. Semester 1)</label>
                 <input required type="text" value={newSection.semesterName} onChange={e => setNewSection({...newSection, semesterName: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Institution</label>
+                <select value={newSection.institutionId} onChange={e => setNewSection({...newSection, institutionId: e.target.value})} className="w-full px-3 py-2 border rounded-xl">
+                  <option value="">Select an institution</option>
+                  {institutions.map((institution: any) => (
+                    <option key={institution.id} value={institution.id}>{institution.name} ({institution.code})</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-3 justify-end mt-6">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl">Cancel</button>

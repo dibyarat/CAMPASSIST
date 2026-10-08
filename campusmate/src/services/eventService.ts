@@ -14,7 +14,8 @@ export type CampusEvent = {
 };
 
 export const eventService = {
-	list: () => apiClient('/events') as Promise<CampusEvent[]>,
+	list: (includeAll = false) => apiClient(`/events${includeAll ? '?includeAll=true' : ''}`) as Promise<CampusEvent[]>,
 	create: (data: Omit<CampusEvent, 'id' | '_count'>) => apiClient('/events', { method: 'POST', body: JSON.stringify(data) }),
-	register: (id: string) => apiClient(`/events/${id}/register`, { method: 'POST' })
+	register: (id: string) => apiClient(`/events/${id}/register`, { method: 'POST' }),
+	remove: (id: string) => apiClient(`/events/${id}`, { method: 'DELETE' })
 };

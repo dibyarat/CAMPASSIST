@@ -34,7 +34,17 @@ export class InstitutionsService {
     });
   }
 
-  remove(id: string) {
-    return this.prisma.institution.delete({ where: { id } });
+  async remove(id: string) {
+    return this.prisma.$transaction(async (transaction) => {
+      await transaction.user.updateMany({
+        where: { institutionId: id },
+        data: { institutionId: null }
+      });
+      await transaction.section.updateMany({
+        where: { institutionId: id },
+        data: { institutionId: null }
+      });
+      return transaction.institution.delete({ where: { id } });
+    });
   }
 }

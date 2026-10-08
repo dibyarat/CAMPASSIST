@@ -11,7 +11,14 @@ export class SectionsController {
   @Post()
   @UseGuards(SupabaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
-  create(@Body() createSectionDto: { name: string; departmentCode: string; departmentName: string; semesterNumber: number; semesterName: string }) {
+  create(@Body() createSectionDto: {
+    name: string;
+    departmentCode: string;
+    departmentName: string;
+    semesterNumber: number;
+    semesterName: string;
+    institutionId?: string | null;
+  }) {
     return this.sectionsService.create(createSectionDto);
   }
 

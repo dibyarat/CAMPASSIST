@@ -5,9 +5,9 @@ import { PrismaService } from '../common/prisma.service';
 export class EventsService {
   constructor(private prisma: PrismaService) {}
 
-  list() {
+  list(includeAll = false) {
     return this.prisma.campusEvent.findMany({
-      where: { OR: [{ endDate: null }, { endDate: { gte: new Date() } }] },
+      where: includeAll ? {} : { OR: [{ endDate: null }, { endDate: { gte: new Date() } }] },
       include: { _count: { select: { registrations: true } } },
       orderBy: { startDate: 'asc' }
     });
@@ -35,5 +35,9 @@ export class EventsService {
     } catch {
       throw new ConflictException('You are already registered for this event');
     }
+  }
+
+  remove(eventId: string) {
+    return this.prisma.campusEvent.delete({ where: { id: eventId } });
   }
 }

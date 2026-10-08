@@ -57,6 +57,16 @@ export const DeveloperInstitutions = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this institution and all related section assignments?')) return;
+    try {
+      await apiClient(`/institutions/${id}`, { method: 'DELETE' });
+      await fetchInstitutions();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete institution');
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>;
   }
@@ -94,6 +104,7 @@ export const DeveloperInstitutions = () => {
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500">Users</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500">Sections</th>
                 <th className="py-3 px-4 text-sm font-semibold text-slate-500">Created</th>
+                <th className="py-3 px-4 text-sm font-semibold text-slate-500">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -119,11 +130,20 @@ export const DeveloperInstitutions = () => {
                   <td className="py-4 px-4 text-slate-500 text-sm">
                     {new Date(inst.createdAt).toLocaleDateString()}
                   </td>
+                  <td className="py-4 px-4">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(inst.id)}
+                      className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 transition"
+                    >
+                      <Trash2 size={15} /> Delete
+                    </button>
+                  </td>
                 </tr>
               ))}
               {institutions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     No institutions found. Create one to get started.
                   </td>
                 </tr>

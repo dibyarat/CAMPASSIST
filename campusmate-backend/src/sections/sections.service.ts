@@ -5,7 +5,14 @@ import { PrismaService } from '../common/prisma.service';
 export class SectionsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { name: string; departmentCode: string; departmentName: string; semesterNumber: number; semesterName: string }) {
+  async create(data: {
+    name: string;
+    departmentCode: string;
+    departmentName: string;
+    semesterNumber: number;
+    semesterName: string;
+    institutionId?: string | null;
+  }) {
     // Upsert Department
     let department = await this.prisma.department.findFirst({
       where: { code: data.departmentCode }
@@ -30,14 +37,15 @@ export class SectionsService {
       data: {
         name: data.name,
         departmentId: department.id,
-        semesterId: semester.id
+        semesterId: semester.id,
+        institutionId: data.institutionId ?? null
       }
     });
   }
 
   async findAll() {
     return this.prisma.section.findMany({
-      include: { department: true, semester: true }
+      include: { department: true, semester: true, institution: true }
     });
   }
 

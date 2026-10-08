@@ -18,6 +18,11 @@ export const Settings = () => {
   const [securityError, setSecurityError] = useState('');
   const [securityMessage, setSecurityMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'Profile' | 'Notifications' | 'Security'>('Profile');
+  const [notificationPreferences, setNotificationPreferences] = useState({
+    classUpdates: true,
+    attendance: true,
+    announcements: true
+  });
 
   React.useEffect(() => {
     let isMounted = true;
@@ -190,6 +195,10 @@ export const Settings = () => {
                   <input type="text" value={department} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Institution</label>
+                  <input type="text" value={profile?.Institution?.name || profile?.Institution?.code || ''} readOnly aria-readonly="true" placeholder="Not assigned" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                </div>
+                <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Semester</label>
                   <input type="text" value={profile?.profile?.semester || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
                 </div>
@@ -200,7 +209,25 @@ export const Settings = () => {
           {activeTab === 'Notifications' && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Notification Preferences</h3>
-              <p className="text-sm text-slate-600">No notification preferences are currently configured for this account.</p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  ['classUpdates', 'Class updates', 'Room changes and cancellations'],
+                  ['attendance', 'Attendance', 'Attendance reminders and alerts'],
+                  ['announcements', 'Announcements', 'Section and institution announcements']
+                ].map(([key, label, description]) => (
+                  <label key={key} className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-200">
+                    <input
+                      type="checkbox"
+                      checked={notificationPreferences[key as keyof typeof notificationPreferences]}
+                      onChange={event => setNotificationPreferences(current => ({ ...current, [key]: event.target.checked }))}
+                      className="mb-3 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="block text-sm font-bold text-slate-800">{label}</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-slate-500">{description}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500">Changes are stored in this browser session. Connect the preference API to persist them across devices.</p>
             </div>
           )}
 

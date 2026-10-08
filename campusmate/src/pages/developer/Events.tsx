@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Loader2, Plus } from 'lucide-react';
+import { Calendar, Loader2, Plus, Trash2 } from 'lucide-react';
 import { eventService } from '../../services/eventService';
 import type { CampusEvent } from '../../services/eventService';
 
@@ -8,9 +8,10 @@ export const Events = () => {
 	const [showForm, setShowForm] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
+	const [deleting, setDeleting] = useState<string | null>(null);
 	const [form, setForm] = useState({ title: '', description: '', startDate: '', endDate: '', location: '', organizer: '', tags: '', imageUrl: '' });
 
-	const load = () => { setLoading(true); eventService.list().then(setEvents).catch(console.error).finally(() => setLoading(false)); };
+	const load = () => { setLoading(true); eventService.list(true).then(setEvents).catch(console.error).finally(() => setLoading(false)); };
 	useEffect(load, []);
 
 	const create = async (event: React.FormEvent) => {
@@ -19,6 +20,14 @@ export const Events = () => {
 		try { await eventService.create(form); setForm({ title: '', description: '', startDate: '', endDate: '', location: '', organizer: '', tags: '', imageUrl: '' }); setShowForm(false); load(); }
 		catch (error) { console.error('Failed to create event', error); }
 		finally { setSaving(false); }
+	};
+
+	const remove = async (id: string) => {
+		if (!window.confirm('Delete this event and all of its registrations? This action cannot be undone.')) return;
+		setDeleting(id);
+		try { await eventService.remove(id); await load(); }
+		catch (error) { console.error('Failed to delete event', error); }
+		finally { setDeleting(null); }
 	};
 
 	return <div className="max-w-6xl mx-auto space-y-6 pb-10">
@@ -30,6 +39,6 @@ export const Events = () => {
 			<textarea value={form.description} onChange={event => setForm({ ...form, description: event.target.value })} placeholder="Description" className="md:col-span-2 px-4 py-2.5 rounded-xl border border-slate-200" />
 			<button disabled={saving} className="md:col-span-2 w-fit px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold disabled:opacity-60">{saving ? 'Publishing...' : 'Publish Event'}</button>
 		</form>}
-		{loading ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-blue-500" /></div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{events.map(item => <article key={item.id} className="bg-white/60 p-5 rounded-2xl border border-slate-100"><div className="flex gap-3"><Calendar className="text-blue-600" /><div><h2 className="font-bold text-lg">{item.title}</h2><p className="text-sm text-slate-500">{new Date(item.startDate).toLocaleString()} · {item.location}</p><p className="text-sm text-slate-600 mt-3">{item.description}</p><p className="text-xs text-slate-400 mt-3">{item._count?.registrations || 0} registrations</p></div></div></article>)}</div>}
+		{loading ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-blue-500" /></div> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{events.map(item => <article key={item.id} className="bg-white/60 p-5 rounded-2xl border border-slate-100"><div className="flex gap-3"><Calendar className="text-blue-600" /><div className="min-w-0 flex-1"><h2 className="font-bold text-lg">{item.title}</h2><p className="text-sm text-slate-500">{new Date(item.startDate).toLocaleString()} · {item.location}</p><p className="text-sm text-slate-600 mt-3">{item.description}</p><p className="text-xs text-slate-400 mt-3">{item._count?.registrations || 0} registrations</p></div><button type="button" onClick={() => remove(item.id)} disabled={deleting === item.id} aria-label={`Delete ${item.title}`} className="self-start text-slate-400 hover:text-red-600 disabled:opacity-50"><Trash2 size={17} /></button></div></article>)}</div>}
 	</div>;
 };

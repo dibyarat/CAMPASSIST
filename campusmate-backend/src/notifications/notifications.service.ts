@@ -51,19 +51,27 @@ export class NotificationsService {
   async createAnnouncement(crUserId: string, title: string, message: string) {
     const cr = await this.prisma.user.findUnique({ where: { id: crUserId }, include: { crAssignment: true } });
     if (!cr || !cr.crAssignment || !cr.crAssignment.isActive) throw new Error('Not an active CR');
-    
+
     const studentsInSection = await this.prisma.student.findMany({
       where: { sectionId: cr.crAssignment.sectionId },
       select: { userId: true }
     });
-    
-    const notifications = studentsInSection.map((s: any) => ({
-      recipientId: s.userId,
-      title,
-      message,
-      type: 'GENERAL_ANNOUNCEMENT' as any
-    }));
-    
+
+    const notifications = [
+      ...studentsInSection.map((student: { userId: string }) => ({
+        recipientId: student.userId,
+        title,
+        message,
+        type: 'GENERAL_ANNOUNCEMENT'
+      })),
+      {
+        recipientId: crUserId,
+        title,
+        message,
+        type: 'GENERAL_ANNOUNCEMENT'
+      }
+    ];
+
     if (notifications.length > 0) {
       await this.prisma.notification.createMany({ data: notifications });
     }
