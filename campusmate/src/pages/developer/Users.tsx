@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Loader2, Save, X } from 'lucide-react';
+import { Edit2, Trash2, Loader2, RefreshCw, Save, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminService, type AdminInstitution, type AdminSection, type AdminUser } from '../../services/adminService';
 
@@ -47,6 +47,7 @@ export const Users = () => {
   const [editForm, setEditForm] = useState<UserEditForm>(emptyUserEditForm);
   const [editError, setEditError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [loadingSections, setLoadingSections] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -71,9 +72,22 @@ export const Users = () => {
     }
   };
 
+  const refreshSections = async () => {
+    setLoadingSections(true);
+    try {
+      setSections(await adminService.listSections());
+      setEditError('');
+    } catch (requestError) {
+      setEditError(requestError instanceof Error ? requestError.message : 'Unable to refresh sections.');
+    } finally {
+      setLoadingSections(false);
+    }
+  };
+
   const startEditing = (user: AdminUser) => {
     setEditUser(user);
     setEditError('');
+    void refreshSections();
     setEditForm({
       ...emptyUserEditForm,
       fullName: user.profile?.fullName || '',
@@ -240,11 +254,17 @@ export const Users = () => {
                   <input value={editForm.rollNumber} onChange={event => setEditForm({ ...editForm, rollNumber: event.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-400" />
                 </label>
                 <label className="space-y-1.5">
-                  <span className="text-sm font-semibold text-slate-700">Assigned Section</span>
-                  <select value={editForm.sectionId} onChange={event => setEditForm({ ...editForm, sectionId: event.target.value })} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400">
+                  <span className="flex items-center justify-between text-sm font-semibold text-slate-700">
+                    Assigned Section
+                    <button type="button" onClick={() => void refreshSections()} disabled={loadingSections} aria-label="Refresh sections" title="Refresh sections" className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 disabled:opacity-50">
+                      <RefreshCw size={13} className={loadingSections ? 'animate-spin' : ''} /> Refresh
+                    </button>
+                  </span>
+                  <select value={editForm.sectionId} disabled={loadingSections} onChange={event => setEditForm({ ...editForm, sectionId: event.target.value })} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-400 disabled:opacity-60">
                     <option value="">No section assigned</option>
                     {sections.map(section => <option key={section.id} value={section.id}>{section.name} ({section.department?.code || section.department?.name || ''})</option>)}
                   </select>
+                  {sections.length === 0 && !loadingSections && <span className="block text-xs text-slate-500">No sections found. Create one to assign a section.</span>}
                   <Link to="/developer/sections" onClick={() => setEditUser(null)} className="inline-block text-xs font-semibold text-blue-700 hover:underline">Create or manage sections</Link>
                 </label>
                 <label className="space-y-1.5">
