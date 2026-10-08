@@ -11,7 +11,7 @@ export const Landing = () => {
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={logoIcon} alt="CampAssist Logo" className="w-9 h-9 object-contain" />
-            <span className="font-extrabold text-2xl tracking-tight text-[#0a1128]">CampAssist</span>
+            <span className="brand-wordmark font-extrabold text-2xl tracking-tight">CampAssist</span>
           </div>
           <nav className="hidden md:flex gap-8 font-medium text-slate-600">
             <a href="#features" className="hover:text-blue-600 transition">Features</a>

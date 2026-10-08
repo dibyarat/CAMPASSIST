@@ -146,11 +146,11 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
         <div className={'h-16 flex items-center border-b border-slate-100 justify-between lg:justify-start cursor-pointer select-none ' + (isCollapsed ? 'px-4 justify-center' : 'px-6')} onClick={() => setIsCollapsed(!isCollapsed)}>
           <div className="hidden lg:flex items-center gap-2 overflow-hidden">
             <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain hover:scale-105 transition-transform" />
-            {!isCollapsed && <span className="font-extrabold text-xl tracking-tight text-[#0a1128] whitespace-nowrap hover:text-blue-600 transition-colors">CampAssist</span>}
+            {!isCollapsed && <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>}
           </div>
           <Link to="/" className="flex lg:hidden items-center gap-2 overflow-hidden">
             <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain" />
-            <span className="font-extrabold text-xl tracking-tight text-[#0a1128] whitespace-nowrap">CampAssist</span>
+            <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>
           </Link>
           <div className="flex items-center gap-2 lg:hidden">
             <button className="p-1 text-slate-500" onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(false); }}>

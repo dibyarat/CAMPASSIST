@@ -9,6 +9,7 @@
   --brand-navy: #0f172a;
   
   --gradient-primary: linear-gradient(to right, #0ea5e9, #8b5cf6, #ec4899);
+  --gradient-wordmark: linear-gradient(90deg, #1d4ed8 0%, #0ea5e9 32%, #8b5cf6 68%, #ec4899 100%);
   --gradient-secondary: linear-gradient(to right, #3b82f6, #8b5cf6);
   
   --font-family: 'Inter', system-ui, sans-serif;
@@ -34,6 +35,13 @@ body {
 /* Base utility for gradient text */
 .text-gradient {
   background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand-wordmark {
+  background-image: var(--gradient-wordmark);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

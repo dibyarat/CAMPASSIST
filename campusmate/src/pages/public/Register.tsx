@@ -114,7 +114,7 @@ export const Register = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex items-center justify-center gap-3">
           <img src={logoIcon} alt="" className="h-14 w-14 object-contain" />
-          <span className="text-3xl font-extrabold text-gradient">CampAssist</span>
+          <span className="brand-wordmark text-3xl font-extrabold">CampAssist</span>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
           Create your account
