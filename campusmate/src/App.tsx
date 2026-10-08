@@ -13,7 +13,7 @@ import {
   CrDashboard, CrTimetable, CrAttendance, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
   DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters
 } from './lazyRoutes';
-import logoMark from './assets/logo-mark.svg';
+import logoIcon from './assets/logo-icon.png';
 
 const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: string, icon: any, children: React.ReactNode, isCollapsed?: boolean }) => {
   const location = useLocation();
@@ -90,11 +90,11 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
       <div className={`fixed lg:static inset-y-0 left-0 bg-white border-r border-slate-200 flex flex-col z-30 transform transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${isCollapsed ? 'w-20' : 'w-72'}`}>
         <div className={'h-16 flex items-center border-b border-slate-100 justify-between lg:justify-start cursor-pointer select-none ' + (isCollapsed ? 'px-4 justify-center' : 'px-6')} onClick={() => setIsCollapsed(!isCollapsed)}>
           <div className="hidden lg:flex items-center gap-2 overflow-hidden">
-            <img src={logoMark} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain hover:scale-105 transition-transform" />
+            <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain hover:scale-105 transition-transform" />
             {!isCollapsed && <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>}
           </div>
           <Link to="/" className="flex lg:hidden items-center gap-2 overflow-hidden">
-            <img src={logoMark} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain" />
+            <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain" />
             <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>
           </Link>
           <div className="flex items-center gap-2 lg:hidden">

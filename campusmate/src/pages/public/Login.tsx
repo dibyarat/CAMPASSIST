@@ -4,7 +4,7 @@ import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
-import logoMark from '../../assets/logo-mark.svg';
+import logoIcon from '../../assets/logo-icon.png';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ export const Login = () => {
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-slate-50 to-pink-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex items-center justify-center gap-3">
-          <img src={logoMark} alt="" className="h-14 w-14 object-contain" />
+          <img src={logoIcon} alt="CampAssist Logo" className="h-14 w-14 object-contain" />
           <span className="brand-wordmark text-3xl font-extrabold">CampAssist</span>
         </div>
         <h1 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
