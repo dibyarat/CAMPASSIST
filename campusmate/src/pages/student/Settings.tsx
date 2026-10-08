@@ -1,12 +1,70 @@
 import React, { useState } from 'react';
-import { User, Bell, Lock, Shield, Camera, Save } from 'lucide-react';
+import { User, Bell, Shield, Camera, Save } from 'lucide-react';
 
 import { apiClient } from '../../services/apiClient';
 
 export const Settings = () => {
   const [profile, setProfile] = React.useState<any>(null);
-  React.useEffect(() => { apiClient('/users/me').then(setProfile).catch(console.error); }, []);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileError, setProfileError] = useState('');
+  const [saveMessage, setSaveMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'Profile' | 'Notifications' | 'Security'>('Profile');
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    apiClient('/users/me')
+      .then((data) => {
+        if (!isMounted) return;
+        setProfile(data);
+        const nameParts = (data?.profile?.fullName || '').trim().split(/\s+/).filter(Boolean);
+        setFirstName(nameParts[0] || '');
+        setLastName(nameParts.slice(1).join(' '));
+        setProfileError('');
+      })
+      .catch((error) => {
+        if (isMounted) setProfileError(error instanceof Error ? error.message : 'Unable to load your account.');
+      })
+      .finally(() => {
+        if (isMounted) setLoadingProfile(false);
+      });
+
+    return () => { isMounted = false; };
+  }, []);
+
+  const saveProfile = async () => {
+    const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ');
+    if (!fullName) {
+      setProfileError('Enter your first or last name before saving.');
+      return;
+    }
+
+    setSavingProfile(true);
+    setProfileError('');
+    setSaveMessage('');
+    try {
+      const updatedProfile = await apiClient('/users/me/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ fullName }),
+      });
+      setProfile((current: any) => ({
+        ...current,
+        profile: { ...current?.profile, ...updatedProfile, fullName },
+      }));
+      setSaveMessage('Profile saved.');
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : 'Unable to save your profile.');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const fullName = profile?.profile?.fullName?.trim() || '';
+  const assignedSection = profile?.student?.section?.name || profile?.profile?.section || '';
+  const department = profile?.student?.section?.department?.name || profile?.profile?.department || '';
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-10">
@@ -50,37 +108,57 @@ export const Settings = () => {
         <div className="flex-1 bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8">
           {activeTab === 'Profile' && (
             <div className="space-y-8">
+              {loadingProfile && <p role="status" className="text-sm text-slate-500">Loading account details...</p>}
+              {profileError && <p role="alert" className="text-sm text-red-700">{profileError}</p>}
               <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
                 <div className="relative group cursor-pointer">
                   <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-slate-50">
-                    <img src={`https://ui-avatars.com/api/?name=${profile?.profile?.fullName || 'Student'}&background=3B82F6&color=fff&size=128`} alt="Avatar" className="w-full h-full object-cover" />
+                    {profile?.profile?.avatarUrl ? (
+                      <img src={profile.profile.avatarUrl} alt={`${fullName || 'Account'} profile`} className="w-full h-full object-cover" />
+                    ) : fullName ? (
+                      <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=3B82F6&color=fff&size=128`} alt={`${fullName} avatar`} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400"><User size={32} /></div>
+                    )}
                   </div>
                   <div className="absolute inset-0 bg-slate-900/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                     <Camera size={24} className="text-white" />
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl text-slate-900">{profile?.profile?.fullName || 'Student'}</h3>
-                  <p className="text-slate-500 font-medium">{profile?.email || 'No email yet'}</p>
+                  <h3 className="font-bold text-xl text-slate-900">{loadingProfile ? 'Loading profile' : fullName || 'Name not set'}</h3>
+                  <p className="text-slate-500 font-medium">{profile?.email || (loadingProfile ? '' : 'Email not available')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">First Name</label>
-                  <input type="text" defaultValue={profile?.profile?.fullName?.split(" ")[0] || "Student"} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <input type="text" value={firstName} onChange={(event) => setFirstName(event.target.value)} disabled={loadingProfile || savingProfile} autoComplete="given-name" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Last Name</label>
-                  <input type="text" defaultValue={profile?.profile?.fullName?.split(" ").slice(1).join(" ") || ""} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <input type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} disabled={loadingProfile || savingProfile} autoComplete="family-name" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Email</label>
-                  <input type="email" defaultValue={profile?.email || ""} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <input type="email" value={profile?.email || ''} readOnly aria-readonly="true" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Phone</label>
-                  <input type="text" defaultValue="" placeholder="Phone number" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <label className="text-sm font-semibold text-slate-700">Roll Number</label>
+                  <input type="text" value={profile?.profile?.rollNumber || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Section</label>
+                  <input type="text" value={assignedSection} readOnly aria-readonly="true" placeholder="Not assigned" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Department</label>
+                  <input type="text" value={department} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Semester</label>
+                  <input type="text" value={profile?.profile?.semester || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
                 </div>
               </div>
             </div>
@@ -134,8 +212,8 @@ export const Settings = () => {
           )}
 
           <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
-            <button className="flex items-center gap-2 px-6 py-3 bg-gradient-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition">
-              <Save size={18} /> Save Changes
+            <button onClick={saveProfile} disabled={activeTab !== 'Profile' || loadingProfile || savingProfile || !profile} className="flex items-center gap-2 px-6 py-3 bg-gradient-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition disabled:opacity-50">
+              <Save size={18} /> {savingProfile ? 'Saving...' : saveMessage || 'Save Changes'}
             </button>
           </div>
         </div>
