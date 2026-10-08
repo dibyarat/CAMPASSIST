@@ -15,14 +15,11 @@ export const Register = () => {
   useEffect(() => {
     const fetchInstitutions = async () => {
       try {
-        const res = await fetch('https://campassist.onrender.com/api/v1/institutions');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            setInstitutions(data);
-            if (data.length > 0) {
-              setFormData(prev => ({ ...prev, institutionCode: data[0].code }));
-            }
+        const data = await apiClient('/institutions');
+        if (Array.isArray(data)) {
+          setInstitutions(data);
+          if (data.length > 0) {
+            setFormData(prev => ({ ...prev, institutionCode: data[0].code }));
           }
         }
       } catch (err) {
@@ -32,14 +29,11 @@ export const Register = () => {
 
     const fetchSections = async () => {
       try {
-        const res = await fetch('https://campassist.onrender.com/api/v1/sections');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            setSections(data);
-            if (data.length > 0) {
-              setFormData(prev => ({ ...prev, section: data[0].name }));
-            }
+        const data = await apiClient('/sections');
+        if (Array.isArray(data)) {
+          setSections(data);
+          if (data.length > 0) {
+            setFormData(prev => ({ ...prev, section: data[0].name }));
           }
         }
       } catch (err) {

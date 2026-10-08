@@ -14,13 +14,26 @@ export class UsersService {
       else throw new NotFoundException('Invalid Institution Code');
     }
 
+    const sectionRecord = section
+      ? await this.prisma.section.findFirst({
+          where: {
+            name: section,
+            ...(institutionId ? { institutionId } : {})
+          }
+        })
+      : null;
+
     const user = await this.prisma.user.upsert({
       where: { id },
       update: { email, role, institutionId },
       create: { id, email, role, institutionId }
     });
     
-    const student = await this.prisma.student.upsert({ where: { userId: id }, update: {}, create: { userId: id } });
+    const student = await this.prisma.student.upsert({
+      where: { userId: id },
+      update: { sectionId: sectionRecord?.id },
+      create: { userId: id, sectionId: sectionRecord?.id }
+    });
     
     const profile = await this.prisma.profile.upsert({
       where: { userId: id },
@@ -34,7 +47,7 @@ export class UsersService {
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { profile: true, crAssignment: true, student: true }
+      include: { profile: true, crAssignment: true, student: { include: { section: true } } }
     });
     
     if (!user) throw new NotFoundException('User not found');
@@ -67,11 +80,18 @@ export class UsersService {
     });
 
     if (role === 'CR' && sectionId) {
+      const currentTerm = await this.prisma.academicTerm.findFirst({
+        where: { isCurrent: true },
+        orderBy: { startDate: 'desc' }
+      }) || await this.prisma.academicTerm.findUnique({ where: { id: 'TERM-1' } });
+
+      if (!currentTerm) throw new NotFoundException('No academic term is configured');
+
       // Upsert CR assignment
       await this.prisma.crAssignment.upsert({
         where: { userId: id },
-        create: { userId: id, sectionId: sectionId, termId: 'TERM-1', isActive: true },
-        update: { sectionId: sectionId, isActive: true }
+        create: { userId: id, sectionId, termId: currentTerm.id, isActive: true },
+        update: { sectionId, termId: currentTerm.id, isActive: true }
       });
     } else {
       // If no longer CR, deactivate or delete assignment
