@@ -6,7 +6,7 @@ export const Sections = () => {
   const [sections, setSections] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [newSection, setNewSection] = useState({ name: '', departmentName: '', semesterName: '' });
+  const [newSection, setNewSection] = useState({ name: "", departmentCode: "", departmentName: "", semesterNumber: 1, semesterName: "" });
   const [submitting, setSubmitting] = useState(false);
 
   const handleDelete = async (id: string) => {
@@ -44,7 +44,7 @@ export const Sections = () => {
         body: JSON.stringify(newSection)
       });
       setShowModal(false);
-      setNewSection({ name: '', departmentName: '', semesterName: '' });
+      setNewSection({ name: "", departmentCode: "", departmentName: "", semesterNumber: 1, semesterName: "" });
       await fetchSections();
     } catch (err) {
       console.error(err);
@@ -76,11 +76,19 @@ export const Sections = () => {
                 <input required type="text" value={newSection.name} onChange={e => setNewSection({...newSection, name: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
               </div>
               <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Department Code (e.g. CS)</label>
+                <input required type="text" value={newSection.departmentCode} onChange={e => setNewSection({...newSection, departmentCode: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Department Name (e.g. Computer Science)</label>
                 <input required type="text" value={newSection.departmentName} onChange={e => setNewSection({...newSection, departmentName: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Semester Name (e.g. Fall 2026)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Semester Number (e.g. 1)</label>
+                <input required type="number" value={newSection.semesterNumber} onChange={e => setNewSection({...newSection, semesterNumber: parseInt(e.target.value) || 1})} className="w-full px-3 py-2 border rounded-xl" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Semester Name (e.g. Semester 1)</label>
                 <input required type="text" value={newSection.semesterName} onChange={e => setNewSection({...newSection, semesterName: e.target.value})} className="w-full px-3 py-2 border rounded-xl" />
               </div>
               <div className="flex gap-3 justify-end mt-6">
@@ -125,4 +133,5 @@ export const Sections = () => {
     </div>
   );
 };
+
 
