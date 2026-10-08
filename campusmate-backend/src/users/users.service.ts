@@ -127,9 +127,9 @@ export class UsersService {
     return this.prisma.user.findMany({
       include: {
         profile: true,
-        student: true,
+        student: { include: { section: true } },
         crAssignment: { include: { section: true } },
-          Institution: true
+        Institution: true
       }
     });
   }

@@ -201,7 +201,7 @@ export const Users = () => {
                   </td>
                   <td className="py-4 px-4 text-slate-600">{user.Institution?.code || "-"}</td>
                   <td className="py-4 px-4 text-slate-600">
-                    {user.crAssignment?.section?.name || user.student?.section?.name || '-'}
+                    {user.crAssignment?.section?.name || user.student?.section?.name || user.profile?.section || '-'}
                   </td>
                                     <td className="py-4 px-4 text-right flex justify-end gap-2">
                     <button onClick={() => startEditing(user)} aria-label={`Edit ${user.profile?.fullName || user.email}`} className="p-2 text-slate-400 hover:text-blue-600 transition bg-slate-50 rounded-lg hover:bg-blue-50">
