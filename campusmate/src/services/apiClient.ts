@@ -13,6 +13,17 @@ export const apiClient = async (endpoint: string, options: RequestInit = {}) => 
     token = data?.session?.access_token;
   }
   
+  // Final nuclear fallback: read local storage manually
+  if (!token) {
+    try {
+      const authKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+      if (authKey) {
+        const stored = JSON.parse(localStorage.getItem(authKey) || '{}');
+        if (stored.access_token) token = stored.access_token;
+      }
+    } catch(e) {}
+  }
+  
   const headers = new Headers(options.headers || {});
   
   // Only inject the Bearer token if the user is authenticated
