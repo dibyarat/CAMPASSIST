@@ -4,6 +4,7 @@ import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
+import logoIcon from '../../assets/logo-icon.png';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -44,26 +45,29 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-slate-50 to-pink-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-            C
-          </div>
+        <div className="flex items-center justify-center gap-3">
+          <img src={logoIcon} alt="" className="h-14 w-14 object-contain" />
+          <span className="text-3xl font-extrabold text-gradient">CampAssist</span>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
-          Sign in to CampusMate
-        </h2>
+        <h1 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
+          Sign in to CampAssist
+        </h1>
         <p className="mt-2 text-center text-sm text-slate-600">
+          Continue to your campus account
+        </p>
+        <p className="mt-4 text-center text-sm text-slate-600">
           Or{' '}
-          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link to="/register" className="font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-purple)]">
             create a new account
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl shadow-slate-200/50 sm:rounded-2xl sm:px-10 border border-slate-100">
+        <div className="overflow-hidden bg-white/95 py-8 px-4 shadow-xl shadow-slate-200/60 sm:rounded-2xl sm:px-10 border border-slate-200">
+          <div className="h-1.5 rounded-full bg-gradient-primary mb-8" />
           
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
@@ -85,7 +89,7 @@ export const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
                   placeholder="you@university.edu"
                 />
               </div>
@@ -103,7 +107,7 @@ export const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
                   placeholder="••••••••"
                 />
               </div>
@@ -123,7 +127,7 @@ export const Login = () => {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <a href="#" className="font-medium text-[var(--brand-blue)] hover:text-[var(--brand-purple)]">
                   Forgot your password?
                 </a>
               </div>
@@ -133,7 +137,7 @@ export const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-medium text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition disabled:opacity-70"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] transition disabled:opacity-70"
               >
                 {loading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                   <>Sign in <ArrowRight className="ml-2 h-5 w-5" /></>

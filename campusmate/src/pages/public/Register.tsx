@@ -4,6 +4,7 @@ import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2 } from 'lucide-react';
 import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
+import logoIcon from '../../assets/logo-icon.png';
 
 export const Register = () => {
   const navigate = useNavigate();
@@ -109,12 +110,11 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-slate-50 to-pink-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center text-white font-black text-2xl shadow-lg">
-            C
-          </div>
+        <div className="flex items-center justify-center gap-3">
+          <img src={logoIcon} alt="" className="h-14 w-14 object-contain" />
+          <span className="text-3xl font-extrabold text-gradient">CampAssist</span>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
           Create your account

@@ -10,8 +10,8 @@ export const Landing = () => {
       <header className="bg-white/60 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src={logoIcon} alt="CampusMate Logo" className="w-9 h-9 object-contain" />
-            <span className="font-extrabold text-2xl tracking-tight text-[#0a1128]">CampusMate</span>
+            <img src={logoIcon} alt="CampAssist Logo" className="w-9 h-9 object-contain" />
+            <span className="font-extrabold text-2xl tracking-tight text-[#0a1128]">CampAssist</span>
           </div>
           <nav className="hidden md:flex gap-8 font-medium text-slate-600">
             <a href="#features" className="hover:text-blue-600 transition">Features</a>
@@ -54,7 +54,7 @@ export const Landing = () => {
       <section id="features" className="py-20 px-6 max-w-7xl mx-auto w-full">
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold mb-4">Everything You Need</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto">CampusMate brings all your scattered college information into one beautiful, unified dashboard.</p>
+          <p className="text-slate-600 max-w-2xl mx-auto">CampAssist brings all your scattered college information into one beautiful, unified dashboard.</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -80,7 +80,7 @@ export const Landing = () => {
       {/* Footer */}
       <footer className="bg-white/60 backdrop-blur-xl border-t border-slate-200 py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-6 text-center text-slate-500 text-sm">
-          &copy; {new Date().getFullYear()} CampusMate. Student-first digital college companion.
+          &copy; {new Date().getFullYear()} CampAssist. Student-first digital college companion.
         </div>
       </footer>
     </div>
