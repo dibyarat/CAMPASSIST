@@ -33,7 +33,7 @@ export const Users = () => {
     const handleDeleteUser = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
     try {
-      await apiClient(/users/ + id, { method: 'DELETE' });
+      await apiClient(`/users/${id}`, { method: 'DELETE' });
       fetchData(); // Refresh list
     } catch (e: any) {
       alert(e.message);
