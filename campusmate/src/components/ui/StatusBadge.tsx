@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const StatusBadge: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>StatusBadge Placeholder</div>;
-};
+export const StatusBadge = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLSpanElement>) => (
+  <span className={['inline-flex rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'Active'}
+  </span>
+);

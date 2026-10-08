@@ -286,8 +286,7 @@ export default function App() {
         <Route path="/student/lab-records" element={<MainLayout role="student"><StudentLabRecords /></MainLayout>} />
         <Route path="/student/profile" element={<MainLayout role="student"><StudentProfile /></MainLayout>} />
 
-        {/* Fallback mock routes for scaffolding */}
-        <Route path="/student/*" element={<MainLayout role="student"><div className="p-6">Page under construction (Scaffolded)</div></MainLayout>} />
+        <Route path="/student/*" element={<Navigate to="/student" replace />} />
         
                   {/* CR Routes */}
           <Route path="/cr" element={<MainLayout role="cr"><CrDashboard /></MainLayout>} />

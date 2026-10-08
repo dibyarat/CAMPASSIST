@@ -1,5 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const TimePicker: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>TimePicker Placeholder</div>;
-};
+export const TimePicker = ({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input type="time" className={['w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:bg-white', className].filter(Boolean).join(' ')} {...props} />
+);

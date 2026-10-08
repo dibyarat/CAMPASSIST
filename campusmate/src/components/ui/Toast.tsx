@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const Toast: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>Toast Placeholder</div>;
-};
+export const Toast = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={['rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-sm', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'Success'}
+  </div>
+);

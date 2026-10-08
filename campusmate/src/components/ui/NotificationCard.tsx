@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const NotificationCard: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>NotificationCard Placeholder</div>;
-};
+export const NotificationCard = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={['rounded-xl border border-slate-200 bg-white p-4 shadow-sm', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'Notification'}
+  </div>
+);

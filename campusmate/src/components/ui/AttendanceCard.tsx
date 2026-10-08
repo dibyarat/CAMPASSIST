@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const AttendanceCard: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>AttendanceCard Placeholder</div>;
-};
+export const AttendanceCard = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={['border border-slate-200 rounded-xl bg-white p-4 shadow-sm', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'Attendance Card'}
+  </div>
+);

@@ -61,7 +61,7 @@ export const Settings = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-xl text-slate-900">{profile?.profile?.fullName || 'Student'}</h3>
-                  <p className="text-slate-500 font-medium">{profile?.email || 'student@college.edu'}</p>
+                  <p className="text-slate-500 font-medium">{profile?.email || 'No email yet'}</p>
                 </div>
               </div>
 
@@ -76,11 +76,11 @@ export const Settings = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Email</label>
-                  <input type="email" defaultValue={profile?.email || "student@college.edu"} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <input type="email" defaultValue={profile?.email || ""} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Phone</label>
-                  <input type="text" defaultValue="+1 (234) 567-8900" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <input type="text" defaultValue="" placeholder="Phone number" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
                 </div>
               </div>
             </div>

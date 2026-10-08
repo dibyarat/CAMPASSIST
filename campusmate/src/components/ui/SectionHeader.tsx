@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const SectionHeader: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>SectionHeader Placeholder</div>;
-};
+export const SectionHeader = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  <h3 className={['text-lg font-bold text-slate-900', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'Section Header'}
+  </h3>
+);

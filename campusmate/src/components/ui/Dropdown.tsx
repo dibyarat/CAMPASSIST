@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const Dropdown: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>Dropdown Placeholder</div>;
-};
+export const Dropdown = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={['relative', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'Dropdown'}
+  </div>
+);

@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const FileCard: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>FileCard Placeholder</div>;
-};
+export const FileCard = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={['rounded-xl border border-slate-200 bg-slate-50 p-4', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'File'}
+  </div>
+);

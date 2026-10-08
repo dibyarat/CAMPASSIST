@@ -1,5 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const Checkbox: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>Checkbox Placeholder</div>;
-};
+export const Checkbox = ({ className = '', ...props }: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input type="checkbox" className={['h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500', className].filter(Boolean).join(' ')} {...props} />
+);

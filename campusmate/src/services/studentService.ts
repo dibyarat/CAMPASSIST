@@ -1,2 +1,14 @@
-// Mock implementation for studentService
-export const studentService = {};
+import { apiClient } from './apiClient';
+
+export const studentService = {
+  profile: () => apiClient('/users/me') as Promise<any>,
+  onboard: (payload: Record<string, any>) => apiClient('/users/onboard', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }),
+  updateProfile: (profileData: Record<string, any>) => apiClient('/users/me/profile', {
+    method: 'PUT',
+    body: JSON.stringify(profileData)
+  }),
+  listCRs: () => apiClient('/users/cr') as Promise<any[]>
+};

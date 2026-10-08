@@ -1,5 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 
-export const EmptyState: React.FC<any> = (props) => {
-  return <div className="p-2 border border-gray-200 rounded" {...props}>EmptyState Placeholder</div>;
-};
+export const EmptyState = ({ children, className = '', ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={['rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500', className].filter(Boolean).join(' ')} {...props}>
+    {children ?? 'No items found'}
+  </div>
+);
