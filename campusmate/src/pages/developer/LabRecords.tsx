@@ -1,1 +1,3 @@
-export const LabRecords = () => <div className='p-6'>Developer LabRecords Page</div>;
+import { Navigate } from 'react-router-dom';
+
+export const LabRecords = () => <Navigate to="/developer" replace />;

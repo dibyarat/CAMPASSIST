@@ -23,8 +23,8 @@ export class PollsController {
   }
 
   @Get()
-  getActivePolls() {
-    return this.pollsService.getActivePolls();
+  getActivePolls(@CurrentUser() user: any) {
+    return this.pollsService.getActivePolls(user.id);
   }
 }
 

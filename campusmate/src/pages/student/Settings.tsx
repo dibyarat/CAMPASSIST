@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Bell, Shield, Camera, Save } from 'lucide-react';
 
 import { apiClient } from '../../services/apiClient';
+import { supabase } from '../../services/supabaseClient';
 
 export const Settings = () => {
   const [profile, setProfile] = React.useState<any>(null);
@@ -11,6 +12,11 @@ export const Settings = () => {
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileError, setProfileError] = useState('');
   const [saveMessage, setSaveMessage] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [securityError, setSecurityError] = useState('');
+  const [securityMessage, setSecurityMessage] = useState('');
   const [activeTab, setActiveTab] = useState<'Profile' | 'Notifications' | 'Security'>('Profile');
 
   React.useEffect(() => {
@@ -59,6 +65,33 @@ export const Settings = () => {
       setProfileError(error instanceof Error ? error.message : 'Unable to save your profile.');
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const updatePassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSecurityError('');
+    setSecurityMessage('');
+    if (newPassword.length < 8) {
+      setSecurityError('Use a password with at least 8 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setSecurityError('The passwords do not match.');
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setNewPassword('');
+      setConfirmPassword('');
+      setSecurityMessage('Password updated.');
+    } catch (error) {
+      setSecurityError(error instanceof Error ? error.message : 'Unable to update your password.');
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -165,57 +198,41 @@ export const Settings = () => {
           )}
 
           {activeTab === 'Notifications' && (
-            <div className="space-y-8">
-              <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Communication Preferences</h3>
-              
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-bold text-slate-900 mb-1">Email Notifications</h4>
-                    <p className="text-sm text-slate-500 font-medium">Receive daily summaries and critical alerts via email.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/60 backdrop-blur-xl after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  </label>
-                </div>
-                
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h4 className="font-bold text-slate-900 mb-1">SMS Alerts</h4>
-                    <p className="text-sm text-slate-500 font-medium">Get text messages for class cancellations.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/60 backdrop-blur-xl after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  </label>
-                </div>
-              </div>
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Notification Preferences</h3>
+              <p className="text-sm text-slate-600">No notification preferences are currently configured for this account.</p>
             </div>
           )}
 
           {activeTab === 'Security' && (
-            <div className="space-y-8">
+            <form onSubmit={updatePassword} className="space-y-8">
               <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Update Password</h3>
-              
+
               <div className="space-y-4 max-w-md">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Current Password</label>
-                  <input type="password" placeholder="••••••••" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <label htmlFor="new-password" className="text-sm font-semibold text-slate-700">New Password</label>
+                  <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={event => setNewPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">New Password</label>
-                  <input type="password" placeholder="••••••••" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium" />
+                  <label htmlFor="confirm-password" className="text-sm font-semibold text-slate-700">Confirm New Password</label>
+                  <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
                 </div>
               </div>
-            </div>
+              {securityError && <p role="alert" className="text-sm text-red-700">{securityError}</p>}
+              {securityMessage && <p role="status" className="text-sm text-emerald-700">{securityMessage}</p>}
+              <div className="flex justify-end border-t border-slate-100 pt-5">
+                <button type="submit" disabled={savingPassword} className="flex items-center gap-2 rounded-xl bg-gradient-primary px-6 py-3 font-bold text-white shadow-md transition hover:shadow-lg disabled:opacity-50">
+                  <Save size={18} /> {savingPassword ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
           )}
 
-          <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
-            <button onClick={saveProfile} disabled={activeTab !== 'Profile' || loadingProfile || savingProfile || !profile} className="flex items-center gap-2 px-6 py-3 bg-gradient-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition disabled:opacity-50">
+          {activeTab === 'Profile' && <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
+            <button onClick={saveProfile} disabled={loadingProfile || savingProfile || !profile} className="flex items-center gap-2 px-6 py-3 bg-gradient-primary text-white font-bold rounded-xl shadow-md hover:shadow-lg transition disabled:opacity-50">
               <Save size={18} /> {savingProfile ? 'Saving...' : saveMessage || 'Save Changes'}
             </button>
-          </div>
+          </div>}
         </div>
       </div>
     </div>

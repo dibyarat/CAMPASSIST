@@ -1,1 +1,3 @@
-export const Submissions = () => <div className='p-6'>Developer Submissions Page</div>;
+import { Navigate } from 'react-router-dom';
+
+export const Submissions = () => <Navigate to="/developer" replace />;

@@ -44,14 +44,17 @@ export class PollsService {
     }
   }
 
-  async getActivePolls() {
-    return this.prisma.poll.findMany({
+  async getActivePolls(userId: string) {
+    const polls = await this.prisma.poll.findMany({
       where: { status: 'ACTIVE' },
       include: { 
         options: {
           include: { _count: { select: { votes: true } } }
-        }
+        },
+        votes: { where: { userId }, select: { id: true } }
       }
     });
+
+    return polls.map(({ votes, ...poll }) => ({ ...poll, hasVoted: votes.length > 0 }));
   }
 }

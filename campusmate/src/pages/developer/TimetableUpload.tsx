@@ -1,1 +1,3 @@
-export const TimetableUpload = () => <div className='p-6'>Developer TimetableUpload Page</div>;
+import { Navigate } from 'react-router-dom';
+
+export const TimetableUpload = () => <Navigate to="/developer/timetable" replace />;

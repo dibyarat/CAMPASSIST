@@ -1,45 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart2, CheckCircle2, Loader2 } from 'lucide-react';
-import { apiClient } from '../../services/apiClient';
+import { pollService, type ActivePoll } from '../../services/pollService';
 
 export const Polls = () => {
-  const [polls, setPolls] = useState<any[]>([]);
+  const [polls, setPolls] = useState<ActivePoll[]>([]);
   const [loading, setLoading] = useState(true);
-  const [votedPolls, setVotedPolls] = useState<Record<string, boolean>>({});
+  const [votingPollId, setVotingPollId] = useState('');
+  const [error, setError] = useState('');
+
+  const fetchPolls = async () => {
+    try {
+      setError('');
+      setPolls(await pollService.listActive());
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Failed to load polls.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPolls = async () => {
-      try {
-        const data = await apiClient('/polls');
-        setPolls(data);
-        
-        // In a real app, the API should return which polls the user voted in.
-        // For now we'll just store locally during session.
-      } catch (error) {
-        console.error("Failed to load polls", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPolls();
+    void fetchPolls();
   }, []);
 
   const handleVote = async (pollId: string, optionId: string) => {
-    if (votedPolls[pollId]) return;
-    
+    setVotingPollId(pollId);
+    setError('');
     try {
-      await apiClient(`/polls/${pollId}/vote`, {
-        method: 'POST',
-        body: JSON.stringify({ optionId })
-      });
-      
-      setVotedPolls({ ...votedPolls, [pollId]: true });
-      
-      // Refresh polls to get updated counts
-      const data = await apiClient('/polls');
-      setPolls(data);
-    } catch (error) {
-      console.error("Failed to cast vote", error);
+      await pollService.vote(pollId, optionId);
+      await fetchPolls();
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Failed to cast vote.');
+    } finally {
+      setVotingPollId('');
     }
   };
 
@@ -54,6 +47,7 @@ export const Polls = () => {
       </div>
 
       <div className="space-y-6">
+        {error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
         {loading ? (
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-purple-500 w-10 h-10" /></div>
         ) : polls.length === 0 ? (
@@ -61,8 +55,8 @@ export const Polls = () => {
             <p className="text-slate-500">No active polls at the moment.</p>
           </div>
         ) : polls.map((poll) => {
-          const isVoted = votedPolls[poll.id] || poll.status === 'CLOSED';
-          const totalVotes = poll.options?.reduce((acc: number, opt: any) => acc + (opt._count?.votes || 0), 0) || 0;
+          const isVoted = poll.hasVoted || poll.status === 'CLOSED';
+          const totalVotes = poll.options.reduce((acc, opt) => acc + (opt._count?.votes || 0), 0);
 
           return (
             <div key={poll.id} className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -80,7 +74,7 @@ export const Polls = () => {
               </div>
 
               <div className="space-y-3 mt-6">
-                {poll.options?.map((opt: any) => {
+                {poll.options.map((opt) => {
                   const optVotes = opt._count?.votes || 0;
                   const percentage = totalVotes === 0 ? 0 : Math.round((optVotes / totalVotes) * 100);
 
@@ -88,7 +82,7 @@ export const Polls = () => {
                     <button
                       key={opt.id}
                       onClick={() => handleVote(poll.id, opt.id)}
-                      disabled={isVoted}
+                      disabled={isVoted || votingPollId === poll.id}
                       className={`w-full relative overflow-hidden rounded-xl border text-left transition-all ${
                         isVoted 
                           ? 'border-slate-200 bg-slate-50 cursor-default' 

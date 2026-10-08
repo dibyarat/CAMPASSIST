@@ -1,1 +1,3 @@
-export const AttendanceRequests = () => <div className='p-6'>CR AttendanceRequests Page</div>;
+import { Navigate } from 'react-router-dom';
+
+export const AttendanceRequests = () => <Navigate to="/cr/attendance" replace />;

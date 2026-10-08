@@ -1,1 +1,3 @@
-export const AuditLogs = () => <div className='p-6'>Developer AuditLogs Page</div>;
+import { Navigate } from 'react-router-dom';
+
+export const AuditLogs = () => <Navigate to="/developer" replace />;

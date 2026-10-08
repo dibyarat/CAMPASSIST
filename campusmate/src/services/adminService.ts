@@ -28,6 +28,7 @@ export type AdminSection = {
   id: string;
   name: string;
   department?: { code?: string; name?: string };
+  semester?: { id: string; number: number; name: string };
 };
 
 export type AdminInstitution = {

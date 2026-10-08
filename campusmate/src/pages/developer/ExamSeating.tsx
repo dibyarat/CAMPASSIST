@@ -1,1 +1,3 @@
-export const ExamSeating = () => <div className='p-6'>Developer ExamSeating Page</div>;
+import { Navigate } from 'react-router-dom';
+
+export const ExamSeating = () => <Navigate to="/developer/exams" replace />;
