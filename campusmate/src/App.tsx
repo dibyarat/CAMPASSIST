@@ -88,6 +88,9 @@ const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: st
 const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode, role?: string }) => {
   const userName = localStorage.getItem('userFullName') || 'Student';
   const actualRole = localStorage.getItem('userRole') || 'STUDENT';
+  const normalizedAccountRole = actualRole.toUpperCase();
+  const accountHome = normalizedAccountRole === 'DEVELOPER' ? '/developer' : normalizedAccountRole === 'CR' ? '/cr' : '/student';
+  const canAccessRole = role.toUpperCase() === normalizedAccountRole || (normalizedAccountRole === 'CR' && role === 'student');
   const [authState, setAuthState] = React.useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
@@ -125,6 +128,10 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
 
   if (authState === 'unauthenticated') {
     return <Navigate to="/login" replace />;
+  }
+
+  if (!canAccessRole) {
+    return <Navigate to={accountHome} replace />;
   }
 
   return (
