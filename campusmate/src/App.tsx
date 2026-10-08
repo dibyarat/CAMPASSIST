@@ -96,8 +96,45 @@ const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: st
 const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode, role?: string }) => {
   const userName = localStorage.getItem('userFullName') || 'Student';
   const actualRole = localStorage.getItem('userRole') || 'STUDENT';
+  const [authState, setAuthState] = React.useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const verifySession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const activeSession = session || (await supabase.auth.refreshSession()).data.session;
+        if (!isMounted) return;
+
+        if (activeSession) {
+          setAuthState('authenticated');
+          return;
+        }
+      } catch (error) {
+        console.error('Unable to restore the authenticated session', error);
+      }
+
+      if (!isMounted) return;
+      localStorage.removeItem('userFullName');
+      localStorage.removeItem('userRole');
+      setAuthState('unauthenticated');
+    };
+
+    void verifySession();
+    return () => { isMounted = false; };
+  }, []);
+
+  if (authState === 'checking') {
+    return <div role="status" className="min-h-screen flex items-center justify-center text-slate-500">Checking your session...</div>;
+  }
+
+  if (authState === 'unauthenticated') {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="flex h-screen bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 font-sans text-slate-900 overflow-hidden">
       {/* Mobile Sidebar Overlay */}
