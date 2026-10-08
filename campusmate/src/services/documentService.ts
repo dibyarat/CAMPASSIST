@@ -1,2 +1,6 @@
-// Mock implementation for documentService
-export const documentService = {};
+import { studyosService } from './studyosService';
+
+export const documentService = {
+	listAcademicResources: studyosService.listResources,
+	getSecureDownloadUrl: studyosService.getDownloadUrl
+};

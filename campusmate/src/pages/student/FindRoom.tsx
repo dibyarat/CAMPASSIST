@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, Airplay, CheckCircle2, XCircle, Search, Loader2 } from 'lucide-react';
-import { apiClient } from '../../services/apiClient';
+import { roomService } from '../../services/roomService';
+import type { RoomStatus } from '../../services/roomService';
 
 export const FindRoom = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [reportingId, setReportingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const data = await apiClient('/rooms');
+        const data = await roomService.list();
         setRooms(data);
       } catch (error) {
         console.error("Failed to load rooms", error);
@@ -20,6 +22,19 @@ export const FindRoom = () => {
     };
     fetchRooms();
   }, []);
+
+  const reportInUse = async (roomId: string) => {
+    setReportingId(roomId);
+    try {
+      await roomService.reportStatus(roomId, 'OCCUPIED_BY_TIMETABLE' as RoomStatus, 'Reported in use by student');
+      const data = await roomService.list();
+      setRooms(data);
+    } catch (error) {
+      console.error('Failed to report room status', error);
+    } finally {
+      setReportingId(null);
+    }
+  };
 
   const filteredRooms = rooms.filter(r => 
     r.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -97,7 +112,9 @@ export const FindRoom = () => {
                     </span>
                     {isFree && (
                       <div className="mt-3">
-                        <button className="text-xs font-bold text-blue-600 hover:text-blue-700 underline">Report in use</button>
+                        <button onClick={() => reportInUse(room.id)} disabled={reportingId === room.id} className="text-xs font-bold text-blue-600 hover:text-blue-700 underline disabled:opacity-60">
+                          {reportingId === room.id ? 'Reporting...' : 'Report in use'}
+                        </button>
                       </div>
                     )}
                   </div>

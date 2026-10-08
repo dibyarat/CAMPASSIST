@@ -16,6 +16,12 @@ export class MapController {
     return this.mapService.getApprovedLocations();
   }
 
+  @Get('moderation')
+  @Roles('DEVELOPER')
+  getModerationQueue() {
+    return this.mapService.getModerationQueue();
+  }
+
   @Post('submit')
   @Roles('STUDENT', 'CR', 'DEVELOPER')
   submitLocation(@Body() data: any, @CurrentUser() user: any) {

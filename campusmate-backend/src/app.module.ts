@@ -17,6 +17,7 @@ import { NotificationsController } from './notifications/notifications.controlle
 import { StudyosController } from './studyos/studyos.controller';
 import { MapController } from './map/map.controller';
 import { HealthController } from './health/health.controller';
+import { RemindersController } from './reminders/reminders.controller';
 
 // Services
 import { UsersService } from './users/users.service';
@@ -31,6 +32,11 @@ import { PollsService } from './polls/polls.service';
 import { NotificationsService } from './notifications/notifications.service';
 import { StudyosService } from './studyos/studyos.service';
 import { MapService } from './map/map.service';
+import { RemindersService } from './reminders/reminders.service';
+import { EventsController } from './events/events.controller';
+import { OffersController } from './offers/offers.controller';
+import { EventsService } from './events/events.service';
+import { OffersService } from './offers/offers.service';
 import { InstitutionsModule } from './institutions/institutions.module';
 import { SubjectsModule } from './subjects/subjects.module';
 
@@ -50,7 +56,10 @@ import { SubjectsModule } from './subjects/subjects.module';
     PollsController,
     NotificationsController,
     StudyosController,
-    MapController
+    MapController,
+    RemindersController,
+    EventsController,
+    OffersController
   ],
   providers: [
     AppService,
@@ -66,7 +75,10 @@ import { SubjectsModule } from './subjects/subjects.module';
     PollsService,
     NotificationsService,
     StudyosService,
-    MapService
+    MapService,
+    RemindersService,
+    EventsService,
+    OffersService
   ],
 })
 export class AppModule {}

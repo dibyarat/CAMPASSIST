@@ -26,6 +26,7 @@ import { ReminderCenter as StudentReminderCenter } from './pages/student/Reminde
 import { ExamSchedule as StudentExamSchedule } from './pages/student/ExamSchedule';
 import { ExamSeat as StudentExamSeat } from './pages/student/ExamSeat';
 import { Events as StudentEvents } from './pages/student/Events';
+import { CollegeMap as StudentCollegeMap } from './pages/student/CollegeMap';
 
 import { Offers as StudentOffers } from './pages/student/Offers';
 import { Settings as StudentSettings } from './pages/student/Settings';
@@ -51,6 +52,9 @@ import { Timetable as DevTimetable } from './pages/developer/Timetable';
 import { Rooms as DevRooms } from './pages/developer/Rooms';
 import { Attendance as DevAttendance } from './pages/developer/Attendance';
 import { Resources as DevResources } from './pages/developer/Resources';
+import { Events as DevEvents } from './pages/developer/Events';
+import { Offers as DevOffers } from './pages/developer/Offers';
+import { Map as DevMap } from './pages/developer/Map';
 import logoIcon from './assets/logo-icon.png';
 
 const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: string, icon: any, children: React.ReactNode, isCollapsed?: boolean }) => {
@@ -117,6 +121,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Campus</div>}
 
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/college-map`} icon={MapPin}>College Map</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/offers`} icon={Tag}>Student Offers</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/notifications`} icon={Bell}>Notifications</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/requests`} icon={FileText}>Requests</SidebarLink>
@@ -160,6 +165,9 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/rooms`} icon={MapPin}>Rooms & Facilities</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/resources`} icon={UploadCloud}>Resources</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/offers`} icon={Tag}>Offers</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/map`} icon={MapPin}>Map Moderation</SidebarLink>
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">System</div>}
 
@@ -247,6 +255,7 @@ export default function App() {
         <Route path="/student/exam-schedule" element={<MainLayout role="student"><StudentExamSchedule /></MainLayout>} />
         <Route path="/student/exam-seat" element={<MainLayout role="student"><StudentExamSeat /></MainLayout>} />
         <Route path="/student/events" element={<MainLayout role="student"><StudentEvents /></MainLayout>} />
+        <Route path="/student/college-map" element={<MainLayout role="student"><StudentCollegeMap /></MainLayout>} />
 
         <Route path="/student/offers" element={<MainLayout role="student"><StudentOffers /></MainLayout>} />
         <Route path="/student/settings" element={<MainLayout role="student"><StudentSettings /></MainLayout>} />
@@ -276,6 +285,9 @@ export default function App() {
           <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
           <Route path="/developer/rooms" element={<MainLayout role="developer"><DevRooms /></MainLayout>} />
                     <Route path="/developer/resources" element={<MainLayout role="developer"><DevResources /></MainLayout>} />
+                    <Route path="/developer/events" element={<MainLayout role="developer"><DevEvents /></MainLayout>} />
+                    <Route path="/developer/offers" element={<MainLayout role="developer"><DevOffers /></MainLayout>} />
+                    <Route path="/developer/map" element={<MainLayout role="developer"><DevMap /></MainLayout>} />
                     <Route path="/developer/settings" element={<MainLayout role="developer"><StudentSettings /></MainLayout>} />
         
         <Route path="*" element={<Navigate to="/" />} />

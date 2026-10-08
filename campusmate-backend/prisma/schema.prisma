@@ -553,4 +553,66 @@ model LabRecord {
   createdAt    DateTime @default(now())
 }
 
+model CampusEvent {
+  id            String             @id @default(uuid())
+  title         String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime?
+  location      String
+  organizer     String?
+  imageUrl      String?
+  tags          String?
+  createdBy     String
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id        String      @id @default(uuid())
+  eventId   String
+  event     CampusEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime    @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model Offer {
+  id          String       @id @default(uuid())
+  title       String
+  provider    String
+  discount    String
+  description String?
+  expiresAt   DateTime?
+  type        String       @default("Digital")
+  claimUrl    String?
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  claims      OfferClaim[]
+}
+
+model OfferClaim {
+  id        String   @id @default(uuid())
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@unique([offerId, userId])
+}
+
+model MapLocation {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  status      String   @default("PENDING")
+  creatorId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 
