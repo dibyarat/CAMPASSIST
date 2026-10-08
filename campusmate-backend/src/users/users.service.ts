@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
-import { Role } from '@prisma/client';
+import { Role, StudentType } from '@prisma/client';
+import { UpdateUserDetailsDto } from './update-user-details.dto';
 
 @Injectable()
 export class UsersService {
@@ -66,6 +67,62 @@ export class UsersService {
     });
   }
 
+  async updateUserDetails(userId: string, data: UpdateUserDetailsDto) {
+    return this.prisma.$transaction(async transaction => {
+      const user = await transaction.user.findUnique({ where: { id: userId } });
+      if (!user) throw new NotFoundException('User not found');
+
+      let sectionName: string | null | undefined;
+      if (data.sectionId !== undefined) {
+        if (data.sectionId) {
+          const section = await transaction.section.findUnique({ where: { id: data.sectionId } });
+          if (!section) throw new NotFoundException('Section not found');
+          sectionName = section.name;
+        } else {
+          sectionName = null;
+        }
+      }
+
+      if (data.institutionId) {
+        const institution = await transaction.institution.findUnique({ where: { id: data.institutionId } });
+        if (!institution) throw new NotFoundException('Institution not found');
+      }
+
+      const student = await transaction.student.upsert({
+        where: { userId },
+        update: data.sectionId === undefined ? {} : { sectionId: data.sectionId || null },
+        create: { userId, sectionId: data.sectionId || null },
+      });
+
+      const profileData = {
+        fullName: data.fullName.trim(),
+        ...(data.rollNumber !== undefined && { rollNumber: data.rollNumber?.trim() || null }),
+        ...(data.department !== undefined && { department: data.department?.trim() || null }),
+        ...(data.semester !== undefined && { semester: data.semester?.trim() || null }),
+        ...(data.studentType !== undefined && { studentType: data.studentType as StudentType }),
+        ...(data.hostelName !== undefined && { hostelName: data.hostelName?.trim() || null }),
+        ...(data.hostelBlock !== undefined && { hostelBlock: data.hostelBlock?.trim() || null }),
+        ...(data.hostelRoom !== undefined && { hostelRoom: data.hostelRoom?.trim() || null }),
+        ...(data.github !== undefined && { github: data.github?.trim() || null }),
+        ...(data.linkedin !== undefined && { linkedin: data.linkedin?.trim() || null }),
+        ...(data.portfolio !== undefined && { portfolio: data.portfolio?.trim() || null }),
+        ...(sectionName !== undefined && { section: sectionName }),
+      };
+
+      const updatedUser = await transaction.user.update({
+        where: { id: userId },
+        data: data.institutionId === undefined ? {} : { institutionId: data.institutionId || null },
+      });
+      const profile = await transaction.profile.upsert({
+        where: { userId },
+        update: profileData,
+        create: { userId, studentId: student.id, ...profileData },
+      });
+
+      return { ...updatedUser, profile, student };
+    });
+  }
+
     async getAllUsers() {
     return this.prisma.user.findMany({
       include: {
@@ -111,7 +168,7 @@ export class UsersService {
   async getAllUsersByRole(role: Role) {
     return this.prisma.user.findMany({
       where: { role },
-      include: { profile: true }
+      include: { profile: true, crAssignment: { include: { section: true } } }
     });
   }
 

@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { UpdateUserDetailsDto } from './update-user-details.dto';
 
 @Controller('users')
 @UseGuards(SupabaseAuthGuard, RolesGuard)
@@ -38,6 +39,12 @@ export class UsersController {
   @Roles('DEVELOPER')
   updateRole(@Param('id') id: string, @Body() data: { role: string; sectionId?: string }) {
     return this.usersService.updateUserRole(id, data.role, data.sectionId);
+  }
+
+  @Patch(':id/profile')
+  @Roles('DEVELOPER')
+  updateUserDetails(@Param('id') id: string, @Body() data: UpdateUserDetailsDto) {
+    return this.usersService.updateUserDetails(id, data);
   }
 
   @Get('cr')
