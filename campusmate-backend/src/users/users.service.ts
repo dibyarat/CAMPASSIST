@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
-import { Role, StudentType } from '@prisma/client';
+import { Role, StudentType } from '../common/enums';
 import { UpdateUserDetailsDto } from './update-user-details.dto';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class UsersService {
     id: string,
     email: string,
     fullName: string,
-    role: Role,
+    role: Role | string,
     rollNumber: string,
     section: string,
     institutionCode?: string,
@@ -47,8 +47,8 @@ export class UsersService {
     // 1. Dual-write to Prisma during migration
     const user = await this.prisma.user.upsert({
       where: { id },
-      update: { email, role, institutionId },
-      create: { id, email, role, institutionId },
+      update: { email, role: role as any, institutionId },
+      create: { id, email, role: role as any, institutionId },
     });
 
     const student = await this.prisma.student.upsert({
@@ -299,7 +299,7 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsersByRole(role: Role) {
+  async getAllUsersByRole(role: Role | string) {
     try {
       const snapshot = await this.firebase.firestore.collection('users').where('role', '==', role).get();
       if (!snapshot.empty) {
@@ -310,7 +310,7 @@ export class UsersService {
     }
 
     return this.prisma.user.findMany({
-      where: { role },
+      where: { role: role as any },
       include: { profile: true, crAssignment: { include: { section: true } } },
     });
   }

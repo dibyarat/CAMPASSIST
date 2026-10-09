@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { GradesService } from './grades.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CreateAcademicRecordDto } from './grades.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('grades')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class GradesController {
   constructor(private readonly gradesService: GradesService) {}
 

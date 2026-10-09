@@ -1,12 +1,12 @@
 import { Controller, Get, Patch, Post, Body, Param, UseGuards, Query, ForbiddenException } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('notifications')
-@UseGuards(SupabaseAuthGuard)
+@UseGuards(FirebaseAuthGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 

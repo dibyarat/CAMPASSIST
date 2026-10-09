@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { RemindersService } from './reminders.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('reminders')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class RemindersController {
   constructor(private readonly remindersService: RemindersService) {}
 

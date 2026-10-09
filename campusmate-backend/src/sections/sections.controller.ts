@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, UseGuards, Param, Delete } from '@nestjs/common';
 import { SectionsService } from './sections.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 
@@ -9,7 +9,7 @@ export class SectionsController {
   constructor(private readonly sectionsService: SectionsService) {}
 
   @Post()
-  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @UseGuards(FirebaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   create(@Body() createSectionDto: {
     name: string;
@@ -28,21 +28,21 @@ export class SectionsController {
   }
 
   @Post('assign-cr')
-  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @UseGuards(FirebaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   assignCr(@Body() assignCrDto: { userId: string; sectionId: string; termId: string }) {
     return this.sectionsService.assignCr(assignCrDto);
   }
 
   @Delete(':id')
-  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @UseGuards(FirebaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   remove(@Param('id') id: string) {
     return this.sectionsService.remove(id);
   }
 
   @Delete('assign-cr/:id')
-  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @UseGuards(FirebaseAuthGuard, RolesGuard)
   @Roles('DEVELOPER')
   removeCr(@Param('id') assignmentId: string) {
     return this.sectionsService.removeCrAssignment(assignmentId);

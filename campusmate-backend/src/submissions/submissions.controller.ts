@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, UseGuards, ForbiddenException } from '@nestjs/common';
 import { SubmissionsService } from './submissions.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('submissions')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 

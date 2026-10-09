@@ -1,19 +1,19 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { StudyosService } from './studyos.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('studyos/academic')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class StudyosController {
   constructor(private readonly studyosService: StudyosService) {}
 
   @Post()
   @Roles('DEVELOPER', 'CR')
   createResource(@Body() data: any, @CurrentUser() user: any) {
-    // Expected that file is already uploaded to Supabase Storage by the client
+    // Expected that file is already uploaded to Cloudinary/Storage by the client
     // Client sends the `fileReference` path here to store the metadata
     return this.studyosService.uploadAcademicResource({ ...data, uploaderId: user.id });
   }

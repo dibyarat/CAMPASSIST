@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, Param, UseGuards, ForbiddenException } from '@nestjs/common';
 import { PollsService } from './polls.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('polls')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class PollsController {
   constructor(private readonly pollsService: PollsService) {}
 

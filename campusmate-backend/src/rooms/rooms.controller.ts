@@ -1,13 +1,13 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { RoomStatus } from '@prisma/client';
+import { RoomStatus } from '../common/enums';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('rooms')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class RoomsController {
   constructor(private readonly roomsService: RoomsService) {}
 

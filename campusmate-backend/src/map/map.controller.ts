@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, Param, Patch, UseGuards } from '@nestjs/common';
 import { MapService } from './map.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @Controller('map')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@UseGuards(FirebaseAuthGuard, RolesGuard)
 export class MapController {
   constructor(private readonly mapService: MapService) {}
 

@@ -1,11 +1,8 @@
 import { auth } from './firebaseClient';
-import { supabase } from './supabaseClient';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://campassist.onrender.com/api/v1';
-let sessionLookupPromise: Promise<string | undefined> | undefined;
 
 export const getAccessToken = async (): Promise<string | undefined> => {
-  // 1. Try Firebase Auth first
   if (auth.currentUser) {
     try {
       const token = await auth.currentUser.getIdToken();
@@ -14,25 +11,7 @@ export const getAccessToken = async (): Promise<string | undefined> => {
       console.warn('Failed to get Firebase token', e);
     }
   }
-
-  // 2. Fallback to Supabase Auth
-  if (sessionLookupPromise) return sessionLookupPromise;
-
-  sessionLookupPromise = (async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.access_token) return session.access_token;
-
-      const { data } = await supabase.auth.refreshSession();
-      return data?.session?.access_token;
-    } catch {
-      return undefined;
-    }
-  })().finally(() => {
-    sessionLookupPromise = undefined;
-  });
-
-  return sessionLookupPromise;
+  return undefined;
 };
 
 export const apiClient = async (endpoint: string, options: RequestInit = {}) => {

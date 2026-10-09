@@ -4,7 +4,6 @@ import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
-import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
 import logoIcon from '../../assets/logo-icon.png';
 
@@ -22,30 +21,7 @@ export const Login = () => {
     setError('');
 
     try {
-      let loggedIn = false;
-
-      // 1. Try Firebase Auth
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        loggedIn = true;
-      } catch (fbErr: any) {
-        // 2. Fallback to Supabase Auth if Firebase failed
-        try {
-          const { data, error: signInError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-          if (!signInError && data?.user) {
-            loggedIn = true;
-          } else {
-            throw fbErr;
-          }
-        } catch {
-          throw fbErr;
-        }
-      }
-
-      if (!loggedIn) throw new Error('Could not sign in');
+      await signInWithEmailAndPassword(auth, email, password);
       
       // Fetch user profile from our backend to know their role
       const profile = await apiClient('/users/me');

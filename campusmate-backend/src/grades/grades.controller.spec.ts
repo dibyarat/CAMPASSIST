@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { vi } from 'vitest';
 import { GradesController } from './grades.controller';
 import { GradesService } from './grades.service';
-import { SupabaseAuthGuard } from '../common/guards/supabase-auth.guard';
+import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { PrismaService } from '../common/prisma.service';
 
@@ -22,7 +22,7 @@ describe('GradesController', () => {
         { provide: PrismaService, useValue: { user: { findUnique: vi.fn() } } },
       ],
     })
-      .overrideGuard(SupabaseAuthGuard)
+      .overrideGuard(FirebaseAuthGuard)
       .useValue({ canActivate: vi.fn().mockResolvedValue(true) })
       .overrideGuard(RolesGuard)
       .useValue({ canActivate: vi.fn().mockResolvedValue(true) })

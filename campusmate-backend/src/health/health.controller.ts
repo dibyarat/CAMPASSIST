@@ -1,16 +1,16 @@
 import { Controller, Get } from '@nestjs/common';
-import { PrismaService } from '../common/prisma.service';
+import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
 
 @Controller('health')
 export class HealthController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private firebase: FirebaseAdminService) {}
 
   @Get()
   async checkHealth() {
     let dbStatus = 'disconnected';
     
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      await this.firebase.firestore.collection('_health').limit(1).get();
       dbStatus = 'connected';
     } catch (e) {
       dbStatus = 'error';

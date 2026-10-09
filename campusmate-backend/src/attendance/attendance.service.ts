@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
-import { AttendanceState } from '@prisma/client';
+import { AttendanceState } from '../common/enums';
 
 @Injectable()
 export class AttendanceService {

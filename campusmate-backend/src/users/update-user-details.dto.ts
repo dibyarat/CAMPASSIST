@@ -1,4 +1,4 @@
-import { StudentType } from '@prisma/client';
+import { StudentType } from '../common/enums';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDetailsDto {

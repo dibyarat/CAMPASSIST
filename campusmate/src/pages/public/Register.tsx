@@ -4,7 +4,6 @@ import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2 } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
-import { supabase } from '../../services/supabaseClient';
 import { apiClient } from '../../services/apiClient';
 import logoIcon from '../../assets/logo-icon.png';
 
@@ -68,30 +67,8 @@ export const Register = () => {
     setError('');
 
     try {
-      let accessToken = '';
-
-      // 1. Try Firebase Auth registration first
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-        accessToken = await userCredential.user.getIdToken();
-      } catch (fbErr: any) {
-        // Fallback to Supabase Auth if Firebase failed
-        try {
-          const { data, error: signUpError } = await supabase.auth.signUp({
-            email: formData.email,
-            password: formData.password,
-          });
-
-          if (signUpError) throw signUpError;
-          if (!data.user) throw new Error('Failed to create account.');
-          if (!data.session) {
-            throw new Error('Email Confirmation is enabled. Please confirm your email or disable confirmation in project settings.');
-          }
-          accessToken = data.session.access_token;
-        } catch {
-          throw fbErr;
-        }
-      }
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const accessToken = await userCredential.user.getIdToken();
 
       // 2. We have the user JWT now. Call our backend to initialize the profile
       await apiClient('/users/onboard', {
