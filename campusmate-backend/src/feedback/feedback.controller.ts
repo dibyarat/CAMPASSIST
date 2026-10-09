@@ -17,13 +17,13 @@ export class FeedbackController {
   }
 
   @Get()
-  @Roles('DEVELOPER', 'ADMIN') // Assuming devs can view all
+  @Roles('DEVELOPER')
   findAll() {
     return this.feedbackService.findAll();
   }
 
   @Patch(':id')
-  @Roles('DEVELOPER', 'ADMIN')
+  @Roles('DEVELOPER')
   updateStatus(@Param('id') id: string, @Body() updateDto: UpdateFeedbackStatusDto) {
     return this.feedbackService.updateStatus(id, updateDto);
   }
