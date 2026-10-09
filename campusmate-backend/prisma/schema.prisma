@@ -124,6 +124,7 @@ model User {
   notifications Notification[] @relation("UserNotifications")
   Institution   Institution?   @relation(fields: [institutionId], references: [id])
   institutionId String?
+  feedbacks     Feedback[]
 }
 
 model Profile {
@@ -662,4 +663,17 @@ model Grade {
   updatedAt        DateTime       @updatedAt
 
   @@unique([academicRecordId, subjectId])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  type      String   @default("GENERAL") // BUG, FEATURE, GENERAL
+  status    String   @default("PENDING") // PENDING, REVIEWED, RESOLVED
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

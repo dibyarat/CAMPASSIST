@@ -1,4 +1,4 @@
-﻿import { lazy } from 'react';
+import { lazy } from 'react';
 
 export const StudentDashboard = lazy(() => import('./pages/student/Dashboard').then(module => ({ default: module.Dashboard })));
 export const StudentTimetable = lazy(() => import('./pages/student/Timetable').then(module => ({ default: module.Timetable })));
@@ -21,6 +21,7 @@ export const StudentOffers = lazy(() => import('./pages/student/Offers').then(mo
 export const StudentSettings = lazy(() => import('./pages/student/Settings').then(module => ({ default: module.Settings })));
 export const StudentAcademicPdfs = lazy(() => import('./pages/student/AcademicPdfs').then(module => ({ default: module.AcademicPdfs })));
 export const StudentProfile = lazy(() => import('./pages/student/Profile').then(module => ({ default: module.Profile })));
+export const StudentFeedback = lazy(() => import('./pages/student/Feedback'));
 
 export const CrDashboard = lazy(() => import('./pages/cr/Dashboard').then(module => ({ default: module.Dashboard })));
 export const CrTimetable = lazy(() => import('./pages/cr/Timetable').then(module => ({ default: module.Timetable })));
@@ -51,6 +52,7 @@ export const DevStudents = lazy(() => import('./pages/developer/Students').then(
 export const DevSettings = lazy(() => import('./pages/developer/Settings').then(module => ({ default: module.Settings })));
 export const DevDepartments = lazy(() => import('./pages/developer/Departments').then(module => ({ default: module.Departments })));
 export const DevSemesters = lazy(() => import('./pages/developer/Semesters').then(module => ({ default: module.Semesters })));
+export const DevFeedbacks = lazy(() => import('./pages/developer/Feedbacks'));
 
 export const Landing = lazy(() => import('./pages/public/Landing').then(module => ({ default: module.Landing })));
 export const Login = lazy(() => import('./pages/public/Login').then(module => ({ default: module.Login })));

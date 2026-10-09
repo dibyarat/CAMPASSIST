@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag } from 'lucide-react';
+import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag, MessageSquare } from 'lucide-react';
 
 // Public
 import { AnalyticsTracker } from './utils/AnalyticsTracker';
@@ -8,10 +8,9 @@ import { trackEvent } from './utils/analytics';
 import { supabase } from './services/supabaseClient';
 import { RouteFallback } from './routeFallback';
 import {
-  Landing, Login, Register,
-  StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile,
+  StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile, StudentFeedback,
   CrDashboard, CrTimetable, CrAttendance, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
-  DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters
+  DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters, DevFeedbacks
 } from './lazyRoutes';
 import logoIcon from './assets/logo-icon.png';
 
@@ -130,6 +129,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/polls`} icon={BarChart2}>Polls</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/reminder-center`} icon={Bookmark}>Reminder Center</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/contacts`} icon={Users}>Contacts</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/feedback`} icon={MessageSquare}>Feedback</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/settings`} icon={Settings}>Settings</SidebarLink>
             </>
           )}
@@ -172,6 +172,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/offers`} icon={Tag}>Offers</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/map`} icon={MapPin}>Map Moderation</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/feedbacks`} icon={MessageSquare}>Feedbacks</SidebarLink>
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">System</div>}
 
@@ -267,6 +268,7 @@ export default function App() {
         
         <Route path="/student/academic-pdfs" element={<MainLayout role="student"><StudentAcademicPdfs /></MainLayout>} />
         <Route path="/student/profile" element={<MainLayout role="student"><StudentProfile /></MainLayout>} />
+        <Route path="/student/feedback" element={<MainLayout role="student"><StudentFeedback /></MainLayout>} />
 
         <Route path="/student/*" element={<Navigate to="/student" replace />} />
         
@@ -307,6 +309,7 @@ export default function App() {
                     <Route path="/developer/students" element={<MainLayout role="developer"><DevStudents /></MainLayout>} />
                     <Route path="/developer/departments" element={<MainLayout role="developer"><DevDepartments /></MainLayout>} />
                     <Route path="/developer/semesters" element={<MainLayout role="developer"><DevSemesters /></MainLayout>} />
+                    <Route path="/developer/feedbacks" element={<MainLayout role="developer"><DevFeedbacks /></MainLayout>} />
                   <Route path="/developer/*" element={<Navigate to="/developer" replace />} />
         
         <Route path="*" element={<Navigate to="/" />} />

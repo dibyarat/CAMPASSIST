@@ -42,9 +42,10 @@ import { AcademicTermsService } from './academic-terms/academic-terms.service';
 import { InstitutionsModule } from './institutions/institutions.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { GradesModule } from './grades/grades.module';
+import { FeedbackModule } from './feedback/feedback.module';
 
 @Module({
-  imports: [InstitutionsModule, SubjectsModule, GradesModule],
+  imports: [InstitutionsModule, SubjectsModule, GradesModule, FeedbackModule],
   controllers: [
     AppController,
     HealthController,
