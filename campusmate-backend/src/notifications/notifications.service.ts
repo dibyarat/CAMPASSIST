@@ -21,9 +21,16 @@ export class NotificationsService {
 
   async getUserNotifications(userId: string, limit = 20, page = 1) {
     const skip = (page - 1) * limit;
-    
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
     return this.prisma.notification.findMany({
-      where: { recipientId: userId },
+      where: { 
+        recipientId: userId,
+        OR: [
+          { isRead: false },
+          { readAt: { gt: oneHourAgo } }
+        ]
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip
@@ -44,7 +51,7 @@ export class NotificationsService {
 
     return this.prisma.notification.update({
       where: { id: notificationId },
-      data: { isRead: true }
+      data: { isRead: true, readAt: new Date() }
     });
   }
 
@@ -81,7 +88,7 @@ export class NotificationsService {
   async markAllAsRead(userId: string) {
     return this.prisma.notification.updateMany({
       where: { recipientId: userId, isRead: false },
-      data: { isRead: true }
+      data: { isRead: true, readAt: new Date() }
     });
   }
 }

@@ -83,7 +83,14 @@ export const Notifications = () => {
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className={`font-bold text-base mb-1 ${notif.isRead ? 'text-slate-700' : 'text-slate-900'}`}>{notif.title}</h4>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className={`font-bold text-base ${notif.isRead ? 'text-slate-700' : 'text-slate-900'}`}>{notif.title}</h4>
+                        {notif.isRead ? (
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-xs font-semibold border border-slate-200">Read</span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-semibold border border-blue-200">New</span>
+                        )}
+                      </div>
                       <p className={`text-sm leading-relaxed ${notif.isRead ? 'text-slate-500' : 'text-slate-600 font-medium'}`}>{notif.message}</p>
                     </div>
                     {!notif.isRead && (
