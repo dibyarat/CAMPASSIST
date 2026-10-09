@@ -8,6 +8,879 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model Institution {
+  id        String    @id @default(uuid())
+  name      String
+  code      String    @unique
+  createdAt DateTime  @default(now())
+  sections  Section[]
+  users     User[]
+}
+
+model User {
+  id                                           String               @id @default(uuid())
+  email                                        String               @unique
+  role                                         Role                 @default(STUDENT)
+  createdAt                                    DateTime             @default(now())
+  updatedAt                                    DateTime             @updatedAt
+  institutionId                                String?
+  name                                         String?
+  avatarUrl                                    String?
+  AcademicIdentity                             AcademicIdentity?
+  auditLogs                                    AuditLog[]
+  ConversationMember                           ConversationMember[]
+  crAssignment                                 CrAssignment?
+  HelpRequest_HelpRequest_providerIdToUser     HelpRequest[]        @relation("HelpRequest_providerIdToUser")
+  HelpRequest_HelpRequest_requesterIdToUser    HelpRequest[]        @relation("HelpRequest_requesterIdToUser")
+  HelpService                                  HelpService[]
+  Message                                      Message[]
+  notifications                                Notification[]       @relation("UserNotifications")
+  pollVotes                                    PollVote[]
+  profile                                      Profile?
+  Project                                      Project[]
+  Resource                                     Resource[]
+  ResourceRating                               ResourceRating[]
+  ResourceReport                               ResourceReport[]
+  ResourceSave                                 ResourceSave[]
+  ServiceReview_ServiceReview_providerIdToUser ServiceReview[]      @relation("ServiceReview_providerIdToUser")
+  ServiceReview_ServiceReview_reviewerIdToUser ServiceReview[]      @relation("ServiceReview_reviewerIdToUser")
+  student                                      Student?
+  StudentSkill                                 StudentSkill[]
+  TeamJoinRequest                              TeamJoinRequest[]
+  TeamMembership                               TeamMembership[]
+  TeamPost                                     TeamPost[]
+  Institution                                  Institution?         @relation(fields: [institutionId], references: [id])
+  VirtualStudyClass                            VirtualStudyClass[]
+  feedbacks                                    Feedback[]
+}
+
+model Profile {
+  id          String      @id @default(uuid())
+  userId      String      @unique
+  fullName    String
+  avatarUrl   String?
+  studentId   String      @unique
+  rollNumber  String?
+  department  String?
+  semester    String?
+  section     String?
+  studentType StudentType @default(DAY_SCHOLAR)
+  hostelName  String?
+  hostelBlock String?
+  hostelRoom  String?
+  github      String?
+  linkedin    String?
+  portfolio   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Student {
+  id                 String              @id @default(uuid())
+  userId             String              @unique
+  sectionId          String?
+  academicRecords    AcademicRecord[]
+  attendanceRecords  AttendanceRecord[]
+  attendanceRequests AttendanceRequest[]
+  section            Section?            @relation(fields: [sectionId], references: [id])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions        Submission[]
+}
+
+model CrAssignment {
+  id        String       @id @default(uuid())
+  userId    String       @unique
+  sectionId String
+  termId    String
+  startDate DateTime     @default(now())
+  endDate   DateTime?
+  isActive  Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  section   Section      @relation(fields: [sectionId], references: [id])
+  term      AcademicTerm @relation(fields: [termId], references: [id])
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sectionId, isActive])
+}
+
+model Department {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  code     String    @unique
+  sections Section[]
+}
+
+model Semester {
+  id       String    @id @default(uuid())
+  number   Int       @unique
+  name     String
+  sections Section[]
+}
+
+model Section {
+  id            String           @id @default(uuid())
+  name          String
+  departmentId  String
+  semesterId    String
+  institutionId String?
+  crAssignments CrAssignment[]
+  reminders     Reminder[]
+  department    Department       @relation(fields: [departmentId], references: [id])
+  institution   Institution?     @relation(fields: [institutionId], references: [id])
+  semester      Semester         @relation(fields: [semesterId], references: [id])
+  students      Student[]
+  subjects      SubjectSection[]
+  timetable     TimetableEntry[]
+}
+
+model Subject {
+  id          String           @id @default(uuid())
+  code        String           @unique
+  name        String
+  credits     Int
+  type        String
+  exams       Exam[]
+  grades      Grade[]
+  sections    SubjectSection[]
+  submissions Submission[]
+  timetable   TimetableEntry[]
+}
+
+model SubjectSection {
+  subjectId String
+  sectionId String
+  section   Section @relation(fields: [sectionId], references: [id])
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  @@id([subjectId, sectionId])
+}
+
+model AcademicTerm {
+  id              String           @id @default(uuid())
+  name            String
+  startDate       DateTime
+  endDate         DateTime
+  isCurrent       Boolean          @default(false)
+  academicRecords AcademicRecord[]
+  crAssignments   CrAssignment[]
+  exams           Exam[]
+  timetable       TimetableEntry[]
+}
+
+model TimetableEntry {
+  id         String       @id @default(uuid())
+  subjectId  String
+  sectionId  String
+  roomId     String?
+  termId     String
+  facultyRef String?
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
+  status     String       @default("ACTIVE")
+  notes      String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  room       Room?        @relation(fields: [roomId], references: [id])
+  section    Section      @relation(fields: [sectionId], references: [id])
+  subject    Subject      @relation(fields: [subjectId], references: [id])
+  term       AcademicTerm @relation(fields: [termId], references: [id])
+}
+
+model Room {
+  id          String           @id @default(uuid())
+  roomNumber  String           @unique
+  building    String?
+  block       String?
+  floor       String?
+  capacity    Int              @default(0)
+  isAC        Boolean          @default(false)
+  isLab       Boolean          @default(false)
+  equipment   String?
+  status      RoomStatus       @default(FREE_BY_TIMETABLE)
+  notes       String?
+  exams       Exam[]
+  roomReports RoomReport[]
+  timetable   TimetableEntry[]
+}
+
+model RoomReport {
+  id         String     @id @default(uuid())
+  roomId     String
+  reportedBy String
+  status     RoomStatus
+  notes      String?
+  createdAt  DateTime   @default(now())
+  room       Room       @relation(fields: [roomId], references: [id])
+}
+
+model AttendanceRecord {
+  id         String          @id @default(uuid())
+  studentId  String
+  subjectRef String
+  date       DateTime
+  state      AttendanceState
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  student    Student         @relation(fields: [studentId], references: [id])
+}
+
+model AttendanceRequest {
+  id          String    @id @default(uuid())
+  studentId   String
+  subjectRef  String
+  sessionDate DateTime
+  reason      String
+  status      String    @default("PENDING")
+  reviewerId  String?
+  reviewNote  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  student     Student   @relation(fields: [studentId], references: [id])
+}
+
+model AttendanceRule {
+  id            String  @id @default(uuid())
+  targetPercent Float   @default(75.0)
+  active        Boolean @default(true)
+}
+
+model Exam {
+  id        String        @id @default(uuid())
+  subjectId String
+  roomId    String?
+  termId    String
+  examType  String
+  date      DateTime
+  startTime String
+  endTime   String
+  notes     String?
+  status    String        @default("SCHEDULED")
+  room      Room?         @relation(fields: [roomId], references: [id])
+  subject   Subject       @relation(fields: [subjectId], references: [id])
+  term      AcademicTerm  @relation(fields: [termId], references: [id])
+  seatings  ExamSeating[]
+}
+
+model ExamSeating {
+  id          String  @id @default(uuid())
+  examId      String
+  rollNumber  String
+  studentId   String?
+  studentName String?
+  roomHall    String
+  seat        String
+  row         String?
+  column      String?
+  exam        Exam    @relation(fields: [examId], references: [id])
+
+  @@unique([examId, rollNumber])
+  @@unique([examId, roomHall, seat])
+}
+
+model Submission {
+  id            String           @id @default(uuid())
+  studentId     String
+  subjectId     String
+  title         String
+  type          SubmissionType
+  status        SubmissionStatus @default(NOT_SUBMITTED)
+  deadline      DateTime?
+  submittedDate DateTime?
+  facultyRef    String?
+  isDigital     Boolean          @default(false)
+  fileReference String?
+  note          String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  student       Student          @relation(fields: [studentId], references: [id])
+  subject       Subject          @relation(fields: [subjectId], references: [id])
+}
+
+model Reminder {
+  id          String           @id @default(uuid())
+  category    ReminderCategory
+  priority    Priority         @default(NORMAL)
+  schedule    ReminderSchedule
+  target      TargetAudience
+  title       String
+  description String?
+  dueDate     DateTime
+  creatorId   String
+  createdAt   DateTime         @default(now())
+  sectionId   String?
+  section     Section?         @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+}
+
+model Poll {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  target      TargetAudience
+  status      String         @default("ACTIVE")
+  creatorId   String
+  startDate   DateTime       @default(now())
+  endDate     DateTime?
+  options     PollOption[]
+  votes       PollVote[]
+}
+
+model PollOption {
+  id     String     @id @default(uuid())
+  pollId String
+  text   String
+  poll   Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes  PollVote[]
+}
+
+model PollVote {
+  id        String     @id @default(uuid())
+  pollId    String
+  optionId  String
+  userId    String
+  createdAt DateTime   @default(now())
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, userId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  userRole   String?
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  status     String
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Notification {
+  id                String   @id @default(uuid())
+  recipientId       String
+  type              String
+  title             String
+  message           String
+  relatedEntityType String?
+  relatedEntityId   String?
+  isRead            Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  user              User     @relation("UserNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id          String    @id @default(uuid())
+  title       String
+  content     String
+  target      String
+  priority    Priority  @default(NORMAL)
+  creatorId   String
+  isPublished Boolean   @default(true)
+  publishDate DateTime  @default(now())
+  expiryDate  DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model AcademicResource {
+  id            String   @id @default(uuid())
+  title         String
+  type          String
+  subjectId     String?
+  fileReference String
+  uploaderId    String
+  createdAt     DateTime @default(now())
+}
+
+model StudyOSResource {
+  id            String   @id @default(uuid())
+  title         String
+  subjectId     String?
+  category      String
+  fileReference String
+  uploaderId    String
+  createdAt     DateTime @default(now())
+}
+
+model LabRecord {
+  id           String   @id @default(uuid())
+  experimentNo Int
+  name         String
+  aim          String?
+  procedure    String?
+  code         String?
+  output       String?
+  subjectId    String
+  createdAt    DateTime @default(now())
+}
+
+model CampusEvent {
+  id            String              @id @default(uuid())
+  title         String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime?
+  location      String
+  organizer     String?
+  imageUrl      String?
+  tags          String?
+  createdBy     String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  registrations EventRegistration[]
+}
+
+model EventRegistration {
+  id        String      @id @default(uuid())
+  eventId   String
+  userId    String
+  createdAt DateTime    @default(now())
+  event     CampusEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+}
+
+model Offer {
+  id          String       @id @default(uuid())
+  title       String
+  provider    String
+  discount    String
+  description String?
+  expiresAt   DateTime?
+  type        String       @default("Digital")
+  claimUrl    String?
+  createdBy   String
+  createdAt   DateTime     @default(now())
+  claims      OfferClaim[]
+}
+
+model OfferClaim {
+  id        String   @id @default(uuid())
+  offerId   String
+  userId    String
+  createdAt DateTime @default(now())
+  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@unique([offerId, userId])
+}
+
+model MapLocation {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  status      String   @default("PENDING")
+  creatorId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AcademicRecord {
+  id            String       @id @default(uuid())
+  studentId     String
+  termId        String
+  sgpa          Float?
+  cgpa          Float?
+  totalCredits  Float?
+  earnedCredits Float?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  student       Student      @relation(fields: [studentId], references: [id])
+  term          AcademicTerm @relation(fields: [termId], references: [id])
+  grades        Grade[]
+
+  @@unique([studentId, termId])
+}
+
+model Grade {
+  id               String         @id @default(uuid())
+  academicRecordId String
+  subjectId        String
+  grade            String
+  gradePoint       Float
+  credits          Float
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  academicRecord   AcademicRecord @relation(fields: [academicRecordId], references: [id], onDelete: Cascade)
+  subject          Subject        @relation(fields: [subjectId], references: [id])
+
+  @@unique([academicRecordId, subjectId])
+}
+
+model AcademicIdentity {
+  id             String   @id
+  userId         String   @unique
+  degree         String?
+  stream         String?
+  branch         String?
+  specialization String?
+  institution    String?
+  year           String?
+  semester       String?
+  session        String?
+  github         String?
+  linkedin       String?
+  portfolio      String?
+  isPublic       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  User           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isPublic])
+}
+
+model Conversation {
+  id                 String               @id
+  contextType        String?
+  contextId          String?
+  contextKey         String?              @unique
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  ConversationMember ConversationMember[]
+  Message            Message[]
+}
+
+model ConversationMember {
+  id             String       @id
+  conversationId String
+  userId         String
+  joinedAt       DateTime     @default(now())
+  lastReadAt     DateTime?
+  Conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@index([userId, lastReadAt])
+}
+
+model HelpRequest {
+  id                                 String         @id
+  serviceId                          String?
+  requesterId                        String
+  providerId                         String
+  status                             String         @default("PENDING")
+  message                            String?
+  createdAt                          DateTime       @default(now())
+  updatedAt                          DateTime
+  User_HelpRequest_providerIdToUser  User           @relation("HelpRequest_providerIdToUser", fields: [providerId], references: [id], onDelete: Cascade)
+  User_HelpRequest_requesterIdToUser User           @relation("HelpRequest_requesterIdToUser", fields: [requesterId], references: [id], onDelete: Cascade)
+  HelpService                        HelpService?   @relation(fields: [serviceId], references: [id])
+  ServiceReview                      ServiceReview?
+
+  @@unique([requesterId, serviceId])
+  @@index([providerId, status])
+  @@index([requesterId, status])
+}
+
+model HelpService {
+  id                  String          @id
+  title               String
+  description         String?
+  category            String?
+  isPaid              Boolean         @default(false)
+  price               Float?
+  skills              String?
+  availability        String?
+  expectedTimeline    String?
+  paymentMethod       String?
+  upiId               String?
+  paymentQrUrl        String?
+  paymentInstructions String?
+  providerId          String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime
+  HelpRequest         HelpRequest[]
+  User                User            @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  ServiceReview       ServiceReview[]
+
+  @@index([providerId, createdAt])
+}
+
+model Message {
+  id             String       @id
+  conversationId String
+  senderId       String
+  content        String
+  isRead         Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  Conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  User           User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+}
+
+model Project {
+  id          String        @id
+  title       String
+  description String?
+  category    String
+  technology  String?
+  githubUrl   String?
+  demoUrl     String?
+  visibility  String        @default("PUBLIC")
+  creatorId   String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  User        User          @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  ProjectFile ProjectFile[]
+  ProjectTag  ProjectTag[]
+
+  @@index([creatorId, createdAt])
+  @@index([visibility, createdAt])
+}
+
+model ProjectFile {
+  id        String   @id
+  projectId String
+  fileUrl   String
+  fileName  String
+  createdAt DateTime @default(now())
+  Project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectTag {
+  id        String  @id
+  projectId String
+  tag       String
+  Project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Resource {
+  id                   String                 @id
+  title                String
+  description          String?
+  type                 String
+  subject              String?
+  topic                String?
+  visibility           String                 @default("PRIVATE")
+  price                Float?
+  paymentMethod        String?
+  upiId                String?
+  paymentInst          String?
+  creatorId            String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  User                 User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  ResourceFile         ResourceFile[]
+  ResourceLink         ResourceLink[]
+  ResourceRating       ResourceRating[]
+  ResourceReport       ResourceReport[]
+  ResourceSave         ResourceSave[]
+  ResourceTag          ResourceTag[]
+  VirtualStudyResource VirtualStudyResource[]
+
+  @@index([creatorId, createdAt])
+  @@index([visibility, createdAt])
+}
+
+model ResourceFile {
+  id         String   @id
+  resourceId String
+  fileUrl    String
+  fileName   String
+  fileSize   Int?
+  mimeType   String?
+  createdAt  DateTime @default(now())
+  Resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+}
+
+model ResourceLink {
+  id         String   @id
+  resourceId String
+  url        String
+  title      String?
+  createdAt  DateTime @default(now())
+  Resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+}
+
+model ResourceRating {
+  id         String   @id
+  userId     String
+  resourceId String
+  rating     Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+  Resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([resourceId])
+}
+
+model ResourceReport {
+  id          String   @id
+  userId      String
+  resourceId  String
+  reason      String
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  description String?
+  Resource    Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId, createdAt])
+}
+
+model ResourceSave {
+  id         String   @id
+  userId     String
+  resourceId String
+  createdAt  DateTime @default(now())
+  Resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([userId])
+}
+
+model ResourceTag {
+  id         String   @id
+  resourceId String
+  tag        String
+  Resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+}
+
+model ServiceReview {
+  id                                  String      @id
+  helpRequestId                       String      @unique
+  serviceId                           String
+  reviewerId                          String
+  providerId                          String
+  rating                              Int
+  comment                             String?
+  createdAt                           DateTime    @default(now())
+  HelpRequest                         HelpRequest @relation(fields: [helpRequestId], references: [id], onDelete: Cascade)
+  User_ServiceReview_providerIdToUser User        @relation("ServiceReview_providerIdToUser", fields: [providerId], references: [id], onDelete: Cascade)
+  User_ServiceReview_reviewerIdToUser User        @relation("ServiceReview_reviewerIdToUser", fields: [reviewerId], references: [id], onDelete: Cascade)
+  HelpService                         HelpService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id           String         @id
+  name         String         @unique
+  StudentSkill StudentSkill[]
+}
+
+model StudentSkill {
+  id        String   @id
+  userId    String
+  skillId   String
+  createdAt DateTime @default(now())
+  Skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+}
+
+model TeamJoinRequest {
+  id        String   @id
+  teamId    String
+  userId    String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  TeamPost  TeamPost @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId, status])
+  @@index([userId, status])
+}
+
+model TeamMembership {
+  id        String   @id
+  teamId    String
+  userId    String
+  role      String   @default("MEMBER")
+  createdAt DateTime @default(now())
+  TeamPost  TeamPost @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model TeamPost {
+  id              String            @id
+  title           String
+  type            String
+  description     String?
+  reqSkills       String?
+  requirements    String?
+  teamSize        Int?
+  deadline        DateTime?
+  creatorId       String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  TeamJoinRequest TeamJoinRequest[]
+  TeamMembership  TeamMembership[]
+  User            User              @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@index([creatorId, createdAt])
+}
+
+model VirtualStudyClass {
+  id                String              @id
+  name              String
+  description       String?
+  creatorId         String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime
+  User              User                @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  VirtualStudyTopic VirtualStudyTopic[]
+
+  @@index([creatorId, createdAt])
+}
+
+model VirtualStudyResource {
+  id                String            @id
+  topicId           String
+  resourceId        String?
+  notes             String?
+  createdAt         DateTime          @default(now())
+  Resource          Resource?         @relation(fields: [resourceId], references: [id])
+  VirtualStudyTopic VirtualStudyTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId])
+}
+
+model VirtualStudyTopic {
+  id                   String                 @id
+  classId              String
+  name                 String
+  order                Int                    @default(0)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  VirtualStudyResource VirtualStudyResource[]
+  VirtualStudyClass    VirtualStudyClass      @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@index([classId, order])
+}
+
 enum Role {
   STUDENT
   CR
@@ -96,584 +969,15 @@ enum TargetAudience {
   INDIVIDUAL
 }
 
-// ------------------------------
-// IDENTITY
-// ------------------------------
-
-model Institution {
-  id        String    @id @default(uuid())
-  name      String
-  code      String    @unique
-  users     User[]
-  sections  Section[]
-  createdAt DateTime  @default(now())
-}
-
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  role      Role     @default(STUDENT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  profile       Profile?
-  crAssignment  CrAssignment?
-  student       Student?
-  pollVotes     PollVote[]
-  auditLogs     AuditLog[]
-  notifications Notification[] @relation("UserNotifications")
-  Institution   Institution?   @relation(fields: [institutionId], references: [id])
-  institutionId String?
-  feedbacks     Feedback[]
-}
-
-model Profile {
-  id         String  @id @default(uuid())
-  userId     String  @unique
-  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fullName   String
-  avatarUrl  String?
-  studentId  String  @unique
-  rollNumber String?
-  department String?
-  semester   String?
-  section    String?
-
-  studentType StudentType @default(DAY_SCHOLAR)
-  hostelName  String?
-  hostelBlock String?
-  hostelRoom  String?
-
-  github    String?
-  linkedin  String?
-  portfolio String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Student {
-  id        String  @id @default(uuid())
-  userId    String  @unique
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sectionId String?
-  section   Section? @relation(fields: [sectionId], references: [id])
-
-  // Backreferences for student-specific data
-  attendanceRecords  AttendanceRecord[]
-  attendanceRequests AttendanceRequest[]
-  submissions        Submission[]
-  academicRecords    AcademicRecord[]
-}
-
-model CrAssignment {
-  id        String       @id @default(uuid())
-  userId    String       @unique
-  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sectionId String
-  section   Section      @relation(fields: [sectionId], references: [id])
-  termId    String
-  term      AcademicTerm @relation(fields: [termId], references: [id])
-
-  startDate DateTime  @default(now())
-  endDate   DateTime?
-  isActive  Boolean   @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, sectionId, isActive])
-}
-
-// ------------------------------
-// ACADEMIC MASTER
-// ------------------------------
-
-model Department {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  code     String    @unique
-  sections Section[]
-}
-
-model Semester {
-  id       String    @id @default(uuid())
-  number   Int       @unique
-  name     String
-  sections Section[]
-}
-
-model Section {
-  institutionId String?
-  institution   Institution? @relation(fields: [institutionId], references: [id])
-  id            String       @id @default(uuid())
-  name          String
-  departmentId  String
-  department    Department   @relation(fields: [departmentId], references: [id])
-  semesterId    String
-  semester      Semester     @relation(fields: [semesterId], references: [id])
-
-  crAssignments CrAssignment[]
-  students      Student[]
-  reminders     Reminder[]
-  subjects      SubjectSection[]
-  timetable     TimetableEntry[]
-}
-
-model Subject {
-  id          String           @id @default(uuid())
-  code        String           @unique
-  name        String
-  credits     Int
-  type        String // Theory, Practical
-  sections    SubjectSection[]
-  timetable   TimetableEntry[]
-  exams       Exam[]
-  submissions Submission[]
-  grades      Grade[]
-}
-
-model SubjectSection {
-  subjectId String
-  sectionId String
-  subject   Subject @relation(fields: [subjectId], references: [id])
-  section   Section @relation(fields: [sectionId], references: [id])
-
-  @@id([subjectId, sectionId])
-}
-
-model AcademicTerm {
-  id        String   @id @default(uuid())
-  name      String
-  startDate DateTime
-  endDate   DateTime
-  isCurrent Boolean  @default(false)
-
-  crAssignments CrAssignment[]
-  timetable     TimetableEntry[]
-  exams         Exam[]
-  academicRecords AcademicRecord[]
-}
-
-// ------------------------------
-// TIMETABLE
-// ------------------------------
-
-model TimetableEntry {
-  id        String       @id @default(uuid())
-  subjectId String
-  subject   Subject      @relation(fields: [subjectId], references: [id])
-  sectionId String
-  section   Section      @relation(fields: [sectionId], references: [id])
-  roomId    String?
-  room      Room?        @relation(fields: [roomId], references: [id])
-  termId    String
-  term      AcademicTerm @relation(fields: [termId], references: [id])
-
-  facultyRef String?
-  dayOfWeek  Int // 0 = Sunday, 1 = Monday, etc.
-  startTime  String // HH:mm
-  endTime    String // HH:mm
-  status     String  @default("ACTIVE") // ACTIVE, CANCELLED
-  notes      String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-// ------------------------------
-// ROOMS
-// ------------------------------
-
-model Room {
-  id         String     @id @default(uuid())
-  roomNumber String     @unique
-  building   String?
-  block      String?
-  floor      String?
-  capacity   Int        @default(0)
-  isAC       Boolean    @default(false)
-  isLab      Boolean    @default(false)
-  equipment  String?
-  status     RoomStatus @default(FREE_BY_TIMETABLE)
-  notes      String?
-
-  timetable   TimetableEntry[]
-  roomReports RoomReport[]
-  exams       Exam[]
-}
-
-model RoomReport {
-  id         String     @id @default(uuid())
-  roomId     String
-  room       Room       @relation(fields: [roomId], references: [id])
-  reportedBy String
-  status     RoomStatus
-  notes      String?
-  createdAt  DateTime   @default(now())
-}
-
-// ------------------------------
-// ATTENDANCE
-// ------------------------------
-
-model AttendanceRecord {
-  id         String          @id @default(uuid())
-  studentId  String
-  student    Student         @relation(fields: [studentId], references: [id])
-  subjectRef String // Subject Code
-  date       DateTime
-  state      AttendanceState
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-}
-
-model AttendanceRequest {
-  id          String    @id @default(uuid())
-  studentId   String
-  student     Student   @relation(fields: [studentId], references: [id])
-  subjectRef  String
-  sessionDate DateTime
-  reason      String
-  status      String    @default("PENDING") // PENDING, APPROVED, REJECTED, RESOLVED
-  reviewerId  String?
-  reviewNote  String?
-  resolvedAt  DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model AttendanceRule {
-  id            String  @id @default(uuid())
-  targetPercent Float   @default(75.0)
-  active        Boolean @default(true)
-}
-
-// ------------------------------
-// EXAMS
-// ------------------------------
-
-model Exam {
-  id        String       @id @default(uuid())
-  subjectId String
-  subject   Subject      @relation(fields: [subjectId], references: [id])
-  roomId    String?
-  room      Room?        @relation(fields: [roomId], references: [id])
-  termId    String
-  term      AcademicTerm @relation(fields: [termId], references: [id])
-
-  examType  String
-  date      DateTime
-  startTime String
-  endTime   String
-  notes     String?
-  status    String   @default("SCHEDULED")
-
-  seatings ExamSeating[]
-}
-
-model ExamSeating {
-  id          String  @id @default(uuid())
-  examId      String
-  exam        Exam    @relation(fields: [examId], references: [id])
-  rollNumber  String
-  studentId   String?
-  studentName String?
-  roomHall    String
-  seat        String
-  row         String?
-  column      String?
-
-  @@unique([examId, rollNumber])
-  @@unique([examId, roomHall, seat])
-}
-
-// ------------------------------
-// PRODUCTIVITY
-// ------------------------------
-
-model Submission {
-  id        String  @id @default(uuid())
-  studentId String
-  student   Student @relation(fields: [studentId], references: [id])
-  subjectId String
-  subject   Subject @relation(fields: [subjectId], references: [id])
-
-  title         String
-  type          SubmissionType
-  status        SubmissionStatus @default(NOT_SUBMITTED)
-  deadline      DateTime?
-  submittedDate DateTime?
-  facultyRef    String?
-  isDigital     Boolean          @default(false)
-  fileReference String?
-  note          String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Reminder {
-  id          String           @id @default(uuid())
-  category    ReminderCategory
-  priority    Priority         @default(NORMAL)
-  schedule    ReminderSchedule
-  target      TargetAudience
-  title       String
-  description String?
-  dueDate     DateTime
-  creatorId   String
-  sectionId   String?
-  section     Section? @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-}
-
-model Poll {
-  id          String         @id @default(uuid())
-  title       String
-  description String?
-  target      TargetAudience
-  status      String         @default("ACTIVE")
-  creatorId   String
-  startDate   DateTime       @default(now())
-  endDate     DateTime?
-
-  options PollOption[]
-  votes   PollVote[]
-}
-
-model PollOption {
-  id     String @id @default(uuid())
-  pollId String
-  poll   Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  text   String
-
-  votes PollVote[]
-}
-
-model PollVote {
-  id       String     @id @default(uuid())
-  pollId   String
-  poll     Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  optionId String
-  option   PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  userId   String
-  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([pollId, userId]) // Enforce 1 vote per user per poll
-}
-
-// ------------------------------
-// SYSTEM
-// ------------------------------
-
-model AuditLog {
-  id         String  @id @default(uuid())
-  userId     String?
-  user       User? @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userRole   String?
-  action     String
-  entityType String
-  entityId   String
-  metadata   Json?
-  status     String
-  ipAddress  String?
-
-  timestamp DateTime @default(now())
-}
-
-model SystemSetting {
-  id          String   @id @default(uuid())
-  key         String   @unique
-  value       String
-  description String?
-  updatedAt   DateTime @updatedAt
-}
-
-// ------------------------------
-// NOTIFICATIONS
-// ------------------------------
-
-model Notification {
-  id                String   @id @default(uuid())
-  recipientId       String
-  user              User @relation("UserNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
-  type              String // ATTENDANCE_REMINDER, CLASS_CANCELLED, etc.
-  title             String
-  message           String
-  relatedEntityType String?
-  relatedEntityId   String?
-  isRead            Boolean  @default(false)
-  createdAt         DateTime @default(now())
-}
-
-model Announcement {
-  id          String    @id @default(uuid())
-  title       String
-  content     String
-  target      String // COLLEGE, DEPARTMENT, SECTION
-  priority    Priority  @default(NORMAL)
-  creatorId   String
-  isPublished Boolean   @default(true)
-  publishDate DateTime  @default(now())
-  expiryDate  DateTime?
-  createdAt   DateTime  @default(now())
-}
-
-// ------------------------------
-// STUDYOS & RESOURCES
-// ------------------------------
-
-model AcademicResource {
-  id            String   @id @default(uuid())
-  title         String
-  type          String // LAB_PDF, ASSIGNMENT_FORMAT
-  subjectId     String?
-  fileReference String
-  uploaderId    String
-  createdAt     DateTime @default(now())
-}
-
-model StudyOSResource {
-  id            String   @id @default(uuid())
-  title         String
-  subjectId     String?
-  category      String
-  fileReference String
-  uploaderId    String
-  createdAt     DateTime @default(now())
-}
-
-model LabRecord {
-  id           String   @id @default(uuid())
-  experimentNo Int
-  name         String
-  aim          String?
-  procedure    String?
-  code         String?
-  output       String?
-  subjectId    String
-  createdAt    DateTime @default(now())
-}
-
-model CampusEvent {
-  id            String             @id @default(uuid())
-  title         String
-  description   String?
-  startDate     DateTime
-  endDate       DateTime?
-  location      String
-  organizer     String?
-  imageUrl      String?
-  tags          String?
-  createdBy     String
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  registrations EventRegistration[]
-}
-
-model EventRegistration {
-  id        String      @id @default(uuid())
-  eventId   String
-  event     CampusEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  userId    String
-  createdAt DateTime    @default(now())
-
-  @@unique([eventId, userId])
-}
-
-model Offer {
-  id          String       @id @default(uuid())
-  title       String
-  provider    String
-  discount    String
-  description String?
-  expiresAt   DateTime?
-  type        String       @default("Digital")
-  claimUrl    String?
-  createdBy   String
-  createdAt   DateTime     @default(now())
-  claims      OfferClaim[]
-}
-
-model OfferClaim {
-  id        String   @id @default(uuid())
-  offerId   String
-  offer     Offer    @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  userId    String
-  createdAt DateTime @default(now())
-
-  @@unique([offerId, userId])
-}
-
-model MapLocation {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  latitude    Float
-  longitude   Float
-  status      String   @default("PENDING")
-  creatorId   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-
-
-// ------------------------------
-// GRADES AND ACADEMICS
-// ------------------------------
-
-model AcademicRecord {
-  id         String       @id @default(uuid())
-  studentId  String
-  student    Student      @relation(fields: [studentId], references: [id])
-  termId     String
-  term       AcademicTerm @relation(fields: [termId], references: [id])
-  
-  sgpa       Float?
-  cgpa       Float?
-  totalCredits Float?
-  earnedCredits Float?
-  
-  grades     Grade[]
-
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-
-  @@unique([studentId, termId])
-}
-
-model Grade {
-  id               String         @id @default(uuid())
-  academicRecordId String
-  academicRecord   AcademicRecord @relation(fields: [academicRecordId], references: [id], onDelete: Cascade)
-  subjectId        String
-  subject          Subject        @relation(fields: [subjectId], references: [id])
-  
-  grade            String         // A+, A, B, C, F, etc.
-  gradePoint       Float
-  credits          Float
-  
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-
-  @@unique([academicRecordId, subjectId])
-}
-
 model Feedback {
   id        String   @id @default(uuid())
   title     String
   content   String
-  type      String   @default("GENERAL") // BUG, FEATURE, GENERAL
-  status    String   @default("PENDING") // PENDING, REVIEWED, RESOLVED
+  type      String   @default("GENERAL")
+  status    String   @default("PENDING")
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
