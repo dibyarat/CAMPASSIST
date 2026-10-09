@@ -8,6 +8,7 @@ import { trackEvent } from './utils/analytics';
 import { supabase } from './services/supabaseClient';
 import { RouteFallback } from './routeFallback';
 import {
+  Landing, Login, Register,
   StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile, StudentFeedback,
   CrDashboard, CrTimetable, CrAttendance, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
   DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters, DevFeedbacks
