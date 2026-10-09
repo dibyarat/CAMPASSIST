@@ -12,7 +12,7 @@ import { GlobalSearch } from './components/GlobalSearch';
 import {
   Landing, Login, Register,
   StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile, StudentFeedback,
-  CrDashboard, CrTimetable, CrAttendance, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
+  CrDashboard, CrTimetable, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
   DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters, DevFeedbacks
 } from './lazyRoutes';
 import logoIcon from './assets/logo-icon.png';
@@ -154,7 +154,6 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">My Board</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance Disputes</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/announcements`} icon={Bell}>Announcements</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/cancellations`} icon={MapPin}>Cancellations</SidebarLink>
               
@@ -287,7 +286,6 @@ export default function App() {
                   {/* CR Routes */}
           <Route path="/cr" element={<MainLayout role="cr"><CrDashboard /></MainLayout>} />
           <Route path="/cr/timetable" element={<MainLayout role="cr"><CrTimetable /></MainLayout>} />
-          <Route path="/cr/attendance" element={<MainLayout role="cr"><CrAttendance /></MainLayout>} />
           <Route path="/cr/announcements" element={<MainLayout role="cr"><CrAnnouncements /></MainLayout>} />
           <Route path="/cr/cancellations" element={<MainLayout role="cr"><CrCancellations /></MainLayout>} />
           <Route path="/cr/reports" element={<MainLayout role="cr"><CrReports /></MainLayout>} />

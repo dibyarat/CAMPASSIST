@@ -72,13 +72,13 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
       return [
         { id: 'p-cr-dash', title: 'CR Dashboard', desc: 'Quick overview of class routine and actions', path: '/cr', category: 'Pages & Tools', icon: Layers },
         { id: 'p-cr-tt', title: 'Class Timetable', desc: 'Weekly schedule and slot timings', path: '/cr/timetable', category: 'Pages & Tools', icon: Calendar },
-        { id: 'p-cr-att', title: 'Mark Attendance', desc: 'Record and submit today\'s class attendance', path: '/cr/attendance', category: 'Pages & Tools', icon: Clock },
+        { id: 'p-cr-my-att', title: 'My Attendance Tracker', desc: 'Log personal class attendance & check safe bunks', path: '/student/attendance', category: 'Pages & Tools', icon: Clock },
         { id: 'p-cr-ann', title: 'Broadcast Announcements', desc: 'Push important updates to all classmates', path: '/cr/announcements', category: 'Pages & Tools', icon: Bell },
         { id: 'p-cr-canc', title: 'Class Cancellations', desc: 'Log cancelled or rescheduled lectures', path: '/cr/cancellations', category: 'Pages & Tools', icon: Calendar },
         { id: 'p-cr-subm', title: 'Collect Submissions', desc: 'Track assignment submissions and files', path: '/cr/submissions', category: 'Pages & Tools', icon: FileText },
         { id: 'p-cr-polls', title: 'Class Polls', desc: 'Create polls to vote on deadlines or dates', path: '/cr/polls', category: 'Pages & Tools', icon: MessageSquare },
         { id: 'p-cr-rem', title: 'Class Reminders', desc: 'Schedule auto-reminders for exams and dues', path: '/cr/reminders', category: 'Pages & Tools', icon: Bell },
-        { id: 'p-cr-rep', title: 'Class Reports', desc: 'Export class attendance statistics', path: '/cr/reports', category: 'Pages & Tools', icon: BarChart2 },
+        { id: 'p-cr-rep', title: 'Class Reports', desc: 'Export class activity and submissions', path: '/cr/reports', category: 'Pages & Tools', icon: BarChart2 },
         { id: 'p-cr-room', title: 'Find Empty Rooms', desc: 'Search for vacant classrooms right now', path: '/student/find-room', category: 'Pages & Tools', icon: MapPin },
         { id: 'p-cr-study', title: 'StudyOS Library', desc: 'Access class notes, pyqs, and textbooks', path: '/student/studyos', category: 'Pages & Tools', icon: BookOpen },
       ];
@@ -437,3 +437,4 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
     </div>
   );
 };
+

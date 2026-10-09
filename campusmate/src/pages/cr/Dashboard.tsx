@@ -81,12 +81,12 @@ export const Dashboard = () => {
             </div>
             
             <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                <AlertCircle size={24} />
+              <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                <BarChart2 size={24} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Pending Requests</p>
-                <h3 className="text-xl font-bold text-slate-900">3</h3>
+                <p className="text-sm font-medium text-slate-500">Active Polls</p>
+                <h3 className="text-xl font-bold text-slate-900">{polls.length}</h3>
               </div>
             </div>
 

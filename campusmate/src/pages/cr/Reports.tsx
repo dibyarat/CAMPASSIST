@@ -7,7 +7,7 @@ export const Reports = () => {
       <div className="flex justify-between items-center bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Class Reports</h1>
-          <p className="text-slate-500 font-medium mt-1">Export attendance and class metrics.</p>
+          <p className="text-slate-500 font-medium mt-1">Export class activity and submission metrics.</p>
         </div>
         <button className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-medium flex items-center gap-2">
           <Download size={18} /> Export CSV

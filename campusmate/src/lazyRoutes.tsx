@@ -25,7 +25,6 @@ export const StudentFeedback = lazy(() => import('./pages/student/Feedback'));
 
 export const CrDashboard = lazy(() => import('./pages/cr/Dashboard').then(module => ({ default: module.Dashboard })));
 export const CrTimetable = lazy(() => import('./pages/cr/Timetable').then(module => ({ default: module.Timetable })));
-export const CrAttendance = lazy(() => import('./pages/cr/Attendance').then(module => ({ default: module.Attendance })));
 export const CrAnnouncements = lazy(() => import('./pages/cr/Announcements').then(module => ({ default: module.Announcements })));
 export const CrCancellations = lazy(() => import('./pages/cr/Cancellations').then(module => ({ default: module.Cancellations })));
 export const CrReports = lazy(() => import('./pages/cr/Reports').then(module => ({ default: module.Reports })));
