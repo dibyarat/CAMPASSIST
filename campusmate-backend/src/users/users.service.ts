@@ -37,10 +37,10 @@ export class UsersService {
     const sectionRecord = section
       ? await this.prisma.section.findFirst({
           where: {
-            name: section,
-            ...(institutionId ? { institutionId } : {}),
+            name: { equals: section, mode: 'insensitive' },
+            ...(institutionId ? { OR: [{ institutionId }, { institutionId: null }] } : {}),
           },
-          include: { department: true },
+          include: { department: true, institution: true },
         })
       : null;
 
@@ -101,7 +101,44 @@ export class UsersService {
   }
 
   async getProfile(userId: string) {
-    // 1. Check Firestore first
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          profile: true,
+          crAssignment: { include: { section: true } },
+          Institution: true,
+          student: { include: { section: { include: { department: true, institution: true } } } },
+        },
+      });
+
+      if (user) {
+        // Auto-backfill to Firestore for future instant reads
+        try {
+          await this.firebase.firestore.collection('users').doc(userId).set(
+            {
+              id: user.id,
+              email: user.email,
+              role: user.role,
+              institutionId: user.institutionId,
+              Institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
+              institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
+              profile: user.profile,
+              student: user.student,
+              crAssignment: user.crAssignment,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true },
+          );
+        } catch {}
+
+        return user;
+      }
+    } catch (err: any) {
+      this.logger.warn(`Prisma getProfile error: ${err?.message}`);
+    }
+
+    // Fallback to Firestore if Prisma failed
     try {
       const doc = await this.firebase.firestore.collection('users').doc(userId).get();
       if (doc.exists) {
@@ -111,40 +148,7 @@ export class UsersService {
       this.logger.warn(`Firestore getProfile error: ${err?.message}`);
     }
 
-    // 2. Fallback to Prisma
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        profile: true,
-        crAssignment: true,
-        Institution: true,
-        student: { include: { section: { include: { department: true } } } },
-      },
-    });
-
-    if (!user) throw new NotFoundException('User not found');
-
-    // 3. Auto-backfill to Firestore for future instant reads
-    try {
-      await this.firebase.firestore.collection('users').doc(userId).set(
-        {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          institutionId: user.institutionId,
-          Institution: user.Institution,
-          profile: user.profile,
-          student: user.student,
-          crAssignment: user.crAssignment,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true },
-      );
-    } catch {
-      // Ignore background backfill errors
-    }
-
-    return user;
+    throw new NotFoundException('User not found');
   }
 
   async updateProfile(userId: string, data: any) {
@@ -219,12 +223,22 @@ export class UsersService {
         create: { userId, studentId: student.id, ...profileData },
       });
 
+      const fullUpdated = await transaction.user.findUnique({
+        where: { id: userId },
+        include: {
+          profile: true,
+          student: { include: { section: { include: { department: true, institution: true } } } },
+          crAssignment: { include: { section: true } },
+          Institution: true,
+        },
+      });
+
       // Sync to Firestore
       try {
         await this.firebase.firestore.collection('users').doc(userId).set(
           {
-            profile: profileData,
-            institutionId: data.institutionId || user.institutionId,
+            ...fullUpdated,
+            institution: fullUpdated?.Institution,
             updatedAt: new Date().toISOString(),
           },
           { merge: true },
@@ -233,28 +247,52 @@ export class UsersService {
         this.logger.warn(`Failed syncing updated user details to Firestore: ${err?.message}`);
       }
 
-      return { ...updatedUser, profile, student };
+      return fullUpdated;
     });
   }
 
   async getAllUsers() {
     try {
+      const users = await this.prisma.user.findMany({
+        include: {
+          profile: true,
+          student: { include: { section: { include: { department: true, institution: true } } } },
+          crAssignment: { include: { section: true } },
+          Institution: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // Update Firestore cache in background
+      try {
+        for (const u of users) {
+          await this.firebase.firestore.collection('users').doc(u.id).set(
+            {
+              id: u.id,
+              email: u.email,
+              role: u.role,
+              institutionId: u.institutionId,
+              Institution: u.Institution ? { id: u.Institution.id, name: u.Institution.name, code: u.Institution.code } : null,
+              institution: u.Institution ? { id: u.Institution.id, name: u.Institution.name, code: u.Institution.code } : null,
+              profile: u.profile,
+              student: u.student,
+              crAssignment: u.crAssignment,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true },
+          );
+        }
+      } catch {}
+
+      return users;
+    } catch (err: any) {
+      this.logger.warn(`Failed reading all users from Prisma, falling back to Firestore: ${err?.message}`);
       const snapshot = await this.firebase.firestore.collection('users').get();
       if (!snapshot.empty) {
         return snapshot.docs.map((doc) => doc.data());
       }
-    } catch (err: any) {
-      this.logger.warn(`Failed reading all users from Firestore: ${err?.message}`);
+      return [];
     }
-
-    return this.prisma.user.findMany({
-      include: {
-        profile: true,
-        student: { include: { section: true } },
-        crAssignment: { include: { section: true } },
-        Institution: true,
-      },
-    });
   }
 
   async updateUserRole(id: string, role: string, sectionId?: string) {

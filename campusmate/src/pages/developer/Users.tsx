@@ -93,7 +93,7 @@ export const Users = () => {
       fullName: user.profile?.fullName || '',
       role: user.role || 'STUDENT',
       sectionId: user.crAssignment?.sectionId || user.student?.sectionId || '',
-      institutionId: user.institutionId || user.Institution?.id || '',
+      institutionId: user.institutionId || user.Institution?.id || (user as any).institution?.id || '',
       rollNumber: user.profile?.rollNumber || '',
       department: user.profile?.department || '',
       semester: user.profile?.semester || '',
@@ -199,7 +199,7 @@ export const Users = () => {
                       {user.role}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-slate-600">{user.Institution?.code || "-"}</td>
+                  <td className="py-4 px-4 text-slate-600">{user.Institution?.code || (user as any).institution?.code || user.Institution?.name || (user as any).institution?.name || "-"}</td>
                   <td className="py-4 px-4 text-slate-600">
                     {user.crAssignment?.section?.name || user.student?.section?.name || user.profile?.section || '-'}
                   </td>

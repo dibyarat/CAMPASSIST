@@ -312,7 +312,7 @@ export const Sections = () => {
                         {sec.semester?.number ? `(Sem ${sec.semester.number})` : ''}
                       </td>
                       <td className="py-4 px-4 text-slate-500 text-sm">
-                        {sec.institution?.name || sec.institutionId || '-'}
+                        {sec.institution?.name ? `${sec.institution.name} (${sec.institution.code || ''})` : (sec.institutionId || '-')}
                       </td>
                       <td className="py-4 px-4 text-right space-x-2">
                         <button

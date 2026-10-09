@@ -46,7 +46,7 @@ export class SectionsService {
         semesterId: semester.id,
         institutionId: data.institutionId ?? null,
       },
-      include: { department: true, semester: true },
+      include: { department: true, semester: true, institution: true },
     });
 
     try {
@@ -58,6 +58,7 @@ export class SectionsService {
         semesterId: section.semesterId,
         semester: { number: semester.number, name: semester.name },
         institutionId: section.institutionId,
+        institution: section.institution ? { id: section.institution.id, name: section.institution.name, code: section.institution.code } : null,
         createdAt: new Date().toISOString(),
       });
     } catch (err: any) {
@@ -69,17 +70,39 @@ export class SectionsService {
 
   async findAll() {
     try {
+      const sections = await this.prisma.section.findMany({
+        include: { department: true, semester: true, institution: true },
+        orderBy: { name: 'asc' },
+      });
+
+      // Update Firestore cache in background
+      try {
+        for (const sec of sections) {
+          await this.firebase.firestore.collection('sections').doc(sec.id).set(
+            {
+              id: sec.id,
+              name: sec.name,
+              departmentId: sec.departmentId,
+              department: sec.department,
+              semesterId: sec.semesterId,
+              semester: sec.semester,
+              institutionId: sec.institutionId,
+              institution: sec.institution ? { id: sec.institution.id, name: sec.institution.name, code: sec.institution.code } : null,
+            },
+            { merge: true },
+          );
+        }
+      } catch {}
+
+      return sections;
+    } catch (err: any) {
+      this.logger.warn(`Failed fetching sections from Prisma, falling back to Firestore: ${err?.message}`);
       const snap = await this.firebase.firestore.collection('sections').get();
       if (!snap.empty) {
         return snap.docs.map((doc) => doc.data());
       }
-    } catch (err: any) {
-      this.logger.warn(`Failed fetching sections from Firestore: ${err?.message}`);
+      return [];
     }
-
-    return this.prisma.section.findMany({
-      include: { department: true, semester: true, institution: true },
-    });
   }
 
   async update(id: string, data: {

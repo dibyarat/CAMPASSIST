@@ -35,21 +35,40 @@ export class InstitutionsService {
 
   async findAll() {
     try {
+      const institutions = await this.prisma.institution.findMany({
+        include: {
+          _count: {
+            select: { users: true, sections: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // Update Firestore cache in background
+      try {
+        for (const inst of institutions) {
+          await this.firebase.firestore.collection('institutions').doc(inst.id).set(
+            {
+              id: inst.id,
+              name: inst.name,
+              code: inst.code,
+              _count: inst._count,
+              createdAt: inst.createdAt.toISOString(),
+            },
+            { merge: true },
+          );
+        }
+      } catch {}
+
+      return institutions;
+    } catch (err: any) {
+      this.logger.warn(`Failed fetching institutions from Prisma, falling back to Firestore: ${err?.message}`);
       const snap = await this.firebase.firestore.collection('institutions').get();
       if (!snap.empty) {
         return snap.docs.map((doc) => doc.data());
       }
-    } catch (err: any) {
-      this.logger.warn(`Failed fetching institutions from Firestore: ${err?.message}`);
+      return [];
     }
-
-    return this.prisma.institution.findMany({
-      include: {
-        _count: {
-          select: { users: true, sections: true },
-        },
-      },
-    });
   }
 
   async findOne(id: string) {

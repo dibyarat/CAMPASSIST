@@ -79,14 +79,15 @@ export const Students = () => {
 						</thead>
 						<tbody className="divide-y divide-slate-100">
 							{filteredStudents.map(student => {
-								const section = (student.student?.sectionId && sectionNames.get(student.student.sectionId)) || student.profile?.section;
+								const section = (student.student?.sectionId && sectionNames.get(student.student.sectionId)) || student.student?.section?.name || student.profile?.section;
+								const institutionName = student.Institution?.name || (student as any).institution?.name || student.Institution?.code || (student as any).institution?.code;
 								return (
 									<tr key={student.id}>
 										<td className="px-4 py-3 text-sm font-medium text-slate-800">{student.profile?.fullName || 'Name not provided'}</td>
 										<td className="px-4 py-3 text-sm text-slate-600">{student.profile?.rollNumber || 'Not provided'}</td>
 										<td className="px-4 py-3 text-sm text-slate-600">{student.email}</td>
 										<td className="px-4 py-3 text-sm text-slate-600">{section || 'Not assigned'}</td>
-										<td className="px-4 py-3 text-sm text-slate-600">{student.Institution?.name || student.Institution?.code || 'Not provided'}</td>
+										<td className="px-4 py-3 text-sm text-slate-600">{institutionName || 'Not provided'}</td>
 									</tr>
 								);
 							})}
