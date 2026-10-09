@@ -8,6 +8,7 @@ import { trackEvent } from './utils/analytics';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './services/firebaseClient';
 import { RouteFallback } from './routeFallback';
+import { GlobalSearch } from './components/GlobalSearch';
 import {
   Landing, Login, Register,
   StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile, StudentFeedback,
@@ -221,9 +222,8 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             <button className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg" onClick={() => setIsSidebarOpen(true)}>
               <LayoutDashboard size={20} />
             </button>
-            <div className="hidden sm:flex items-center bg-slate-100 rounded-full px-4 py-2 w-96 border border-slate-200 focus-within:border-blue-300 focus-within:bg-white/60 backdrop-blur-xl transition">
-              <Search size={18} className="text-slate-400" />
-              <input type="text" placeholder="Search for rooms, notes, people..." className="bg-transparent border-none outline-none ml-2 text-sm w-full" />
+            <div className="w-64 sm:w-80 md:w-96">
+              <GlobalSearch role={role} />
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">
