@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, UseGuards, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards, Param, Delete } from '@nestjs/common';
 import { SectionsService } from './sections.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -32,6 +32,23 @@ export class SectionsController {
   @Roles('DEVELOPER')
   assignCr(@Body() assignCrDto: { userId: string; sectionId: string; termId: string }) {
     return this.sectionsService.assignCr(assignCrDto);
+  }
+
+  @Patch(':id')
+  @UseGuards(FirebaseAuthGuard, RolesGuard)
+  @Roles('DEVELOPER')
+  update(
+    @Param('id') id: string,
+    @Body() updateSectionDto: {
+      name?: string;
+      departmentCode?: string;
+      departmentName?: string;
+      semesterNumber?: number;
+      semesterName?: string;
+      institutionId?: string | null;
+    },
+  ) {
+    return this.sectionsService.update(id, updateSectionDto);
   }
 
   @Delete(':id')

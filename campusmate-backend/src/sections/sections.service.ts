@@ -82,6 +82,64 @@ export class SectionsService {
     });
   }
 
+  async update(id: string, data: {
+    name?: string;
+    departmentCode?: string;
+    departmentName?: string;
+    semesterNumber?: number;
+    semesterName?: string;
+    institutionId?: string | null;
+  }) {
+    let departmentId: string | undefined;
+    let semesterId: string | undefined;
+
+    if (data.departmentCode) {
+      let dept = await this.prisma.department.findFirst({ where: { code: data.departmentCode } });
+      if (!dept && data.departmentName) {
+        dept = await this.prisma.department.create({
+          data: { name: data.departmentName, code: data.departmentCode },
+        });
+      }
+      if (dept) departmentId = dept.id;
+    }
+
+    if (data.semesterNumber !== undefined) {
+      let sem = await this.prisma.semester.findFirst({ where: { number: data.semesterNumber } });
+      if (!sem && data.semesterName) {
+        sem = await this.prisma.semester.create({
+          data: { name: data.semesterName, number: data.semesterNumber },
+        });
+      }
+      if (sem) semesterId = sem.id;
+    }
+
+    const updateData: any = {};
+    if (data.name) updateData.name = data.name;
+    if (departmentId) updateData.departmentId = departmentId;
+    if (semesterId) updateData.semesterId = semesterId;
+    if (data.institutionId !== undefined) updateData.institutionId = data.institutionId;
+
+    const section = await this.prisma.section.update({
+      where: { id },
+      data: updateData,
+      include: { department: true, semester: true, institution: true },
+    });
+
+    try {
+      await this.firebase.firestore.collection('sections').doc(id).set(
+        {
+          ...section,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
+    } catch (err: any) {
+      this.logger.warn(`Failed updating section in Firestore: ${err?.message}`);
+    }
+
+    return section;
+  }
+
   async remove(id: string) {
     try {
       await this.firebase.firestore.collection('sections').doc(id).delete();
