@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDummyKeyForDevelopment123456789',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'campassist-dev.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'campassist-dev',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'campassist-dev.appspot.com',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '1234567890',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:1234567890:web:abcdef123456',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyC-o8-0zbpDI_yRDWUYp2wNyQ2xi61MxmI',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'campassist-1ffac.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'campassist-1ffac',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'campassist-1ffac.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '327581863933',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:327581863933:web:6f33ddfec9e0adc54e9394',
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-CHFJB1SWYE'
 };
 
