@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
+import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
 
 @Injectable()
 export class ExamsService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(ExamsService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private firebase: FirebaseAdminService,
+  ) {}
 
   async createExam(data: {
     subjectId: string;
@@ -15,27 +21,62 @@ export class ExamsService {
     endTime: string;
     notes?: string;
   }) {
-    return this.prisma.exam.create({ data });
+    const exam = await this.prisma.exam.create({ data });
+
+    try {
+      await this.firebase.firestore.collection('exams').doc(exam.id).set({
+        ...exam,
+        date: new Date(exam.date).toISOString(),
+        createdAt: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      this.logger.warn(`Failed writing exam to Firestore: ${err?.message}`);
+    }
+
+    return exam;
   }
 
   async getAllExamsForTerm(termId: string) {
+    try {
+      const snap = await this.firebase.firestore
+        .collection('exams')
+        .where('termId', '==', termId)
+        .get();
+
+      if (!snap.empty) {
+        return snap.docs.map((doc) => doc.data());
+      }
+    } catch {}
+
     return this.prisma.exam.findMany({
       where: { termId },
-      include: { subject: true, room: true }
+      include: { subject: true, room: true },
     });
   }
 
-  // --- SEATING MANAGEMENT ---
-
-  // Represents the end of the import pipeline (Save & Publish)
   async saveSeatingImport(examId: string, seatingData: any[]) {
-    // seatingData is an array of objects mapped from the CSV/XLSX
-    // Ensure we process this in a transaction to prevent partial corrupt state
+    try {
+      const batch = this.firebase.firestore.batch();
+      seatingData.forEach((seat) => {
+        const ref = this.firebase.firestore.collection('exam_seating').doc(`${examId}_${seat.rollNumber}`);
+        batch.set(ref, {
+          examId,
+          rollNumber: seat.rollNumber,
+          studentName: seat.name,
+          roomHall: seat.roomHall,
+          seat: seat.seat,
+          row: seat.row,
+          column: seat.column,
+          updatedAt: new Date().toISOString(),
+        });
+      });
+      await batch.commit();
+    } catch (err: any) {
+      this.logger.warn(`Failed writing exam seating to Firestore: ${err?.message}`);
+    }
+
     return this.prisma.$transaction(async (prisma) => {
-      // 1. Clear old seating for this exam if necessary (or update)
       await prisma.examSeating.deleteMany({ where: { examId } });
-      
-      // 2. Insert new seating
       return prisma.examSeating.createMany({
         data: seatingData.map((seat) => ({
           examId,
@@ -44,22 +85,26 @@ export class ExamsService {
           roomHall: seat.roomHall,
           seat: seat.seat,
           row: seat.row,
-          column: seat.column
-        }))
+          column: seat.column,
+        })),
       });
     });
   }
 
-  // Students can only fetch their own seat
   async getMyExamSeat(examId: string, rollNumber: string) {
+    try {
+      const doc = await this.firebase.firestore.collection('exam_seating').doc(`${examId}_${rollNumber}`).get();
+      if (doc.exists) return doc.data();
+    } catch {}
+
     const seat = await this.prisma.examSeating.findUnique({
       where: {
         examId_rollNumber: {
           examId,
-          rollNumber
-        }
+          rollNumber,
+        },
       },
-      include: { exam: { include: { subject: true } } }
+      include: { exam: { include: { subject: true } } },
     });
 
     if (!seat) throw new NotFoundException('Exam seating not found for your Roll Number');

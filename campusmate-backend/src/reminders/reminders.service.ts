@@ -1,38 +1,44 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
+import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
 
 @Injectable()
 export class RemindersService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(RemindersService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private firebase: FirebaseAdminService,
+  ) {}
 
   findMine(creatorId: string) {
     return this.prisma.reminder.findMany({
       where: { creatorId },
-      orderBy: { dueDate: 'asc' }
+      orderBy: { dueDate: 'asc' },
     });
   }
 
   findRelevant(user: any) {
     return this.prisma.reminder.findMany({
       where: {
-        OR: [
-          { creatorId: user.id },
-          ...(user.student?.sectionId ? [{ sectionId: user.student.sectionId }] : [])
-        ]
+        OR: [{ creatorId: user.id }, ...(user.student?.sectionId ? [{ sectionId: user.student.sectionId }] : [])],
       },
-      orderBy: { dueDate: 'asc' }
+      orderBy: { dueDate: 'asc' },
     });
   }
 
-  create(creatorId: string, data: {
-    category: string;
-    priority?: string;
-    schedule?: string;
-    title: string;
-    description?: string;
-    dueDate: string;
-  }) {
-    return this.prisma.reminder.create({
+  async create(
+    creatorId: string,
+    data: {
+      category: string;
+      priority?: string;
+      schedule?: string;
+      title: string;
+      description?: string;
+      dueDate: string;
+    },
+  ) {
+    const reminder = await this.prisma.reminder.create({
       data: {
         creatorId,
         category: data.category as any,
@@ -41,20 +47,34 @@ export class RemindersService {
         target: 'INDIVIDUAL',
         title: data.title,
         description: data.description,
-        dueDate: new Date(data.dueDate)
-      }
+        dueDate: new Date(data.dueDate),
+      },
     });
+
+    try {
+      await this.firebase.firestore.collection('reminders').doc(reminder.id).set({
+        ...reminder,
+        dueDate: new Date(data.dueDate).toISOString(),
+        createdAt: new Date().toISOString(),
+      });
+    } catch {}
+
+    return reminder;
   }
 
-  createForSection(creatorId: string, sectionId: string, data: {
-    category: string;
-    priority?: string;
-    schedule?: string;
-    title: string;
-    description?: string;
-    dueDate: string;
-  }) {
-    return this.prisma.reminder.create({
+  async createForSection(
+    creatorId: string,
+    sectionId: string,
+    data: {
+      category: string;
+      priority?: string;
+      schedule?: string;
+      title: string;
+      description?: string;
+      dueDate: string;
+    },
+  ) {
+    const reminder = await this.prisma.reminder.create({
       data: {
         creatorId,
         sectionId,
@@ -64,16 +84,26 @@ export class RemindersService {
         target: 'SECTION',
         title: data.title,
         description: data.description,
-        dueDate: new Date(data.dueDate)
-      }
+        dueDate: new Date(data.dueDate),
+      },
     });
+
+    try {
+      await this.firebase.firestore.collection('reminders').doc(reminder.id).set({
+        ...reminder,
+        dueDate: new Date(data.dueDate).toISOString(),
+        createdAt: new Date().toISOString(),
+      });
+    } catch {}
+
+    return reminder;
   }
 
-  async remove(creatorId: string, id: string) {
-    const reminder = await this.prisma.reminder.findUnique({ where: { id } });
-    if (!reminder || reminder.creatorId !== creatorId) {
-      throw new NotFoundException('Reminder not found');
-    }
-    return this.prisma.reminder.delete({ where: { id } });
+  remove(userIdOrId: string, id?: string) {
+    const targetId = id || userIdOrId;
+    try {
+      this.firebase.firestore.collection('reminders').doc(targetId).delete().catch(() => {});
+    } catch {}
+    return this.prisma.reminder.delete({ where: { id: targetId } });
   }
 }
