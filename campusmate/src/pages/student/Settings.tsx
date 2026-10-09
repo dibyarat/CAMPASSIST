@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { User, Bell, Shield, Camera, Save } from 'lucide-react';
 
+import { updatePassword as fbUpdatePassword } from 'firebase/auth';
+import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
 import { supabase } from '../../services/supabaseClient';
 
@@ -88,8 +90,12 @@ export const Settings = () => {
 
     setSavingPassword(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      if (auth.currentUser) {
+        await fbUpdatePassword(auth.currentUser, newPassword);
+      } else {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+      }
       setNewPassword('');
       setConfirmPassword('');
       setSecurityMessage('Password updated.');

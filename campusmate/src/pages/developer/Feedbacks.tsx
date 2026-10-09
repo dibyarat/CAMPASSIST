@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, RefreshCw, CheckCircle, Clock } from 'lucide-react';
-import { supabase } from '../../services/supabaseClient';
+import { apiClient } from '../../services/apiClient';
 
 interface FeedbackItem {
   id: string;
@@ -24,16 +24,8 @@ export default function Feedbacks() {
   const fetchFeedbacks = async () => {
     setIsLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/feedback`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`
-        }
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await apiClient('/feedback');
+      if (Array.isArray(data)) {
         setFeedbacks(data);
       }
     } catch (error) {
@@ -49,24 +41,15 @@ export default function Feedbacks() {
 
   const updateStatus = async (id: string, newStatus: string) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/feedback/${id}`, {
+      await apiClient(`/feedback/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
         body: JSON.stringify({ status: newStatus })
       });
       
-      if (res.ok) {
-        if (newStatus === 'RESOLVED') {
-          setFeedbacks(prev => prev.filter(f => f.id !== id));
-        } else {
-          setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
-        }
+      if (newStatus === 'RESOLVED') {
+        setFeedbacks(prev => prev.filter(f => f.id !== id));
+      } else {
+        setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
       }
     } catch (error) {
       console.error(error);

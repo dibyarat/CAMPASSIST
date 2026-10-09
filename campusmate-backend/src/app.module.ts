@@ -43,9 +43,11 @@ import { InstitutionsModule } from './institutions/institutions.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { GradesModule } from './grades/grades.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { FirebaseAdminModule } from './common/firebase/firebase-admin.module';
+import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [InstitutionsModule, SubjectsModule, GradesModule, FeedbackModule],
+  imports: [InstitutionsModule, SubjectsModule, GradesModule, FeedbackModule, FirebaseAdminModule, CloudinaryModule],
   controllers: [
     AppController,
     HealthController,

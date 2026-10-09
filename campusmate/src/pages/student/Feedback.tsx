@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, MessageSquare, AlertCircle } from 'lucide-react';
-import { supabase } from '../../services/supabaseClient';
+import { apiClient } from '../../services/apiClient';
 
 export default function Feedback() {
   const [title, setTitle] = useState('');
@@ -15,19 +15,10 @@ export default function Feedback() {
     setStatusMsg({ text: '', type: '' });
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not logged in');
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/feedback`, {
+      await apiClient('/feedback', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
         body: JSON.stringify({ title, content, type })
       });
-
-      if (!response.ok) throw new Error('Failed to submit feedback');
 
       setStatusMsg({ text: 'Feedback submitted successfully!', type: 'success' });
       setTitle('');

@@ -5,6 +5,8 @@ import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashbo
 // Public
 import { AnalyticsTracker } from './utils/AnalyticsTracker';
 import { trackEvent } from './utils/analytics';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { auth } from './services/firebaseClient';
 import { supabase } from './services/supabaseClient';
 import { RouteFallback } from './routeFallback';
 import {
@@ -46,6 +48,25 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
 
     const verifySession = async () => {
       try {
+        if (auth.currentUser) {
+          if (!isMounted) return;
+          setAuthState('authenticated');
+          return;
+        }
+
+        const fbUser = await new Promise((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+          });
+        });
+
+        if (fbUser) {
+          if (!isMounted) return;
+          setAuthState('authenticated');
+          return;
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         const activeSession = session || (await supabase.auth.refreshSession()).data.session;
         if (!isMounted) return;
@@ -196,7 +217,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             </Link>
           )}
 
-          <Link to="/" onClick={async (event) => { event.preventDefault(); await supabase.auth.signOut(); localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+          <Link to="/" onClick={async (event) => { event.preventDefault(); try { await signOut(auth); } catch {} try { await supabase.auth.signOut(); } catch {} localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
             <LogOut size={20} className="shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </Link>
