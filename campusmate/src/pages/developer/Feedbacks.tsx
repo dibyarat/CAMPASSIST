@@ -62,7 +62,11 @@ export default function Feedbacks() {
       });
       
       if (res.ok) {
-        setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
+        if (newStatus === 'RESOLVED') {
+          setFeedbacks(prev => prev.filter(f => f.id !== id));
+        } else {
+          setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
+        }
       }
     } catch (error) {
       console.error(error);

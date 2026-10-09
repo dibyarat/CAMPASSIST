@@ -38,6 +38,12 @@ export class FeedbackService {
     if (!feedback) {
       throw new NotFoundException('Feedback not found');
     }
+
+    if (updateDto.status === 'RESOLVED') {
+      await this.prisma.feedback.delete({ where: { id } });
+      return { deleted: true, id };
+    }
+
     return this.prisma.feedback.update({
       where: { id },
       data: { status: updateDto.status },
