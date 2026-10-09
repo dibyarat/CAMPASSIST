@@ -54,7 +54,7 @@ export class FirebaseAdminService implements OnModuleInit {
           'No Firebase Service Account credentials found. Falling back to default app initialization.',
         );
         this.app = initializeApp({
-          projectId: process.env.FIREBASE_PROJECT_ID || 'campassist-dev',
+          projectId: process.env.FIREBASE_PROJECT_ID || 'campassist-1ffac',
           storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         });
       }
@@ -63,7 +63,7 @@ export class FirebaseAdminService implements OnModuleInit {
       const apps = getApps();
       if (apps.length === 0) {
         this.app = initializeApp({
-          projectId: 'campassist-dev',
+          projectId: 'campassist-1ffac',
         });
       } else {
         this.app = apps[0]!;
