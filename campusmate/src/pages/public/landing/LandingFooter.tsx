@@ -18,8 +18,8 @@ export const LandingFooter: React.FC = () => {
                 alt="CampAssist logo"
                 className="h-9 w-9 object-contain drop-shadow-xs"
               />
-              <span className="font-extrabold text-2xl tracking-tight text-[#0B1020]">
-                Camp<span className="text-[#1A86E0]">Assist</span>
+              <span className="brand-wordmark font-extrabold text-2xl tracking-tight">
+                CampAssist
               </span>
             </Link>
             <p className="text-sm sm:text-base text-[#4A5270] max-w-sm leading-relaxed">

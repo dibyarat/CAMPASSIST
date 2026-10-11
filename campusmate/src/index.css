@@ -16,7 +16,7 @@
   --brand-cyan: #0ea5e9;
   --brand-navy: #0f172a;
   --gradient-primary: linear-gradient(to right, #0ea5e9, #8b5cf6, #ec4899);
-  --gradient-wordmark: linear-gradient(90deg, #1d4ed8 0%, #0ea5e9 32%, #8b5cf6 68%, #ec4899 100%);
+  --gradient-wordmark: linear-gradient(90deg, #1A56DB 0%, #1775E0 15%, #2B95EC 35%, #587AF1 52%, #8560F6 70%, #B847DC 85%, #EA489A 100%);
   --gradient-secondary: linear-gradient(to right, #3b82f6, #8b5cf6);
 
   --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -52,6 +52,7 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  display: inline-block;
 }
 
 /* Background gradient utility */

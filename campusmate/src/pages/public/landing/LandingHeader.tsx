@@ -13,8 +13,8 @@ export const LandingHeader: React.FC = () => {
             alt="CampAssist logo"
             className="h-10 w-10 object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
           />
-          <span className="font-extrabold text-2xl tracking-tight text-[#0B1020]">
-            Camp<span className="text-[#1A86E0]">Assist</span>
+          <span className="brand-wordmark font-extrabold text-2xl tracking-tight">
+            CampAssist
           </span>
         </Link>
 
