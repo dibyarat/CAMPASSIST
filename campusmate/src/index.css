@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  /* Logo color palette */
+  /* Prompt Homepage Tokens */
+  --color-ink: #0B1020;
+  --color-muted: #4A5270;
+  --color-white: #FFFFFF;
+  --brand-blue: #1A86E0;
+  --brand-pink: #D23AA0;
+  --brand-purple: #7A5FD0;
+  --gradient-brand: linear-gradient(90deg, #1A86E0, #D23AA0);
+  --section-wash: linear-gradient(100deg, #D9E7FF 0%, #EEE5FC 52%, #FBE1EE 100%);
+  --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(36,150,255,.40), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(255,72,172,.34), transparent 70%);
+
+  /* Existing tokens preserved */
   --brand-cyan: #0ea5e9;
-  --brand-blue: #3b82f6;
-  --brand-purple: #8b5cf6;
-  --brand-pink: #f43f5e;
   --brand-navy: #0f172a;
-  
   --gradient-primary: linear-gradient(to right, #0ea5e9, #8b5cf6, #ec4899);
   --gradient-wordmark: linear-gradient(90deg, #1d4ed8 0%, #0ea5e9 32%, #8b5cf6 68%, #ec4899 100%);
   --gradient-secondary: linear-gradient(to right, #3b82f6, #8b5cf6);
-  
-  --font-family: 'Inter', system-ui, sans-serif;
-  
+
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
   --bg-primary: #f4f7fb;
   --bg-card: #ffffff;
-  
+
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --text-tertiary: #94a3b8;
-  
+
   --border-color: #e2e8f0;
 }
 
@@ -34,7 +41,7 @@ body {
 
 /* Base utility for gradient text */
 .text-gradient {
-  background: var(--gradient-primary);
+  background: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -50,5 +57,35 @@ body {
 /* Background gradient utility */
 .bg-gradient-primary {
   background: var(--gradient-primary);
+}
+
+.bg-gradient-brand {
+  background: var(--gradient-brand);
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+/* Motion: Subtle floating animations (disabled if prefers-reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-float-slow {
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+  .animate-float-alt {
+    animation: floatAlt 7s ease-in-out infinite;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes floatAlt {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(7px); }
 }
 
