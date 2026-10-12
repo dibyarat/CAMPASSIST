@@ -9,6 +9,8 @@ export const Settings = () => {
   const [profile, setProfile] = React.useState<any>(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [studentType, setStudentType] = useState<'HOSTELLER' | 'DAY_SCHOLAR'>('DAY_SCHOLAR');
+  const [gender, setGender] = useState('Prefer not to say');
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileError, setProfileError] = useState('');
@@ -35,6 +37,14 @@ export const Settings = () => {
         const nameParts = (data?.profile?.fullName || '').trim().split(/\s+/).filter(Boolean);
         setFirstName(nameParts[0] || '');
         setLastName(nameParts.slice(1).join(' '));
+        const rawType = data?.profile?.studentType || data?.profile?.residency || data?.studentType;
+        if (rawType) {
+          setStudentType(String(rawType).toUpperCase().includes('HOSTEL') ? 'HOSTELLER' : 'DAY_SCHOLAR');
+        }
+        const rawGender = data?.profile?.gender || data?.gender || data?.academicIdentity?.gender;
+        if (rawGender) {
+          setGender(rawGender);
+        }
         setProfileError('');
       })
       .catch((error) => {
@@ -58,13 +68,19 @@ export const Settings = () => {
     setProfileError('');
     setSaveMessage('');
     try {
+      const payload = {
+        fullName,
+        studentType,
+        residency: studentType === 'HOSTELLER' ? 'HOSTELER' : 'DAY_SCHOLAR',
+        gender,
+      };
       const updatedProfile = await apiClient('/users/me/profile', {
         method: 'PUT',
-        body: JSON.stringify({ fullName }),
+        body: JSON.stringify(payload),
       });
       setProfile((current: any) => ({
         ...current,
-        profile: { ...current?.profile, ...updatedProfile, fullName },
+        profile: { ...current?.profile, ...updatedProfile, ...payload },
       }));
       setSaveMessage('Profile saved.');
     } catch (error) {
@@ -205,6 +221,32 @@ export const Settings = () => {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Semester</label>
                   <input type="text" value={profile?.profile?.semester || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Living Arrangement</label>
+                  <select
+                    value={studentType}
+                    onChange={(e) => setStudentType(e.target.value as any)}
+                    disabled={loadingProfile || savingProfile}
+                    className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-400 outline-none transition font-medium"
+                  >
+                    <option value="DAY_SCHOLAR">🎒 Day Scholar</option>
+                    <option value="HOSTELLER">🏠 Hosteller (Hostel Resident)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Gender (Optional)</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    disabled={loadingProfile || savingProfile}
+                    className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-400 outline-none transition font-medium"
+                  >
+                    <option value="Prefer not to say">Prefer not to say</option>
+                    <option value="Boy">Boy / Male</option>
+                    <option value="Girl">Girl / Female</option>
+                    <option value="Another identity">Another identity</option>
+                  </select>
                 </div>
               </div>
             </div>

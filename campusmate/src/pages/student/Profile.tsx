@@ -38,17 +38,27 @@ export const Profile = () => {
 		return () => { isMounted = false; };
 	}, []);
 
+	const rawStudentType = profile?.profile?.studentType || (profile?.profile as any)?.residency || (profile as any)?.studentType || (profile as any)?.residency;
+	const formattedStudentType = rawStudentType
+		? (String(rawStudentType).toUpperCase().includes('HOSTEL') ? 'Hosteller' : 'Day Scholar')
+		: 'Not provided';
+
+	const rawGender = (profile?.profile as any)?.gender || (profile as any)?.gender || (profile as any)?.academicIdentity?.gender;
+	const formattedGender = rawGender || 'Not provided';
+
 	const details = [
 		['Email', profile?.email],
-		['Roll Number', profile?.profile?.rollNumber],
-		['Section', profile?.student?.section?.name || profile?.profile?.section],
-		['Department', profile?.student?.section?.department?.name || profile?.profile?.department],
-		['Semester', profile?.profile?.semester],
-		['Student Type', profile?.profile?.studentType?.replace('_', ' ')],
-		['Hostel', profile?.profile?.hostelName],
-		['Hostel Block', profile?.profile?.hostelBlock],
-		['Hostel Room', profile?.profile?.hostelRoom],
+		['Roll Number', profile?.profile?.rollNumber || 'Not provided'],
+		['Section', profile?.student?.section?.name || profile?.profile?.section || 'Not assigned'],
+		['Department', profile?.student?.section?.department?.name || profile?.profile?.department || 'Not provided'],
+		['Semester', profile?.profile?.semester || 'Not provided'],
+		['Student Type', formattedStudentType],
+		['Gender', formattedGender],
+		['Hostel', profile?.profile?.hostelName || (formattedStudentType === 'Hosteller' ? 'Assigned' : 'N/A')],
+		['Hostel Block', profile?.profile?.hostelBlock || (formattedStudentType === 'Hosteller' ? 'Assigned' : 'N/A')],
+		['Hostel Room', profile?.profile?.hostelRoom || (formattedStudentType === 'Hosteller' ? 'Assigned' : 'N/A')],
 	];
+
 
 	return (
 		<section className="max-w-4xl mx-auto space-y-6 pb-10">
