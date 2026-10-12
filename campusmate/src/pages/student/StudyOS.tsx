@@ -15,7 +15,9 @@ import {
   BookOpen,
   X,
   AlertCircle,
-  Download
+  Download,
+  Users,
+  MessageSquare
 } from 'lucide-react';
 import { studyosService } from '../../services/studyosService';
 import type { AcademicResource, StudyOSOverview } from '../../services/studyosService';
@@ -190,6 +192,12 @@ export const StudyOS: React.FC = () => {
       totalLabs: overview?.totalLabs ?? overview?.stats?.totalLabs ?? totalLabs,
       myClasses: overview?.myClasses ?? overview?.stats?.myClasses ?? myClasses,
       totalClasses: overview?.totalClasses ?? overview?.stats?.totalClasses ?? totalClasses,
+      openTeams: overview?.openTeams ?? overview?.stats?.openTeams ?? overview?.totalTeams ?? overview?.stats?.totalTeams ?? 0,
+      myTeams: overview?.myTeams ?? overview?.stats?.myTeams ?? 0,
+      totalTeams: overview?.totalTeams ?? overview?.stats?.totalTeams ?? overview?.openTeams ?? overview?.stats?.openTeams ?? 0,
+      helpServices: overview?.helpServices ?? overview?.stats?.helpServices ?? overview?.totalHelpServices ?? overview?.stats?.totalHelpServices ?? 0,
+      myHelpServices: overview?.myHelpServices ?? overview?.stats?.myHelpServices ?? 0,
+      totalHelpServices: overview?.totalHelpServices ?? overview?.stats?.totalHelpServices ?? overview?.helpServices ?? overview?.stats?.helpServices ?? 0,
     };
   }, [normalizedList, overview]);
 
@@ -340,31 +348,43 @@ export const StudyOS: React.FC = () => {
 
         {/* Live Metrics Row */}
         <div className="mt-8 pt-6 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3">
+          <div 
+            onClick={() => openStudyOS('teams')}
+            className="bg-white/10 hover:bg-white/15 transition-all cursor-pointer backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3"
+            title="Open Team Finder in StudyOS"
+          >
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <BookOpen size={20} className="text-white" />
+              <Users size={20} className="text-white" />
             </div>
             <div>
-              <div className="text-xs text-white/70 font-medium">Notes & Resources</div>
+              <div className="text-xs text-white/70 font-medium">Open Teams</div>
               <div className="text-lg font-bold">
-                {stats.myResources} <span className="text-xs font-normal text-white/60">mine / {stats.totalResources} total</span>
+                {stats.myTeams} <span className="text-xs font-normal text-white/60">mine / {stats.openTeams} total</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3">
+          <div 
+            onClick={() => openStudyOS('skills')}
+            className="bg-white/10 hover:bg-white/15 transition-all cursor-pointer backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3"
+            title="Open Skills & Help in StudyOS"
+          >
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <FlaskConical size={20} className="text-white" />
+              <MessageSquare size={20} className="text-white" />
             </div>
             <div>
-              <div className="text-xs text-white/70 font-medium">Lab Experiments</div>
+              <div className="text-xs text-white/70 font-medium">Help Services</div>
               <div className="text-lg font-bold">
-                {stats.myLabs} <span className="text-xs font-normal text-white/60">mine / {stats.totalLabs} total</span>
+                {stats.myHelpServices} <span className="text-xs font-normal text-white/60">mine / {stats.helpServices} total</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3">
+          <div 
+            onClick={() => openStudyOS('classes')}
+            className="bg-white/10 hover:bg-white/15 transition-all cursor-pointer backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3"
+            title="Open Virtual Classes in StudyOS"
+          >
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
               <Video size={20} className="text-white" />
             </div>

@@ -29,6 +29,12 @@ export type StudyOSOverview = {
 	myResources?: number;
 	totalLabs?: number;
 	myLabs?: number;
+	openTeams?: number;
+	myTeams?: number;
+	totalTeams?: number;
+	helpServices?: number;
+	myHelpServices?: number;
+	totalHelpServices?: number;
 	stats?: {
 		totalClasses: number;
 		myClasses: number;
@@ -36,6 +42,12 @@ export type StudyOSOverview = {
 		myResources: number;
 		totalLabs: number;
 		myLabs: number;
+		openTeams?: number;
+		myTeams?: number;
+		totalTeams?: number;
+		helpServices?: number;
+		myHelpServices?: number;
+		totalHelpServices?: number;
 	};
 	studyosUrl?: string;
 };

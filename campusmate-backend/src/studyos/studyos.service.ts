@@ -202,26 +202,81 @@ export class StudyosService {
     let myResources = 0;
     let totalLabs = 0;
     let myLabs = 0;
+    let totalTeams = 0;
+    let myTeams = 0;
+    let totalHelpServices = 0;
+    let myHelpServices = 0;
 
     try {
-      const [classesSnap, resSnap, labsSnap] = await Promise.all([
+      const [classesSnap, resSnap, labsSnap, teamsSnap, helpSnap] = await Promise.all([
         db.collection('classes').get().catch(() => ({ docs: [] })),
         db.collection('resources').get().catch(() => ({ docs: [] })),
         db.collection('labs').get().catch(() => ({ docs: [] })),
+        db.collection('teams').get().catch(() => ({ docs: [] })),
+        db.collection('help_services').get().catch(() => ({ docs: [] })),
       ]);
 
       totalClasses = classesSnap.docs.length;
       totalResources = resSnap.docs.length;
       totalLabs = labsSnap.docs.length;
+      totalTeams = teamsSnap.docs.length;
+      totalHelpServices = helpSnap.docs.length;
+
+      // Fallback to 'team_posts' if 'teams' is empty
+      if (totalTeams === 0) {
+        try {
+          const teamPostsSnap = await db.collection('team_posts').get().catch(() => ({ docs: [] }));
+          if (teamPostsSnap.docs.length > 0) {
+            totalTeams = teamPostsSnap.docs.length;
+            if (userId) {
+              myTeams = teamPostsSnap.docs.filter((d: any) => {
+                const data = d.data();
+                return data.creatorId === userId || data.authorId === userId || data.userId === userId;
+              }).length;
+            }
+          }
+        } catch {}
+      }
 
       if (userId) {
         myClasses = classesSnap.docs.filter((d: any) => d.data().creatorId === userId).length;
         myResources = resSnap.docs.filter((d: any) => d.data().creatorId === userId).length;
         myLabs = labsSnap.docs.filter((d: any) => d.data().creatorId === userId).length;
+        if (totalTeams > 0 && myTeams === 0) {
+          myTeams = teamsSnap.docs.filter((d: any) => {
+            const data = d.data();
+            return data.creatorId === userId || data.authorId === userId || data.userId === userId;
+          }).length;
+        }
+        myHelpServices = helpSnap.docs.filter((d: any) => {
+          const data = d.data();
+          return data.providerId === userId || data.creatorId === userId || data.userId === userId;
+        }).length;
       }
     } catch (e: any) {
       this.logger.warn(`Error compiling StudyOS overview: ${e?.message}`);
     }
+
+    // Prisma fallback if Firestore returned 0
+    try {
+      if (totalTeams === 0) {
+        totalTeams = await this.prisma.teamPost.count().catch(() => 0);
+        if (userId && totalTeams > 0) {
+          myTeams = await this.prisma.teamPost.count({ where: { creatorId: userId } }).catch(() => 0);
+        }
+      }
+      if (totalHelpServices === 0) {
+        totalHelpServices = await this.prisma.helpService.count().catch(() => 0);
+        if (userId && totalHelpServices > 0) {
+          myHelpServices = await this.prisma.helpService.count({ where: { providerId: userId } }).catch(() => 0);
+        }
+      }
+    } catch (e: any) {
+      this.logger.warn(`Prisma fallback for StudyOS overview failed: ${e?.message}`);
+    }
+
+    const openTeams = totalTeams;
+    const helpServices = totalHelpServices;
 
     return {
       connected: true,
@@ -231,6 +286,12 @@ export class StudyosService {
       myResources,
       totalLabs,
       myLabs,
+      openTeams,
+      myTeams,
+      totalTeams,
+      helpServices,
+      myHelpServices,
+      totalHelpServices,
       stats: {
         totalClasses,
         myClasses,
@@ -238,6 +299,12 @@ export class StudyosService {
         myResources,
         totalLabs,
         myLabs,
+        openTeams,
+        myTeams,
+        totalTeams,
+        helpServices,
+        myHelpServices,
+        totalHelpServices,
       },
       studyosUrl: process.env.STUDYOS_URL || 'https://studyos-nu-three.vercel.app',
     };
