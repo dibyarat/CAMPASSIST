@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Param, Body, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -11,7 +11,21 @@ import { AttendanceState } from '../common/enums';
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
-  // --- 1. Manual Tracking (Personal to Student) ---
+  // --- 1. Manual Tracking & Register (Personal to Student) ---
+
+  @Get('register')
+  @Roles('STUDENT', 'CR')
+  getAttendanceRegister(@CurrentUser() user: any) {
+    if (!user.student) throw new ForbiddenException('User must have a student profile setup');
+    return this.attendanceService.getAttendanceRegister(user.student.id);
+  }
+
+  @Put('register')
+  @Roles('STUDENT', 'CR')
+  saveAttendanceRegister(@CurrentUser() user: any, @Body() data: any) {
+    if (!user.student) throw new ForbiddenException('User must have a student profile setup');
+    return this.attendanceService.saveAttendanceRegister(user.student.id, data);
+  }
 
   @Post('mark')
   @Roles('STUDENT', 'CR')

@@ -3,6 +3,58 @@ import { PrismaService } from '../common/prisma.service';
 import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
 import { AttendanceState } from '../common/enums';
 
+export interface RegisterComponent {
+  key: string;
+  base: { p: number; a: number };
+}
+
+export interface RegisterSubject {
+  id: string;
+  name: string;
+  code?: string;
+  components: RegisterComponent[];
+  createdAt: string;
+}
+
+export interface RegisterLog {
+  id: string;
+  sid: string;
+  comp: string;
+  status: 'p' | 'a' | 'c';
+  date: string;
+  at: string;
+}
+
+export interface AttendanceRegisterStore {
+  target: number;
+  subjects: RegisterSubject[];
+  logs: RegisterLog[];
+}
+
+export const PORTAL_ROWS: [string, string, ...[string, number, number][]][] = [
+  ['Job Readiness', 'CUTM1016', ['PR', 11, 15]],
+  ['Internship', 'CUTM1905', ['TUT', 1, 1]],
+  ['Data Structure and Algorithms', 'CUTM3166', ['PR', 16, 18], ['TUT', 6, 10]],
+  ['Machine Learning for Predictive Analytics', 'CUML1021', ['PR', 13, 20], ['TUT', 10, 12]],
+  ['Deep Learning for Image Analytics', 'CUML1022', ['PR', 13, 17], ['TUT', 7, 7]],
+  ['Data Analytics Using Tableau', 'CUML1023', ['PR', 20, 32], ['TUT', 6, 9]],
+  ['Customer Experience Design and Programming', 'CUCS1012', ['PP', 3, 3], ['PR', 7, 8], ['TUT', 2, 3]],
+];
+
+export function seedAttendanceRegister(): AttendanceRegisterStore {
+  return {
+    target: 75,
+    subjects: PORTAL_ROWS.map(([name, code, ...comps]) => ({
+      id: 'seed-' + code,
+      name,
+      code,
+      components: comps.map(([key, att, del]) => ({ key, base: { p: att, a: del - att } })),
+      createdAt: '2026-08-25T00:00:00.000Z',
+    })),
+    logs: [],
+  };
+}
+
 @Injectable()
 export class AttendanceService {
   private readonly logger = new Logger(AttendanceService.name);
@@ -11,6 +63,50 @@ export class AttendanceService {
     private prisma: PrismaService,
     private firebase: FirebaseAdminService,
   ) {}
+
+  // --- Attendance Register Methods (matching AttendanceRegister.apk logic) ---
+  async getAttendanceRegister(studentId: string): Promise<AttendanceRegisterStore> {
+    try {
+      const doc = await this.firebase.firestore.collection('attendance_registers').doc(studentId).get();
+      if (doc.exists) {
+        const data = doc.data() as AttendanceRegisterStore;
+        if (data && Array.isArray(data.subjects) && Array.isArray(data.logs)) {
+          return {
+            target: typeof data.target === 'number' ? data.target : 75,
+            subjects: data.subjects,
+            logs: data.logs,
+          };
+        }
+      }
+    } catch (err: any) {
+      this.logger.warn(`Failed reading register from Firestore for student ${studentId}: ${err?.message}`);
+    }
+
+    return seedAttendanceRegister();
+  }
+
+  async saveAttendanceRegister(studentId: string, store: AttendanceRegisterStore) {
+    if (!store || !Array.isArray(store.subjects) || !Array.isArray(store.logs)) {
+      throw new Error('Invalid attendance register payload');
+    }
+
+    const payload: AttendanceRegisterStore = {
+      target: typeof store.target === 'number' ? Math.min(100, Math.max(1, store.target)) : 75,
+      subjects: store.subjects,
+      logs: store.logs,
+    };
+
+    try {
+      await this.firebase.firestore.collection('attendance_registers').doc(studentId).set({
+        ...payload,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      this.logger.warn(`Failed saving register to Firestore for student ${studentId}: ${err?.message}`);
+    }
+
+    return payload;
+  }
 
   // 1. Manual Attendance Tracking (Student Self-Update)
   async markAttendance(studentId: string, data: { subjectRef: string; date: Date; state: AttendanceState }) {
@@ -63,9 +159,69 @@ export class AttendanceService {
   }
 
   async getMyAttendanceStats(studentId: string) {
+    // 1. Try reading from Firestore Attendance Register first
+    try {
+      const doc = await this.firebase.firestore.collection('attendance_registers').doc(studentId).get();
+      if (doc.exists) {
+        const reg = doc.data() as AttendanceRegisterStore;
+        if (reg && Array.isArray(reg.subjects)) {
+          let overallAttended = 0;
+          let overallTotal = 0;
+          let overallCancelled = 0;
+          const subjectsStats: Record<string, { attended: number; total: number; percentage: number; cancelled?: number; code?: string; name?: string }> = {};
+
+          for (const s of reg.subjects) {
+            let sp = 0;
+            let sa = 0;
+            let sc = 0;
+            for (const comp of s.components || []) {
+              let cp = comp.base ? (comp.base.p || 0) : 0;
+              let ca = comp.base ? (comp.base.a || 0) : 0;
+              let cc = 0;
+              for (const l of reg.logs || []) {
+                if (l.sid !== s.id || l.comp !== comp.key) continue;
+                if (l.status === 'p') cp++;
+                else if (l.status === 'a') ca++;
+                else cc++;
+              }
+              sp += cp;
+              sa += ca;
+              sc += cc;
+            }
+            const stotal = sp + sa;
+            const spct = stotal > 0 ? (sp / stotal) * 100 : 0;
+            const refKey = s.code || s.name;
+            subjectsStats[refKey] = {
+              attended: sp,
+              total: stotal,
+              percentage: spct,
+              cancelled: sc,
+              code: s.code,
+              name: s.name,
+            };
+            overallAttended += sp;
+            overallTotal += stotal;
+            overallCancelled += sc;
+          }
+
+          const overallPercentage = overallTotal > 0 ? (overallAttended / overallTotal) * 100 : 0;
+          return {
+            overallPercentage,
+            overallAttended,
+            overallTotal,
+            overallCancelled,
+            target: reg.target || 75,
+            subjects: subjectsStats,
+          };
+        }
+      }
+    } catch (err: any) {
+      this.logger.warn(`Failed reading register stats from Firestore: ${err?.message}`);
+    }
+
     let records: any[] = [];
 
-    // Try reading from Firestore
+    // Try reading from Firestore individual records
     try {
       const snap = await this.firebase.firestore
         .collection('attendance_records')

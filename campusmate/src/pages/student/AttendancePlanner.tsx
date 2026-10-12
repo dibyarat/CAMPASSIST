@@ -17,9 +17,37 @@ export const AttendancePlanner = () => {
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
+        // Try reading local register first
+        const localRaw = localStorage.getItem('attendance-register-v2');
+        if (localRaw) {
+          const parsed = JSON.parse(localRaw);
+          if (Array.isArray(parsed.subjects)) {
+            let p = 0;
+            let a = 0;
+            for (const s of parsed.subjects) {
+              for (const c of s.components || []) {
+                p += (c.base?.p || 0);
+                a += (c.base?.a || 0);
+              }
+            }
+            for (const l of parsed.logs || []) {
+              if (l.status === 'p') p++;
+              else if (l.status === 'a') a++;
+            }
+            const tot = p + a;
+            setAttended(p);
+            setTotal(tot);
+            setTarget(parsed.target || 75);
+            setCurrentPercent(tot > 0 ? (p / tot) * 100 : 0);
+            setLoading(false);
+            return;
+          }
+        }
+
         const stats = await apiClient('/attendance/my-attendance');
         setAttended(stats.overallAttended || 0);
         setTotal(stats.overallTotal || 0);
+        if (stats.target) setTarget(stats.target);
         setCurrentPercent(stats.overallPercentage || 0);
       } catch (error) {
         console.error("Failed to load attendance stats", error);
@@ -31,23 +59,16 @@ export const AttendancePlanner = () => {
   }, []);
 
   const calculate = () => {
-    const current = (attended / total) * 100;
-    setCurrentPercent(current || 0);
+    const current = total === 0 ? 0 : (attended / total) * 100;
+    setCurrentPercent(current);
 
-    const targetDec = target / 100;
+    const T = target;
+    const num = T * total - 100 * attended;
+    const need = num > 0 ? Math.ceil(num / (100 - T)) : 0;
+    const bunk = Math.max(0, Math.floor((100 * attended - T * total) / T));
 
-    // To find how many can miss: 
-    // attended / (total + x) = targetDec => attended = targetDec * total + targetDec * x => x = (attended - targetDec * total) / targetDec
-    let miss = Math.floor((attended - targetDec * total) / targetDec);
-    if (miss < 0) miss = 0;
-    
-    // To find how many need to attend:
-    // (attended + y) / (total + y) = targetDec => attended + y = targetDec * total + targetDec * y => y * (1 - targetDec) = targetDec * total - attended
-    let attend = Math.ceil((targetDec * total - attended) / (1 - targetDec));
-    if (attend < 0) attend = 0;
-
-    setCanMiss(miss);
-    setNeedToAttend(attend);
+    setCanMiss(bunk);
+    setNeedToAttend(need);
     setCalculated(true);
   };
 
