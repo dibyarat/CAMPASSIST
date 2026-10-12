@@ -52,31 +52,12 @@ function blank(): AttendanceRegisterStore {
   return { target: 75, subjects: [], logs: [] };
 }
 
-const PORTAL_ROWS: [string, string, ...[string, number, number][]][] = [
-  ['Job Readiness', 'CUTM1016', ['PR', 11, 15]],
-  ['Internship', 'CUTM1905', ['TUT', 1, 1]],
-  ['Data Structure and Algorithms', 'CUTM3166', ['PR', 16, 18], ['TUT', 6, 10]],
-  ['Machine Learning for Predictive Analytics', 'CUML1021', ['PR', 13, 20], ['TUT', 10, 12]],
-  ['Deep Learning for Image Analytics', 'CUML1022', ['PR', 13, 17], ['TUT', 7, 7]],
-  ['Data Analytics Using Tableau', 'CUML1023', ['PR', 20, 32], ['TUT', 6, 9]],
-  ['Customer Experience Design and Programming', 'CUCS1012', ['PP', 3, 3], ['PR', 7, 8], ['TUT', 2, 3]],
-];
+function isApkSeedSubject(s: any): boolean {
+  return typeof s?.id === 'string' && s.id.startsWith('seed-');
+}
 
 function seedState(): AttendanceRegisterStore {
-  return {
-    target: 75,
-    subjects: PORTAL_ROWS.map(([name, code, ...comps]) => ({
-      id: 'seed-' + code,
-      name,
-      code,
-      components: comps.map(([key, att, del]) => ({
-        key,
-        base: { p: att, a: del - att },
-      })),
-      createdAt: '2026-08-25T00:00:00.000Z',
-    })),
-    logs: [],
-  };
+  return blank();
 }
 
 function loadInitialStore(): AttendanceRegisterStore {
@@ -85,17 +66,29 @@ function loadInitialStore(): AttendanceRegisterStore {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed.subjects) && Array.isArray(parsed.logs)) {
-        return {
+        // Filter out any hardcoded seed subjects from the APK snapshot
+        const cleanSubjects = parsed.subjects.filter((s: any) => !isApkSeedSubject(s));
+        const cleanSubjectIds = new Set(cleanSubjects.map((s: any) => s.id));
+        const cleanLogs = parsed.logs.filter((l: any) => cleanSubjectIds.has(l.sid));
+
+        const cleanedStore: AttendanceRegisterStore = {
           target: typeof parsed.target === 'number' ? parsed.target : 75,
-          subjects: parsed.subjects,
-          logs: parsed.logs,
+          subjects: cleanSubjects,
+          logs: cleanLogs,
         };
+
+        // If local storage was holding the APK seed subjects, overwrite with the clean store
+        if (cleanSubjects.length !== parsed.subjects.length) {
+          localStorage.setItem(LS_KEY, JSON.stringify(cleanedStore));
+        }
+
+        return cleanedStore;
       }
     }
   } catch (err) {
     console.error('Failed reading localStorage register', err);
   }
-  return seedState();
+  return blank();
 }
 
 /* ————————————————— Mathematical engine ————————————————— */
@@ -223,12 +216,22 @@ export const Attendance: React.FC = () => {
       .getRegister()
       .then((remote) => {
         if (!isMounted) return;
-        if (remote && Array.isArray(remote.subjects) && remote.subjects.length > 0) {
-          // If local is empty or untouched default seed, take cloud
-          const localRaw = localStorage.getItem(LS_KEY);
-          if (!localRaw) {
-            setStore(remote);
-            localStorage.setItem(LS_KEY, JSON.stringify(remote));
+        if (remote && Array.isArray(remote.subjects)) {
+          const cleanSubjects = remote.subjects.filter((s: any) => !isApkSeedSubject(s));
+          const cleanSubjectIds = new Set(cleanSubjects.map((s: any) => s.id));
+          const cleanLogs = (remote.logs || []).filter((l: any) => cleanSubjectIds.has(l.sid));
+
+          if (cleanSubjects.length > 0) {
+            const localRaw = localStorage.getItem(LS_KEY);
+            if (!localRaw) {
+              const cleanRemote: AttendanceRegisterStore = {
+                target: typeof remote.target === 'number' ? remote.target : 75,
+                subjects: cleanSubjects,
+                logs: cleanLogs,
+              };
+              setStore(cleanRemote);
+              localStorage.setItem(LS_KEY, JSON.stringify(cleanRemote));
+            }
           }
         }
       })
@@ -1118,7 +1121,7 @@ export const Attendance: React.FC = () => {
                     {/* Opening Balances */}
                     <div className="space-y-2">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        Opening Balances (Portal Import)
+                        Opening Balances (Attended / Delivered)
                       </p>
                       {s.components.map((comp) => {
                         const hasBase = comp.base && (comp.base.p || 0) + (comp.base.a || 0) > 0;
@@ -1278,8 +1281,8 @@ export const Attendance: React.FC = () => {
           <b className="text-slate-800 font-semibold">How it's counted:</b> each subject's
           components (<span className="font-mono">PR</span> / <span className="font-mono">TUT</span>{' '}
           / <span className="font-mono">PP</span> / <span className="font-mono">TH</span>) are
-          combined into one total, the exact way your university and portal snapshot calculates it.
-          Mark each component separately after every period — cancelled periods aren't counted.
+          combined into one total, the exact way attendance components are calculated. Mark each
+          component separately after every period — cancelled periods aren't counted.
         </p>
         <p>
           "Miss up to N" calculates the maximum classes you can safely skip while holding ≥{' '}

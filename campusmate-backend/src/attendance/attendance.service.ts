@@ -31,26 +31,10 @@ export interface AttendanceRegisterStore {
   logs: RegisterLog[];
 }
 
-export const PORTAL_ROWS: [string, string, ...[string, number, number][]][] = [
-  ['Job Readiness', 'CUTM1016', ['PR', 11, 15]],
-  ['Internship', 'CUTM1905', ['TUT', 1, 1]],
-  ['Data Structure and Algorithms', 'CUTM3166', ['PR', 16, 18], ['TUT', 6, 10]],
-  ['Machine Learning for Predictive Analytics', 'CUML1021', ['PR', 13, 20], ['TUT', 10, 12]],
-  ['Deep Learning for Image Analytics', 'CUML1022', ['PR', 13, 17], ['TUT', 7, 7]],
-  ['Data Analytics Using Tableau', 'CUML1023', ['PR', 20, 32], ['TUT', 6, 9]],
-  ['Customer Experience Design and Programming', 'CUCS1012', ['PP', 3, 3], ['PR', 7, 8], ['TUT', 2, 3]],
-];
-
 export function seedAttendanceRegister(): AttendanceRegisterStore {
   return {
     target: 75,
-    subjects: PORTAL_ROWS.map(([name, code, ...comps]) => ({
-      id: 'seed-' + code,
-      name,
-      code,
-      components: comps.map(([key, att, del]) => ({ key, base: { p: att, a: del - att } })),
-      createdAt: '2026-08-25T00:00:00.000Z',
-    })),
+    subjects: [],
     logs: [],
   };
 }
