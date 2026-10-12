@@ -175,6 +175,23 @@ export class UsersService {
           );
         } catch {}
 
+        // Hydrate tonePreference and gender from Firestore to maintain cross-app sync
+        try {
+          const doc = await this.firebase.firestore.collection('users').doc(userId).get();
+          if (doc.exists) {
+            const d = doc.data() || {};
+            const tonePref = d.tonePreference || d.profile?.tonePreference || d.academicIdentity?.tonePreference || 'buddy';
+            const genderVal = d.gender || d.profile?.gender || d.academicIdentity?.gender || 'Prefer not to say';
+            if (user.profile) {
+              (user.profile as any).tonePreference = tonePref;
+              (user.profile as any).gender = (user.profile as any).gender || genderVal;
+            } else {
+              (user as any).profile = { tonePreference: tonePref, gender: genderVal };
+            }
+            (user as any).tonePreference = tonePref;
+          }
+        } catch {}
+
         return user;
       }
     } catch (err: any) {
@@ -195,10 +212,23 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, data: any) {
+    const tonePreference = data.tonePreference || 'buddy';
+    const gender = data.gender || 'Prefer not to say';
+
     try {
       await this.firebase.firestore.collection('users').doc(userId).set(
         {
-          profile: data,
+          profile: {
+            ...data,
+            tonePreference,
+            gender,
+          },
+          tonePreference,
+          gender,
+          academicIdentity: {
+            tonePreference,
+            gender,
+          },
           updatedAt: new Date().toISOString(),
         },
         { merge: true },
@@ -207,11 +237,34 @@ export class UsersService {
       this.logger.warn(`Failed updating profile in Firestore: ${err?.message}`);
     }
 
-    return this.prisma.profile.upsert({
-      where: { userId },
-      update: data,
-      create: { ...data, userId },
-    });
+    const prismaAllowed = [
+      'fullName', 'avatarUrl', 'studentId', 'rollNumber', 'department',
+      'semester', 'section', 'studentType', 'hostelName', 'hostelBlock',
+      'hostelRoom', 'github', 'linkedin', 'portfolio'
+    ];
+    const prismaData: any = {};
+    for (const key of prismaAllowed) {
+      if (data[key] !== undefined) {
+        prismaData[key] = data[key];
+      }
+    }
+
+    try {
+      const updated = await this.prisma.profile.upsert({
+        where: { userId },
+        update: prismaData,
+        create: {
+          ...prismaData,
+          userId,
+          studentId: prismaData.studentId || userId,
+          fullName: prismaData.fullName || 'Student',
+        },
+      });
+      return { ...updated, ...data, tonePreference, gender };
+    } catch (err: any) {
+      this.logger.warn(`Prisma profile upsert error: ${err?.message}`);
+      return { id: userId, userId, ...data, tonePreference, gender };
+    }
   }
 
   async updateUserDetails(userId: string, data: UpdateUserDetailsDto) {

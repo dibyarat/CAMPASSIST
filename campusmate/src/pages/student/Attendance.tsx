@@ -168,11 +168,43 @@ function fmtDate(iso: string) {
   }
 }
 
-function getPersonalizedMessage(attended: number, total: number, target: number, rawGender?: string): string {
-  if (total <= 0) return 'Add your subjects and start marking attendance below to plan your semester.';
+function getPersonalizedMessage(
+  attended: number,
+  total: number,
+  target: number,
+  rawTone?: string,
+  rawGender?: string
+): string {
+  const tone = String(rawTone || 'buddy').toLowerCase();
   const g = String(rawGender || '').toLowerCase();
   const isBoy = g.includes('boy') || g === 'male';
   const isGirl = g.includes('girl') || g === 'female';
+
+  if (total <= 0) {
+    switch (tone) {
+      case 'bro':
+        return 'Zero classes logged yet, bro. Add your subjects and let’s get grinding!';
+      case 'baddie':
+        return 'Clean slate, baddie! Add your subjects and show them how attendance is served.';
+      case 'queen':
+        return 'Your semester kingdom awaits, queen. Add your subjects to begin your reign.';
+      case 'genz':
+        return 'Empty log is lowkey peaceful, but let’s add subjects and lock in fr.';
+      case 'meme':
+        return '0 classes logged? Either you are a campus ghost or the syllabus hasn’t loaded yet.';
+      case 'hype':
+        return 'NEW SEMESTER, NEW OPPORTUNITIES! Add your subjects right now and aim for 100%!';
+      case 'supportive':
+        return 'Take it one step at a time. Add your subjects when you’re ready, you’ve got this.';
+      case 'neutral':
+        return 'No attendance records found. Add subjects to begin tracking your attendance.';
+      case 'minimal':
+        return '0 classes logged. Add subjects.';
+      case 'buddy':
+      default:
+        return 'Add your subjects and start marking attendance below to plan your semester.';
+    }
+  }
 
   const currentPct = (attended / total) * 100;
   const isSafe = currentPct >= target;
@@ -180,21 +212,148 @@ function getPersonalizedMessage(attended: number, total: number, target: number,
   if (isSafe) {
     const skippable = Math.floor((attended * 100) / target - total);
     if (skippable <= 0) {
-      if (isBoy) return `You're right at ${target}%, bro! Sit every upcoming class to hold your ground.`;
-      if (isGirl) return `You're right at ${target}%, sister! Attend the next class to protect your streak.`;
-      return `You are right at ${target}%. Attend the next class to stay safe.`;
+      switch (tone) {
+        case 'bro':
+          return `Right on the edge at ${target}%, bro! Don’t risk it, sit every upcoming class.`;
+        case 'baddie':
+          return `Walking that fine ${target}% line, baddie! Protect your streak and attend the next one.`;
+        case 'queen':
+          return `Balancing right at ${target}%, queen! Grace the next class to protect your crown.`;
+        case 'genz':
+          return `You are exactly at ${target}%, no cap. One absence and you’re cooked, attend next class!`;
+        case 'meme':
+          return `Living on the edge of anime protagonist plot armor at ${target}%. Don’t test fate today.`;
+        case 'hype':
+          return `HOLDING THE LINE AT ${target}%! Protect that boundary like a champion!`;
+        case 'supportive':
+          return `You’ve worked hard to stay at ${target}%. Going to the next class will give you peace of mind.`;
+        case 'neutral':
+          return `Current attendance meets the ${target}% threshold. Continued attendance is recommended.`;
+        case 'minimal':
+          return `At ${target}% target. Attend next class.`;
+        case 'buddy':
+        default:
+          if (isBoy) return `You're right at ${target}%, bro! Sit every upcoming class to hold your ground.`;
+          if (isGirl) return `You're right at ${target}%, sister! Attend the next class to protect your streak.`;
+          return `You are right at ${target}%. Attend the next class to stay comfortably safe.`;
+      }
     }
+
     const classWord = skippable === 1 ? 'class' : 'classes';
-    if (isBoy) return `Looking strong, brother! You can safely skip ${skippable} more ${classWord} and stay at or above ${target}%.`;
-    if (isGirl) return `Looking great, sister! You can safely skip ${skippable} more ${classWord} and stay at or above ${target}%.`;
-    return `You can skip ${skippable} more ${classWord} and stay at or above ${target}%.`;
+    switch (tone) {
+      case 'bro':
+        return `Looking solid, bro! You can safely skip ${skippable} more ${classWord} and stay above ${target}%.`;
+      case 'baddie':
+        return `Your attendance is serving, baddie! You have room to skip ${skippable} more ${classWord} and stay slaying.`;
+      case 'queen':
+        return `You’re ruling this semester, queen! You may graciously miss ${skippable} more ${classWord} and retain your standing.`;
+      case 'genz':
+        return `Attendance is highkey valid! You can skip ${skippable} more ${classWord} and still not be cooked, huge W.`;
+      case 'meme':
+        return `Task failed successfully: You have permission from the math gods to bunk ${skippable} more ${classWord}.`;
+      case 'hype':
+        return `ABSOLUTE BEAST MODE! You have a cushion of ${skippable} ${classWord}! KEEP THE MOMENTUM!`;
+      case 'supportive':
+        return `You’ve built a wonderful buffer. You can take ${skippable} ${classWord} off if you need rest, guilt-free.`;
+      case 'neutral':
+        return `Attendance is satisfactory. You may miss up to ${skippable} ${classWord} while maintaining ${target}%.`;
+      case 'minimal':
+        return `${skippable} ${classWord} buffer above ${target}%.`;
+      case 'buddy':
+      default:
+        if (isBoy) return `Looking strong, brother! You can safely skip ${skippable} more ${classWord} and stay at or above ${target}%.`;
+        if (isGirl) return `Looking great, sister! You can safely skip ${skippable} more ${classWord} and stay at or above ${target}%.`;
+        return `Looking good, buddy! You can skip ${skippable} more ${classWord} and stay at or above ${target}%.`;
+    }
   } else {
     const needed = Math.ceil((target * total - 100 * attended) / (100 - target));
     const classWord = needed === 1 ? 'class' : 'classes';
-    if (isBoy) return `Time to lock in, bro! Attend the next ${needed} ${classWord} in a row to reach ${target}%.`;
-    if (isGirl) return `Heads up girl! Attend the next ${needed} ${classWord} in a row to reach ${target}%.`;
-    return `Attend the next ${needed} ${classWord} in a row to reach ${target}%.`;
+    switch (tone) {
+      case 'bro':
+        return `Bro, attendance is slipping! Get to class and lock in for the next ${needed} straight ${classWord}.`;
+      case 'baddie':
+        return `Can’t let the stats slip, baddie! Strut into the next ${needed} ${classWord} in a row and reclaim ${target}%.`;
+      case 'queen':
+        return `Minor setback for a major comeback, queen! Grace the next ${needed} ${classWord} to restore your ${target}%.`;
+      case 'genz':
+        return `Attendance is lowkey cooked rn. We need to lock in for the next ${needed} ${classWord} straight, fr.`;
+      case 'meme':
+        return `Danger level: Boss fight approaching. Attend the next ${needed} ${classWord} before the attendance penalty strikes.`;
+      case 'hype':
+        return `COMEBACK SEASON STARTS NOW! Lock in for ${needed} straight ${classWord} and smash through ${target}%!`;
+      case 'supportive':
+        return `Don’t be hard on yourself, we can easily recover. Just attend the next ${needed} ${classWord} one by one.`;
+      case 'neutral':
+        return `Attendance is below the ${target}% requirement. Attend the next ${needed} consecutive ${classWord} to achieve compliance.`;
+      case 'minimal':
+        return `Below target. Attend next ${needed} ${classWord}.`;
+      case 'buddy':
+      default:
+        if (isBoy) return `Time to lock in, bro! Attend the next ${needed} ${classWord} in a row to reach ${target}%.`;
+        if (isGirl) return `Heads up girl! Attend the next ${needed} ${classWord} in a row to reach ${target}%.`;
+        return `Hey buddy, attend the next ${needed} ${classWord} in a row to reach ${target}%.`;
+    }
   }
+}
+
+function getSubjectAdviceMessage(
+  key: 'empty' | 'short' | 'tight' | 'safe',
+  need: number,
+  bunk: number,
+  target: number,
+  rawTone?: string
+): { text: string; colorClass: string } {
+  const tone = String(rawTone || 'buddy').toLowerCase();
+
+  if (key === 'empty') {
+    let text = 'No classes counted yet.';
+    if (tone === 'bro') text = 'No classes logged yet, bro.';
+    else if (tone === 'baddie') text = 'Fresh subject, baddie.';
+    else if (tone === 'genz') text = 'Empty log, clean slate fr.';
+    else if (tone === 'minimal') text = 'No classes.';
+    return { text, colorClass: 'text-slate-400' };
+  }
+
+  if (key === 'short') {
+    let text = `Attend next ${need} in a row to reach ${target}%`;
+    if (tone === 'bro') text = `Lock in bro! Need ${need} in a row for ${target}%`;
+    else if (tone === 'baddie') text = `Slay the next ${need} classes in a row for ${target}%`;
+    else if (tone === 'queen') text = `Reclaim your crown: attend next ${need} for ${target}%`;
+    else if (tone === 'genz') text = `Cooked rn: attend next ${need} straight fr`;
+    else if (tone === 'meme') text = `Boss fight: attend ${need} in a row to survive`;
+    else if (tone === 'hype') text = `LOCK IN! CRUSH NEXT ${need} CLASSES IN A ROW!`;
+    else if (tone === 'supportive') text = `Just ${need} more classes to reach ${target}%, one day at a time`;
+    else if (tone === 'neutral') text = `Attend next ${need} consecutive classes to reach ${target}%`;
+    else if (tone === 'minimal') text = `Need ${need} in a row for ${target}%`;
+    return { text, colorClass: 'text-rose-600' };
+  }
+
+  if (key === 'tight') {
+    let text = "On the knife's edge — sit every class from here on.";
+    if (tone === 'bro') text = "Zero margin bro — sit every class!";
+    else if (tone === 'baddie') text = "Keep it tight baddie — attend every class!";
+    else if (tone === 'queen') text = "Protect the throne — attend every class!";
+    else if (tone === 'genz') text = "No cap, do not miss a single class!";
+    else if (tone === 'meme') text = "Critical HP — one absent and game over.";
+    else if (tone === 'hype') text = "HOLD THE LINE! Attend every upcoming class!";
+    else if (tone === 'supportive') text = "You're close to target — stay steady and attend each one.";
+    else if (tone === 'neutral') text = "At threshold — attend all upcoming sessions.";
+    else if (tone === 'minimal') text = "At threshold. Attend every class.";
+    return { text, colorClass: 'text-amber-600' };
+  }
+
+  // safe
+  let text = `Can skip up to ${bunk} more and stay ≥ ${target}%`;
+  if (tone === 'bro') text = `Can safely bunk ${bunk} more classes, bro`;
+  else if (tone === 'baddie') text = `Room to skip ${bunk} classes and stay slaying ≥ ${target}%`;
+  else if (tone === 'queen') text = `May graciously miss ${bunk} classes and stay ≥ ${target}%`;
+  else if (tone === 'genz') text = `Valid cushion: can skip ${bunk} classes, pure W`;
+  else if (tone === 'meme') text = `Skip pass granted for ${bunk} classes by RNG gods`;
+  else if (tone === 'hype') text = `CUSHION OF ${bunk} CLASSES! STAY WINNING!`;
+  else if (tone === 'supportive') text = `Safe to take up to ${bunk} classes off to recharge`;
+  else if (tone === 'neutral') text = `May miss up to ${bunk} classes while remaining ≥ ${target}%`;
+  else if (tone === 'minimal') text = `Can miss ${bunk} classes (≥ ${target}%)`;
+  return { text, colorClass: 'text-emerald-700' };
 }
 
 export const Attendance: React.FC = () => {
@@ -502,7 +661,12 @@ export const Attendance: React.FC = () => {
   const activePct = totalCount > 0 ? (attendedCount / totalCount) * 100 : 0;
   const isSafe = activePct >= store.target;
 
-  // Gender preference from user profile
+  // Tone and Gender preference from user profile
+  const rawTone =
+    userProfile?.profile?.tonePreference ||
+    userProfile?.tonePreference ||
+    userProfile?.academicIdentity?.tonePreference ||
+    'buddy';
   const rawGender =
     userProfile?.profile?.gender ||
     userProfile?.gender ||
@@ -512,6 +676,7 @@ export const Attendance: React.FC = () => {
     attendedCount,
     totalCount,
     store.target,
+    rawTone,
     rawGender
   );
 
@@ -996,26 +1161,14 @@ export const Attendance: React.FC = () => {
                   </div>
 
                   {/* Advice sentence */}
-                  <div className="mb-3 text-[11px] font-semibold leading-relaxed">
-                    {verd.key === 'empty' && (
-                      <p className="text-slate-400">No classes counted yet.</p>
-                    )}
-                    {verd.key === 'short' && (
-                      <p className="text-rose-600">
-                        Attend next <b>{verd.need}</b> in a row to reach {store.target}%
-                      </p>
-                    )}
-                    {verd.key === 'tight' && (
-                      <p className="text-amber-600">
-                        On the knife's edge — sit every class from here on.
-                      </p>
-                    )}
-                    {verd.key === 'safe' && (
-                      <p className="text-emerald-700">
-                        Can skip up to <b>{verd.bunk}</b> more and stay ≥ {store.target}%
-                      </p>
-                    )}
-                  </div>
+                  {(() => {
+                    const advice = getSubjectAdviceMessage(verd.key, verd.need, verd.bunk, store.target, rawTone);
+                    return (
+                      <div className="mb-3 text-[11px] font-semibold leading-relaxed">
+                        <p className={advice.colorClass}>{advice.text}</p>
+                      </div>
+                    );
+                  })()}
 
                   {/* Component Rows with Quick Mark Buttons */}
                   <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
