@@ -224,4 +224,158 @@ export class TimetableService {
       data: { roomId: newRoomId },
     });
   }
+
+  async importEntriesForCr(
+    entries: Array<{
+      dayOfWeek: number | string;
+      startTime: string;
+      endTime: string;
+      subjectName: string;
+      subjectCode?: string;
+      roomNumber?: string;
+      classType?: string;
+      termId?: string;
+    }>,
+    crSectionId: string,
+    termId: string,
+    options?: { replaceExisting?: boolean }
+  ) {
+    if (!Array.isArray(entries) || entries.length === 0) {
+      throw new ConflictException('No timetable entries provided for import');
+    }
+
+    if (options?.replaceExisting) {
+      const existing = await this.prisma.timetableEntry.findMany({
+        where: { sectionId: crSectionId, termId },
+      });
+
+      if (existing.length > 0) {
+        await this.prisma.timetableEntry.deleteMany({
+          where: { sectionId: crSectionId, termId },
+        });
+
+        for (const entry of existing) {
+          try {
+            await this.firebase.firestore.collection('timetable').doc(entry.id).delete();
+          } catch (err: any) {
+            this.logger.warn(`Failed removing deleted entry ${entry.id} from Firestore: ${err?.message}`);
+          }
+        }
+      }
+    }
+
+    const createdEntries: any[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < entries.length; i++) {
+      const item = entries[i];
+      const rowNum = i + 1;
+      const day = parseInt(String(item.dayOfWeek), 10);
+      const subjectName = String(item.subjectName || '').trim();
+      const startTime = String(item.startTime || '').trim();
+      const endTime = String(item.endTime || '').trim();
+
+      if (!subjectName) {
+        errors.push(`Row ${rowNum}: Subject name is missing`);
+        continue;
+      }
+      if (isNaN(day) || day < 1 || day > 7) {
+        errors.push(`Row ${rowNum}: Invalid day of week '${item.dayOfWeek}' (expected 1-7 or Monday-Sunday)`);
+        continue;
+      }
+      if (!startTime || !endTime) {
+        errors.push(`Row ${rowNum}: Start time and end time are required`);
+        continue;
+      }
+      if (startTime >= endTime) {
+        errors.push(`Row ${rowNum}: Start time (${startTime}) must be earlier than end time (${endTime})`);
+        continue;
+      }
+
+      try {
+        let subject = await this.prisma.subject.findFirst({
+          where: {
+            OR: [
+              { name: { equals: subjectName, mode: 'insensitive' as const } },
+              ...(item.subjectCode ? [{ code: { equals: item.subjectCode.trim(), mode: 'insensitive' as const } }] : []),
+            ],
+          },
+        });
+
+        if (!subject) {
+          const generatedCode = (item.subjectCode && item.subjectCode.trim()) ||
+            (subjectName.replace(/[^A-Za-z0-9]/g, '').substring(0, 4).toUpperCase() || 'SUB') + Math.floor(100 + Math.random() * 900);
+
+          subject = await this.prisma.subject.create({
+            data: {
+              name: subjectName,
+              code: generatedCode,
+              credits: 3,
+              type: item.classType || 'Theory',
+            },
+          });
+        }
+
+        try {
+          const subjectSectionExists = await this.prisma.subjectSection.findFirst({
+            where: { subjectId: subject.id, sectionId: crSectionId },
+          });
+          if (!subjectSectionExists) {
+            await this.prisma.subjectSection.create({
+              data: { subjectId: subject.id, sectionId: crSectionId },
+            });
+          }
+        } catch {}
+
+        let room = null;
+        const roomNumber = item.roomNumber ? String(item.roomNumber).trim() : '';
+        if (roomNumber) {
+          room = await this.prisma.room.findFirst({
+            where: { roomNumber: { equals: roomNumber, mode: 'insensitive' as const } },
+          });
+          if (!room) {
+            room = await this.prisma.room.create({
+              data: { roomNumber },
+            });
+          }
+        }
+
+        const entry = await this.prisma.timetableEntry.create({
+          data: {
+            subjectId: subject.id,
+            sectionId: crSectionId,
+            roomId: room ? room.id : null,
+            termId,
+            dayOfWeek: day,
+            startTime,
+            endTime,
+            status: 'ACTIVE',
+          },
+          include: { subject: true, room: true },
+        });
+
+        try {
+          await this.firebase.firestore.collection('timetable').doc(entry.id).set({
+            ...entry,
+            createdAt: new Date().toISOString(),
+          });
+        } catch (err: any) {
+          this.logger.warn(`Failed syncing imported entry to Firestore: ${err?.message}`);
+        }
+
+        createdEntries.push(entry);
+      } catch (err: any) {
+        this.logger.error(`Failed to import row ${rowNum}: ${err.message}`);
+        errors.push(`Row ${rowNum}: ${err.message}`);
+      }
+    }
+
+    return {
+      success: createdEntries.length > 0,
+      importedCount: createdEntries.length,
+      totalRows: entries.length,
+      entries: createdEntries,
+      errors,
+    };
+  }
 }

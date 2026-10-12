@@ -15,5 +15,9 @@ export const timetableService = {
     method: 'PATCH',
     body: JSON.stringify(payload)
   }),
-  deleteForCr: (entryId: string) => apiClient(`/timetable/${entryId}/cr-delete`, { method: 'DELETE' })
+  deleteForCr: (entryId: string) => apiClient(`/timetable/${entryId}/cr-delete`, { method: 'DELETE' }),
+  importCsvForCr: (payload: { entries: any[]; termId: string; replaceExisting?: boolean }) => apiClient('/timetable/cr/import-csv', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
 };

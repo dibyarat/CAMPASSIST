@@ -39,6 +39,26 @@ export class TimetableController {
     return this.timetableService.createDynamic(data, crSectionId);
   }
 
+  @Post('cr/import-csv')
+  @Roles('CR', 'DEVELOPER')
+  async crImportCsv(
+    @Body() body: { entries: any[]; termId?: string; replaceExisting?: boolean; sectionId?: string },
+    @CurrentUser() user: any
+  ) {
+    let crSectionId = user.crAssignment?.isActive ? user.crAssignment.sectionId : null;
+    if (!crSectionId) {
+      if ((user.roles?.includes('DEVELOPER') || user.role === 'DEVELOPER') && (body.sectionId || body.entries?.[0]?.sectionId)) {
+        crSectionId = body.sectionId || body.entries?.[0]?.sectionId;
+      } else {
+        throw new ForbiddenException('No active CR assignment found');
+      }
+    }
+    const termId = body.termId || user.crAssignment?.termId || 'TERM-1';
+    return this.timetableService.importEntriesForCr(body.entries, crSectionId, termId, {
+      replaceExisting: Boolean(body.replaceExisting),
+    });
+  }
+
   @Patch(':id/cr-update')
   @Roles('CR')
   async crUpdateEntry(@Param('id') entryId: string, @Body() data: any, @CurrentUser() user: any) {
