@@ -57,7 +57,10 @@ export const StudyOS: React.FC = () => {
     loadData();
   }, []);
 
-  const studyosBaseUrl = overview?.studyosUrl || (window.location.hostname === 'localhost' ? 'http://localhost:5173' : 'https://studyos-frontend.vercel.app');
+  const rawUrl = overview?.studyosUrl || '';
+  const studyosBaseUrl = (rawUrl && !rawUrl.includes('studyos-frontend.vercel.app'))
+    ? rawUrl
+    : (window.location.hostname === 'localhost' ? 'http://localhost:5173' : 'https://studyos-nu-three.vercel.app');
 
   const openStudyOS = (path: string = '') => {
     const url = `${studyosBaseUrl.replace(/\/$/, '')}${path ? `/${path.replace(/^\//, '')}` : ''}`;
@@ -153,6 +156,15 @@ export const StudyOS: React.FC = () => {
 
   const myCount = resources.filter(r => r.isMine).length;
 
+  const stats = {
+    myResources: overview?.myResources ?? overview?.stats?.myResources ?? (resources.filter(r => r.isMine && (r.type === 'NOTE' || r.type === 'FILE' || r.type === 'Resources')).length),
+    totalResources: overview?.totalResources ?? overview?.stats?.totalResources ?? (resources.filter(r => r.type === 'NOTE' || r.type === 'FILE' || r.type === 'Resources').length),
+    myLabs: overview?.myLabs ?? overview?.stats?.myLabs ?? (resources.filter(r => r.isMine && r.type === 'Lab Records').length),
+    totalLabs: overview?.totalLabs ?? overview?.stats?.totalLabs ?? (resources.filter(r => r.type === 'Lab Records').length),
+    myClasses: overview?.myClasses ?? overview?.stats?.myClasses ?? (resources.filter(r => r.isMine && r.type === 'Class').length),
+    totalClasses: overview?.totalClasses ?? overview?.stats?.totalClasses ?? (resources.filter(r => r.type === 'Class').length),
+  };
+
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* StudyOS Overview Hub Card */}
@@ -191,7 +203,7 @@ export const StudyOS: React.FC = () => {
             <div>
               <div className="text-xs text-white/70 font-medium">Notes & Resources</div>
               <div className="text-lg font-bold">
-                {overview ? overview.myResources : '—'} <span className="text-xs font-normal text-white/60">mine / {overview ? overview.totalResources : '—'} total</span>
+                {stats.myResources} <span className="text-xs font-normal text-white/60">mine / {stats.totalResources} total</span>
               </div>
             </div>
           </div>
@@ -203,7 +215,7 @@ export const StudyOS: React.FC = () => {
             <div>
               <div className="text-xs text-white/70 font-medium">Lab Experiments</div>
               <div className="text-lg font-bold">
-                {overview ? overview.myLabs : '—'} <span className="text-xs font-normal text-white/60">mine / {overview ? overview.totalLabs : '—'} total</span>
+                {stats.myLabs} <span className="text-xs font-normal text-white/60">mine / {stats.totalLabs} total</span>
               </div>
             </div>
           </div>
@@ -215,7 +227,7 @@ export const StudyOS: React.FC = () => {
             <div>
               <div className="text-xs text-white/70 font-medium">Virtual Classes</div>
               <div className="text-lg font-bold">
-                {overview ? overview.myClasses : '—'} <span className="text-xs font-normal text-white/60">mine / {overview ? overview.totalClasses : '—'} total</span>
+                {stats.myClasses} <span className="text-xs font-normal text-white/60">mine / {stats.totalClasses} total</span>
               </div>
             </div>
           </div>

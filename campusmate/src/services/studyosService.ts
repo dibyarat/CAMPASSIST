@@ -19,13 +19,22 @@ export type AcademicResource = {
 };
 
 export type StudyOSOverview = {
-	totalClasses: number;
-	myClasses: number;
-	totalResources: number;
-	myResources: number;
-	totalLabs: number;
-	myLabs: number;
-	studyosUrl: string;
+	connected?: boolean;
+	totalClasses?: number;
+	myClasses?: number;
+	totalResources?: number;
+	myResources?: number;
+	totalLabs?: number;
+	myLabs?: number;
+	stats?: {
+		totalClasses: number;
+		myClasses: number;
+		totalResources: number;
+		myResources: number;
+		totalLabs: number;
+		myLabs: number;
+	};
+	studyosUrl?: string;
 };
 
 export const studyosService = {

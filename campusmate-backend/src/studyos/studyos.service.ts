@@ -219,6 +219,12 @@ export class StudyosService {
 
     return {
       connected: true,
+      totalClasses,
+      myClasses,
+      totalResources,
+      myResources,
+      totalLabs,
+      myLabs,
       stats: {
         totalClasses,
         myClasses,
@@ -227,7 +233,7 @@ export class StudyosService {
         totalLabs,
         myLabs,
       },
-      studyosUrl: process.env.STUDYOS_URL || 'https://studyos-frontend.vercel.app',
+      studyosUrl: process.env.STUDYOS_URL || 'https://studyos-nu-three.vercel.app',
     };
   }
 
