@@ -18,10 +18,15 @@ export class StudyosController {
     return this.studyosService.uploadAcademicResource({ ...data, uploaderId: user.id });
   }
 
+  @Get('overview')
+  getOverview(@CurrentUser() user: any) {
+    return this.studyosService.getStudyOSOverview(user?.id);
+  }
+
   @Get()
   // Open to all students to find resources
-  getResources(@Query('subjectId') subjectId: string) {
-    return this.studyosService.getAcademicResources(subjectId);
+  getResources(@Query('subjectId') subjectId: string, @CurrentUser() user: any) {
+    return this.studyosService.getAcademicResources(user?.id, subjectId);
   }
 
   @Get('download/:fileRef')
