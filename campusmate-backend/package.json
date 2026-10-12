@@ -53,5 +53,9 @@
     "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^4.1.2"
+  },
+  "overrides": {
+    "tmp": "^0.2.6",
+    "undici": "^6.29.0"
   }
 }
