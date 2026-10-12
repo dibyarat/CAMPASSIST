@@ -113,6 +113,49 @@ export class UsersService {
       });
 
       if (user) {
+        // Auto-heal CR: if user has role CR but lacks an active crAssignment, automatically resolve & activate it
+        if (user.role === 'CR' && (!user.crAssignment || !user.crAssignment.isActive)) {
+          let sectionId = user.student?.sectionId;
+          if (!sectionId && user.profile?.section) {
+            const matchedSection = await this.prisma.section.findFirst({
+              where: { name: { equals: user.profile.section, mode: 'insensitive' } },
+            });
+            sectionId = matchedSection?.id;
+          }
+          if (!sectionId) {
+            const firstSection = await this.prisma.section.findFirst();
+            sectionId = firstSection?.id;
+          }
+          if (sectionId) {
+            let term =
+              (await this.prisma.academicTerm.findFirst({ where: { isCurrent: true }, orderBy: { startDate: 'desc' } })) ||
+              (await this.prisma.academicTerm.findFirst({ orderBy: { startDate: 'desc' } })) ||
+              (await this.prisma.academicTerm.findUnique({ where: { id: 'TERM-1' } }));
+
+            if (!term) {
+              term = await this.prisma.academicTerm.create({
+                data: {
+                  id: 'TERM-1',
+                  name: 'Current Term',
+                  isCurrent: true,
+                  startDate: new Date(),
+                  endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+                },
+              }).catch(async () => this.prisma.academicTerm.findFirst());
+            }
+
+            if (term) {
+              const healedAssignment = await this.prisma.crAssignment.upsert({
+                where: { userId },
+                create: { userId, sectionId, termId: term.id, isActive: true },
+                update: { sectionId, termId: term.id, isActive: true },
+                include: { section: true },
+              });
+              (user as any).crAssignment = healedAssignment;
+            }
+          }
+        }
+
         // Auto-backfill to Firestore for future instant reads
         try {
           await this.firebase.firestore.collection('users').doc(userId).set(
@@ -223,6 +266,27 @@ export class UsersService {
         create: { userId, studentId: student.id, ...profileData },
       });
 
+      if (user.role === 'CR' && data.sectionId) {
+        let currentTerm =
+          (await transaction.academicTerm.findFirst({ where: { isCurrent: true }, orderBy: { startDate: 'desc' } })) ||
+          (await transaction.academicTerm.findFirst({ orderBy: { startDate: 'desc' } })) ||
+          (await transaction.academicTerm.findUnique({ where: { id: 'TERM-1' } }));
+
+        if (!currentTerm) {
+          currentTerm = await transaction.academicTerm.create({
+            data: { id: 'TERM-1', name: 'Current Term', isCurrent: true, startDate: new Date(), endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) },
+          }).catch(async () => transaction.academicTerm.findFirst());
+        }
+
+        if (currentTerm) {
+          await transaction.crAssignment.upsert({
+            where: { userId },
+            create: { userId, sectionId: data.sectionId, termId: currentTerm.id, isActive: true },
+            update: { sectionId: data.sectionId, termId: currentTerm.id, isActive: true },
+          });
+        }
+      }
+
       const fullUpdated = await transaction.user.findUnique({
         where: { id: userId },
         include: {
@@ -301,20 +365,72 @@ export class UsersService {
       data: { role: role as any },
     });
 
-    if (role === 'CR' && sectionId) {
-      const currentTerm =
+    let crAssignmentData: any = null;
+
+    if (role === 'CR') {
+      let effectiveSectionId = sectionId;
+      if (!effectiveSectionId) {
+        const student = await this.prisma.student.findUnique({ where: { userId: id } });
+        effectiveSectionId = student?.sectionId || undefined;
+      }
+
+      if (!effectiveSectionId) {
+        const profile = await this.prisma.profile.findUnique({ where: { userId: id } });
+        if (profile?.section) {
+          const matchedSection = await this.prisma.section.findFirst({
+            where: { name: { equals: profile.section, mode: 'insensitive' } },
+          });
+          effectiveSectionId = matchedSection?.id;
+        }
+      }
+
+      if (!effectiveSectionId) {
+        const firstSection = await this.prisma.section.findFirst();
+        effectiveSectionId = firstSection?.id;
+      }
+
+      let currentTerm =
         (await this.prisma.academicTerm.findFirst({
           where: { isCurrent: true },
           orderBy: { startDate: 'desc' },
-        })) || (await this.prisma.academicTerm.findUnique({ where: { id: 'TERM-1' } }));
+        })) ||
+        (await this.prisma.academicTerm.findFirst({ orderBy: { startDate: 'desc' } })) ||
+        (await this.prisma.academicTerm.findUnique({ where: { id: 'TERM-1' } }));
 
-      if (!currentTerm) throw new NotFoundException('No academic term is configured');
+      if (!currentTerm) {
+        currentTerm = await this.prisma.academicTerm.create({
+          data: {
+            id: 'TERM-1',
+            name: 'Current Term',
+            isCurrent: true,
+            startDate: new Date(),
+            endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+          },
+        }).catch(async () => this.prisma.academicTerm.findFirst());
+      }
 
-      await this.prisma.crAssignment.upsert({
-        where: { userId: id },
-        create: { userId: id, sectionId, termId: currentTerm.id, isActive: true },
-        update: { sectionId, termId: currentTerm.id, isActive: true },
-      });
+      if (effectiveSectionId && currentTerm) {
+        const assignment = await this.prisma.crAssignment.upsert({
+          where: { userId: id },
+          create: { userId: id, sectionId: effectiveSectionId, termId: currentTerm.id, isActive: true },
+          update: { sectionId: effectiveSectionId, termId: currentTerm.id, isActive: true },
+          include: { section: true },
+        });
+
+        crAssignmentData = {
+          id: assignment.id,
+          sectionId: assignment.sectionId,
+          termId: assignment.termId,
+          isActive: true,
+          section: assignment.section ? { id: assignment.section.id, name: assignment.section.name } : null,
+        };
+
+        await this.prisma.student.upsert({
+          where: { userId: id },
+          update: { sectionId: effectiveSectionId },
+          create: { userId: id, sectionId: effectiveSectionId },
+        }).catch(() => {});
+      }
     } else {
       await this.prisma.crAssignment.updateMany({
         where: { userId: id },
@@ -326,6 +442,7 @@ export class UsersService {
       await this.firebase.firestore.collection('users').doc(id).set(
         {
           role,
+          crAssignment: crAssignmentData,
           updatedAt: new Date().toISOString(),
         },
         { merge: true },

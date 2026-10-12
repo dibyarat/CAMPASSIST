@@ -9,6 +9,7 @@ import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './services/firebaseClient';
 import { RouteFallback } from './routeFallback';
 import { GlobalSearch } from './components/GlobalSearch';
+import { authService } from './services/authService';
 import {
   Landing, Login, Register,
   StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile, StudentFeedback,
@@ -34,8 +35,8 @@ const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: st
 };
 
 const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode, role?: string }) => {
-  const userName = localStorage.getItem('userFullName') || 'Student';
-  const actualRole = localStorage.getItem('userRole') || 'STUDENT';
+  const [actualRole, setActualRole] = React.useState<string>(() => localStorage.getItem('userRole') || 'STUDENT');
+  const [userName, setUserName] = React.useState<string>(() => localStorage.getItem('userFullName') || 'Student');
   const normalizedAccountRole = actualRole.toUpperCase();
   const accountHome = normalizedAccountRole === 'DEVELOPER' ? '/developer' : normalizedAccountRole === 'CR' ? '/cr' : '/student';
   const canAccessRole = role.toUpperCase() === normalizedAccountRole || (normalizedAccountRole === 'CR' && role === 'student');
@@ -48,20 +49,32 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
 
     const verifySession = async () => {
       try {
-        if (auth.currentUser) {
-          if (!isMounted) return;
-          setAuthState('authenticated');
-          return;
+        let activeUser = auth.currentUser;
+        if (!activeUser) {
+          activeUser = await new Promise((resolve) => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+              unsubscribe();
+              resolve(user);
+            });
+          });
         }
 
-        const fbUser = await new Promise((resolve) => {
-          const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe();
-            resolve(user);
-          });
-        });
+        if (activeUser) {
+          // Immediately sync latest user profile from backend so role promotions take effect dynamically!
+          try {
+            const profile = await authService.me();
+            if (profile && isMounted) {
+              const liveRole = profile.role || 'STUDENT';
+              const liveName = profile.profile?.fullName || profile.email?.split('@')[0] || 'User';
+              localStorage.setItem('userRole', liveRole);
+              localStorage.setItem('userFullName', liveName);
+              setActualRole(liveRole);
+              setUserName(liveName);
+            }
+          } catch (profileErr) {
+            console.warn('Unable to sync profile during session check:', profileErr);
+          }
 
-        if (fbUser) {
           if (!isMounted) return;
           setAuthState('authenticated');
           return;
