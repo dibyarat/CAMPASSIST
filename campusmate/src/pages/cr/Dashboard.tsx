@@ -178,6 +178,10 @@ export const Dashboard = () => {
                 <span className="font-semibold text-sm">Report Cancellation</span>
                 <XCircle size={18} className="group-hover:scale-110 transition-transform" />
               </Link>
+              <Link to="/cr/find-room" className="w-full flex items-center justify-between p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 hover:bg-emerald-100 transition group">
+                <span className="font-semibold text-sm">Room Availability & Status</span>
+                <MapPin size={18} className="group-hover:scale-110 transition-transform" />
+              </Link>
               <Link to="/cr/polls" className="w-full flex items-center justify-between p-4 rounded-xl bg-purple-50 border border-purple-100 text-purple-700 hover:bg-purple-100 transition group">
                 <span className="font-semibold text-sm">Create Poll</span>
                 <BarChart2 size={18} className="group-hover:scale-110 transition-transform" />

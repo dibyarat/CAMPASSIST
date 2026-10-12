@@ -8,5 +8,9 @@ export const roomService = {
 	reportStatus: (roomId: string, status: RoomStatus, notes?: string) => apiClient(`/rooms/${roomId}/report`, {
 		method: 'PATCH',
 		body: JSON.stringify({ status, notes })
+	}),
+	revokeStatus: (roomId: string) => apiClient(`/rooms/${roomId}/report`, {
+		method: 'PATCH',
+		body: JSON.stringify({ status: 'FREE_BY_TIMETABLE' as RoomStatus, notes: '' })
 	})
 };

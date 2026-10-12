@@ -167,6 +167,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               
               {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">My Board</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/find-room`} icon={MapPin}>Find Room</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/announcements`} icon={Bell}>Announcements</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/cancellations`} icon={MapPin}>Cancellations</SidebarLink>
               
@@ -299,6 +300,7 @@ export default function App() {
                   {/* CR Routes */}
           <Route path="/cr" element={<MainLayout role="cr"><CrDashboard /></MainLayout>} />
           <Route path="/cr/timetable" element={<MainLayout role="cr"><CrTimetable /></MainLayout>} />
+          <Route path="/cr/find-room" element={<MainLayout role="cr"><StudentFindRoom /></MainLayout>} />
           <Route path="/cr/announcements" element={<MainLayout role="cr"><CrAnnouncements /></MainLayout>} />
           <Route path="/cr/cancellations" element={<MainLayout role="cr"><CrCancellations /></MainLayout>} />
           <Route path="/cr/reports" element={<MainLayout role="cr"><CrReports /></MainLayout>} />

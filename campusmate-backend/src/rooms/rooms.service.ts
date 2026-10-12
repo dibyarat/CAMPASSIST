@@ -81,19 +81,22 @@ export class RoomsService {
     const room = await this.prisma.room.findUnique({ where: { id } });
     if (!room) throw new NotFoundException('Room not found');
 
+    const cleanNotes = notes === '' ? null : (notes ?? null);
+
     await this.prisma.roomReport.create({
-      data: { roomId: id, status, reportedBy, notes },
+      data: { roomId: id, status, reportedBy, notes: cleanNotes },
     });
 
     const updated = await this.prisma.room.update({
       where: { id },
-      data: { status, notes },
+      data: { status, notes: cleanNotes },
     });
 
     try {
       await this.firebase.firestore.collection('rooms').doc(id).set(
         {
           ...updated,
+          notes: cleanNotes,
           updatedAt: new Date().toISOString(),
         },
         { merge: true },

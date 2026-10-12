@@ -79,7 +79,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
         { id: 'p-cr-polls', title: 'Class Polls', desc: 'Create polls to vote on deadlines or dates', path: '/cr/polls', category: 'Pages & Tools', icon: MessageSquare },
         { id: 'p-cr-rem', title: 'Class Reminders', desc: 'Schedule auto-reminders for exams and dues', path: '/cr/reminders', category: 'Pages & Tools', icon: Bell },
         { id: 'p-cr-rep', title: 'Class Reports', desc: 'Export class activity and submissions', path: '/cr/reports', category: 'Pages & Tools', icon: BarChart2 },
-        { id: 'p-cr-room', title: 'Find Empty Rooms', desc: 'Search for vacant classrooms right now', path: '/student/find-room', category: 'Pages & Tools', icon: MapPin },
+        { id: 'p-cr-room', title: 'Find Empty Rooms', desc: 'Search for vacant classrooms and manage occupancy', path: '/cr/find-room', category: 'Pages & Tools', icon: MapPin },
         { id: 'p-cr-study', title: 'StudyOS Library', desc: 'Access class notes, pyqs, and textbooks', path: '/student/studyos', category: 'Pages & Tools', icon: BookOpen },
       ];
     }
