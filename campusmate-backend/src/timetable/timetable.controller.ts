@@ -46,6 +46,12 @@ export class TimetableController {
     @CurrentUser() user: any
   ) {
     let crSectionId = user.crAssignment?.isActive ? user.crAssignment.sectionId : null;
+    if (!crSectionId && user.id) {
+      const dbCr = await this.timetableService.findCrAssignment(user.id);
+      if (dbCr?.isActive) {
+        crSectionId = dbCr.sectionId;
+      }
+    }
     if (!crSectionId) {
       if ((user.roles?.includes('DEVELOPER') || user.role === 'DEVELOPER') && (body.sectionId || body.entries?.[0]?.sectionId)) {
         crSectionId = body.sectionId || body.entries?.[0]?.sectionId;

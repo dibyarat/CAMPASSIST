@@ -160,8 +160,15 @@ function parseTimetableCsv(text: string): { rows: ParsedRow[]; errors: string[] 
       const rowB = parsedRows[b];
       if (rowA.isValid && rowB.isValid && rowA.dayOfWeek === rowB.dayOfWeek) {
         if (rowA.startTime < rowB.endTime && rowB.startTime < rowA.endTime) {
-          rowA.conflictsWith = (rowA.conflictsWith || []).concat(rowB.rowNum);
-          rowB.conflictsWith = (rowB.conflictsWith || []).concat(rowA.rowNum);
+          const isIdenticalRecurrence =
+            rowA.startTime === rowB.startTime &&
+            rowA.endTime === rowB.endTime &&
+            rowA.subjectName.toLowerCase() === rowB.subjectName.toLowerCase();
+
+          if (!isIdenticalRecurrence) {
+            rowA.conflictsWith = (rowA.conflictsWith || []).concat(rowB.rowNum);
+            rowB.conflictsWith = (rowB.conflictsWith || []).concat(rowA.rowNum);
+          }
         }
       }
     }
@@ -224,11 +231,13 @@ export const Timetable = () => {
     fetchData();
   }, []);
 
-  const refreshTimetable = async () => {
-    if (profile?.crAssignment?.sectionId && formData.termId) {
+  const refreshTimetable = async (explicitTermId?: string) => {
+    const termToUse = explicitTermId || formData.termId;
+    const sectionToUse = profile?.crAssignment?.sectionId;
+    if (sectionToUse && termToUse) {
       try {
-        const tt = await apiClient(`/timetable/section/${profile.crAssignment.sectionId}/term/${formData.termId}`);
-        setTimetable(tt);
+        const tt = await apiClient(`/timetable/section/${sectionToUse}/term/${termToUse}`);
+        setTimetable(Array.isArray(tt) ? tt : []);
       } catch (err) {
         console.error("Failed to refresh timetable:", err);
       }
@@ -323,7 +332,15 @@ Friday,10:00,11:00,Open Elective,OE501,Room 401,Theory`;
   };
 
   const handleConfirmImport = async () => {
-    const validRows = csvPreview.filter(r => r.isValid && (!r.conflictsWith || r.conflictsWith.length === 0));
+    const seen = new Set<string>();
+    const validRows = csvPreview.filter(r => {
+      if (!r.isValid || (r.conflictsWith && r.conflictsWith.length > 0)) return false;
+      const key = `${r.dayOfWeek}_${r.startTime}_${r.endTime}_${r.subjectName.toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     if (validRows.length === 0) {
       alert("No valid classes without time conflicts were found in this file.");
       return;
@@ -347,13 +364,26 @@ Friday,10:00,11:00,Open Elective,OE501,Room 401,Theory`;
       };
 
       const res = await timetableService.importCsvForCr(payload);
-      setCsvResult({
-        success: true,
-        message: `Successfully imported ${res.importedCount} classes!`,
-        count: res.importedCount,
-      });
+      if (res && res.importedCount > 0) {
+        setCsvResult({
+          success: true,
+          message: `Successfully imported ${res.importedCount} classes!`,
+          count: res.importedCount,
+        });
 
-      await refreshTimetable();
+        if (res.termId) {
+          setFormData(prev => ({ ...prev, termId: res.termId }));
+        }
+
+        await refreshTimetable(res.termId);
+      } else {
+        const errorDetail = res?.errors?.length ? res.errors.slice(0, 3).join('; ') : 'Database returned 0 saved records.';
+        setCsvResult({
+          success: false,
+          message: `Import failed (0 classes saved): ${errorDetail}`,
+          count: 0,
+        });
+      }
     } catch (err: any) {
       setCsvResult({
         success: false,
@@ -369,7 +399,14 @@ Friday,10:00,11:00,Open Elective,OE501,Room 401,Theory`;
   }
 
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  const validCsvCount = csvPreview.filter(r => r.isValid && (!r.conflictsWith || r.conflictsWith.length === 0)).length;
+  const seenCount = new Set<string>();
+  const validCsvCount = csvPreview.filter(r => {
+    if (!r.isValid || (r.conflictsWith && r.conflictsWith.length > 0)) return false;
+    const key = `${r.dayOfWeek}_${r.startTime}_${r.endTime}_${r.subjectName.toLowerCase()}`;
+    if (seenCount.has(key)) return false;
+    seenCount.add(key);
+    return true;
+  }).length;
   const conflictCsvCount = csvPreview.filter(r => r.conflictsWith && r.conflictsWith.length > 0).length;
   const invalidCsvCount = csvPreview.filter(r => !r.isValid).length;
 

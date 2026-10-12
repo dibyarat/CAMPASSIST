@@ -65,7 +65,37 @@ export class TimetableService {
     return entry;
   }
 
+  async findCrAssignment(userId: string) {
+    return this.prisma.crAssignment.findFirst({
+      where: { userId, isActive: true },
+    });
+  }
+
   async findForSection(sectionId: string, termId: string) {
+    try {
+      let entries = await this.prisma.timetableEntry.findMany({
+        where: { sectionId, termId, status: 'ACTIVE' },
+        include: { subject: true, room: true },
+        orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+      });
+
+      if (entries.length === 0) {
+        // Fallback: search without strict termId in case client termId was default or mismatch
+        entries = await this.prisma.timetableEntry.findMany({
+          where: { sectionId, status: 'ACTIVE' },
+          include: { subject: true, room: true },
+          orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+        });
+      }
+
+      if (entries.length > 0) {
+        return entries;
+      }
+    } catch (err: any) {
+      this.logger.warn(`Failed reading timetable from Prisma: ${err?.message}`);
+    }
+
+    // Secondary fallback to Firestore
     try {
       const snap = await this.firebase.firestore
         .collection('timetable')
@@ -82,12 +112,9 @@ export class TimetableService {
       this.logger.warn(`Failed reading timetable from Firestore: ${err?.message}`);
     }
 
-    return this.prisma.timetableEntry.findMany({
-      where: { sectionId, termId, status: 'ACTIVE' },
-      include: { subject: true, room: true },
-      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
-    });
+    return [];
   }
+
 
   async getSubjects() {
     try {
@@ -244,28 +271,43 @@ export class TimetableService {
       throw new ConflictException('No timetable entries provided for import');
     }
 
-    if (options?.replaceExisting) {
-      const existing = await this.prisma.timetableEntry.findMany({
-        where: { sectionId: crSectionId, termId },
+    // 1. Resolve and guarantee valid term in Prisma
+    let resolvedTerm = await this.prisma.academicTerm.findUnique({ where: { id: termId } });
+    if (!resolvedTerm) {
+      resolvedTerm = await this.prisma.academicTerm.findFirst({ where: { isCurrent: true } })
+        || await this.prisma.academicTerm.findFirst({ orderBy: { startDate: 'desc' } });
+    }
+    if (!resolvedTerm) {
+      resolvedTerm = await this.prisma.academicTerm.create({
+        data: {
+          id: termId || 'TERM-1',
+          name: 'Fall 2026',
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
+          isCurrent: true,
+        },
       });
+    }
+    const effectiveTermId = resolvedTerm.id;
 
-      if (existing.length > 0) {
-        await this.prisma.timetableEntry.deleteMany({
-          where: { sectionId: crSectionId, termId },
-        });
-
-        for (const entry of existing) {
-          try {
-            await this.firebase.firestore.collection('timetable').doc(entry.id).delete();
-          } catch (err: any) {
-            this.logger.warn(`Failed removing deleted entry ${entry.id} from Firestore: ${err?.message}`);
-          }
-        }
-      }
+    // 2. Validate section
+    const section = await this.prisma.section.findUnique({ where: { id: crSectionId } });
+    if (!section) {
+      throw new NotFoundException(`Section with id ${crSectionId} not found`);
     }
 
-    const createdEntries: any[] = [];
+    const preparedEntries: Array<{
+      subjectId: string;
+      sectionId: string;
+      roomId: string | null;
+      termId: string;
+      dayOfWeek: number;
+      startTime: string;
+      endTime: string;
+      status: string;
+    }> = [];
     const errors: string[] = [];
+    const seenSlots = new Set<string>();
 
     for (let i = 0; i < entries.length; i++) {
       const item = entries[i];
@@ -291,6 +333,13 @@ export class TimetableService {
         errors.push(`Row ${rowNum}: Start time (${startTime}) must be earlier than end time (${endTime})`);
         continue;
       }
+
+      // Check slot deduplication within this batch (e.g. multi-week recurrence rows)
+      const slotKey = `${day}_${startTime}_${endTime}_${subjectName.toLowerCase()}`;
+      if (seenSlots.has(slotKey)) {
+        continue; // duplicate occurrence across weeks in CSV, seamlessly keep first
+      }
+      seenSlots.add(slotKey);
 
       try {
         let subject = await this.prisma.subject.findFirst({
@@ -340,33 +389,109 @@ export class TimetableService {
           }
         }
 
-        const entry = await this.prisma.timetableEntry.create({
-          data: {
-            subjectId: subject.id,
-            sectionId: crSectionId,
-            roomId: room ? room.id : null,
-            termId,
-            dayOfWeek: day,
-            startTime,
-            endTime,
-            status: 'ACTIVE',
-          },
-          include: { subject: true, room: true },
+        preparedEntries.push({
+          subjectId: subject.id,
+          sectionId: crSectionId,
+          roomId: room ? room.id : null,
+          termId: effectiveTermId,
+          dayOfWeek: day,
+          startTime,
+          endTime,
+          status: 'ACTIVE',
         });
-
-        try {
-          await this.firebase.firestore.collection('timetable').doc(entry.id).set({
-            ...entry,
-            createdAt: new Date().toISOString(),
-          });
-        } catch (err: any) {
-          this.logger.warn(`Failed syncing imported entry to Firestore: ${err?.message}`);
-        }
-
-        createdEntries.push(entry);
       } catch (err: any) {
-        this.logger.error(`Failed to import row ${rowNum}: ${err.message}`);
+        this.logger.error(`Failed preparing row ${rowNum}: ${err.message}`);
         errors.push(`Row ${rowNum}: ${err.message}`);
+      }
+    }
+
+    if (preparedEntries.length === 0) {
+      return {
+        success: false,
+        importedCount: 0,
+        totalRows: entries.length,
+        termId: effectiveTermId,
+        sectionId: crSectionId,
+        entries: [],
+        errors: errors.length > 0 ? errors : ['No valid entries found to import'],
+      };
+    }
+
+    let existingEntries: any[] = [];
+    try {
+      await this.prisma.$transaction(
+        async (tx) => {
+          if (options?.replaceExisting) {
+            existingEntries = await tx.timetableEntry.findMany({
+              where: { sectionId: crSectionId, termId: effectiveTermId },
+            });
+            await tx.timetableEntry.deleteMany({
+              where: { sectionId: crSectionId, termId: effectiveTermId },
+            });
+          } else {
+            // If not replacing, remove any conflict within this exact set before inserting
+            // to prevent duplicate identical entries
+            for (const item of preparedEntries) {
+              await tx.timetableEntry.deleteMany({
+                where: {
+                  sectionId: crSectionId,
+                  termId: effectiveTermId,
+                  dayOfWeek: item.dayOfWeek,
+                  startTime: item.startTime,
+                  endTime: item.endTime,
+                  subjectId: item.subjectId,
+                },
+              });
+            }
+          }
+
+          // Bulk insert in a single database round-trip
+          await tx.timetableEntry.createMany({
+            data: preparedEntries,
+          });
+        },
+        {
+          maxWait: 15000,
+          timeout: 30000,
+        }
+      );
+    } catch (txErr: any) {
+      this.logger.error(`Database transaction failed during timetable import: ${txErr.message}`);
+      return {
+        success: false,
+        importedCount: 0,
+        totalRows: entries.length,
+        termId: effectiveTermId,
+        sectionId: crSectionId,
+        entries: [],
+        errors: [`Database transaction error: ${txErr.message}`],
+      };
+    }
+
+    const createdEntries = await this.prisma.timetableEntry.findMany({
+      where: { sectionId: crSectionId, termId: effectiveTermId, status: 'ACTIVE' },
+      include: { subject: true, room: true },
+      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+    });
+
+    // Clean up Firestore deleted entries if replaced
+    if (options?.replaceExisting && existingEntries.length > 0) {
+      for (const oldEntry of existingEntries) {
+        try {
+          await this.firebase.firestore.collection('timetable').doc(oldEntry.id).delete();
+        } catch {}
+      }
+    }
+
+    // Sync current active entries to Firestore
+    for (const entry of createdEntries) {
+      try {
+        await this.firebase.firestore.collection('timetable').doc(entry.id).set({
+          ...entry,
+          createdAt: entry.createdAt?.toISOString?.() || new Date().toISOString(),
+        }, { merge: true });
+      } catch (err: any) {
+        this.logger.warn(`Failed syncing timetable entry ${entry.id} to Firestore: ${err?.message}`);
       }
     }
 
@@ -374,6 +499,8 @@ export class TimetableService {
       success: createdEntries.length > 0,
       importedCount: createdEntries.length,
       totalRows: entries.length,
+      termId: effectiveTermId,
+      sectionId: crSectionId,
       entries: createdEntries,
       errors,
     };
