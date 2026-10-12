@@ -24,11 +24,50 @@ export class RoomsService {
   }
 
   async findAll() {
+    let prismaRooms: any[] = [];
+    try {
+      prismaRooms = await this.prisma.room.findMany({
+        orderBy: { roomNumber: 'asc' },
+      });
+    } catch (err: any) {
+      this.logger.warn(`Prisma findMany rooms error: ${err?.message}`);
+    }
+
     try {
       const snap = await this.firebase.firestore.collection('rooms').get();
-      if (!snap.empty) return snap.docs.map((doc) => doc.data());
-    } catch {}
-    return this.prisma.room.findMany();
+      const firestoreMap = new Map<string, any>();
+      snap.docs.forEach((doc) => {
+        firestoreMap.set(doc.id, doc.data());
+      });
+
+      if (prismaRooms.length > 0) {
+        // Merge latest status and backfill any missing full records to Firestore
+        const merged = prismaRooms.map((room) => {
+          const fData = firestoreMap.get(room.id);
+          const finalRoom = {
+            ...room,
+            status: fData?.status || room.status || RoomStatus.FREE_BY_TIMETABLE,
+            notes: fData?.notes !== undefined ? fData.notes : room.notes,
+          };
+          if (!fData || !fData.roomNumber) {
+            this.firebase.firestore.collection('rooms').doc(room.id).set(finalRoom, { merge: true }).catch(() => {});
+          }
+          return finalRoom;
+        });
+        return merged;
+      }
+
+      // If Prisma had no records, use valid Firestore room docs
+      if (!snap.empty) {
+        return snap.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((r: any) => r.roomNumber);
+      }
+    } catch (err: any) {
+      this.logger.warn(`Firestore rooms query error: ${err?.message}`);
+    }
+
+    return prismaRooms;
   }
 
   async remove(id: string) {
@@ -46,28 +85,28 @@ export class RoomsService {
       data: { roomId: id, status, reportedBy, notes },
     });
 
+    const updated = await this.prisma.room.update({
+      where: { id },
+      data: { status, notes },
+    });
+
     try {
       await this.firebase.firestore.collection('rooms').doc(id).set(
         {
-          status,
-          notes,
+          ...updated,
           updatedAt: new Date().toISOString(),
         },
         { merge: true },
       );
     } catch {}
 
-    return this.prisma.room.update({
-      where: { id },
-      data: { status, notes },
-    });
+    return updated;
   }
 
   async getAvailableRooms() {
-    return this.prisma.room.findMany({
-      where: {
-        OR: [{ status: RoomStatus.FREE_BY_TIMETABLE }, { status: RoomStatus.REPORTED_FREE }],
-      },
-    });
+    const all = await this.findAll();
+    return all.filter(
+      (r: any) => r.status === RoomStatus.FREE_BY_TIMETABLE || r.status === RoomStatus.REPORTED_FREE
+    );
   }
 }

@@ -118,7 +118,7 @@ export const Rooms = () => {
                     <td className="py-4 px-4 text-slate-600">{room.building || 'Main Block'}</td>
                     <td className="py-4 px-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${room.status === 'FREE_BY_TIMETABLE' || room.status === 'REPORTED_FREE' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
-                        {room.status.replace(/_/g, ' ')}
+                        {String(room.status || 'UNKNOWN').replace(/_/g, ' ')}
                       </span>
                     </td>
                     <td className="py-4 px-4 text-right space-x-2">

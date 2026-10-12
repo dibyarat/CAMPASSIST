@@ -36,10 +36,14 @@ export const FindRoom = () => {
     }
   };
 
-  const filteredRooms = rooms.filter(r => 
-    r.roomNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (r.building && r.building.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredRooms = (Array.isArray(rooms) ? rooms : []).filter(r => {
+    if (!r) return false;
+    const roomNo = String(r.roomNumber || r.name || r.id || '').toLowerCase();
+    const bld = String(r.building || r.block || '').toLowerCase();
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return roomNo.includes(q) || bld.includes(q);
+  });
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -108,7 +112,7 @@ export const FindRoom = () => {
                   
                   <div className="text-right">
                     <span className={`px-3 py-1 text-xs font-bold rounded-lg border ${isFree ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
-                      {room.status.replace(/_/g, ' ')}
+                      {String(room.status || 'UNKNOWN').replace(/_/g, ' ')}
                     </span>
                     {isFree && (
                       <div className="mt-3">
