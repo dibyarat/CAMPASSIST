@@ -9,13 +9,16 @@ export type AcademicResource = {
 	fileReference: string;
 	fileName?: string;
 	fileSize?: number;
+	mimeType?: string;
 	uploaderId: string;
 	createdAt: string;
 	category?: string;
+	displayCategory?: string;
 	experimentNo?: number;
 	code?: string;
 	isMine?: boolean;
-	source?: 'studyos_resource' | 'studyos_lab' | 'studyos_class' | 'campassist_academic';
+	source?: string;
+	studyosUrl?: string;
 };
 
 export type StudyOSOverview = {

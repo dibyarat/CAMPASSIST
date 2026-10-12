@@ -69,14 +69,18 @@ export class StudyosService {
           }
           const attachedFiles = (d.files && Array.isArray(d.files) && d.files.length) ? d.files : (filesByResource[doc.id] || []);
           const firstFile = attachedFiles[0] || {};
-          const isDocOrFile = Boolean(firstFile.fileUrl || d.fileUrl || (firstFile.fileName && firstFile.fileName.includes('.')));
+          const isNote = d.type === 'NOTE' || d.type === 'NOTES' || (!d.type && !firstFile.fileUrl);
+          const isViva = d.type === 'VIVA' || (Array.isArray(d.tags) && d.tags.some((t: any) => String(t).toUpperCase().includes('VIVA')));
+          const canonicalCategory = isViva ? 'VIVA' : isNote ? 'NOTE' : 'FILE';
+          const displayCategory = isViva ? 'Viva' : isNote ? 'Notes' : 'Files';
 
           results.push({
             id: doc.id,
             title: d.title || 'Untitled Study Resource',
             description: d.description || '',
-            type: d.type === 'NOTES' ? 'Notes' : isDocOrFile ? 'Files' : (d.type || 'Notes'),
-            category: isDocOrFile ? 'Files' : 'Notes',
+            type: canonicalCategory,
+            category: canonicalCategory,
+            displayCategory,
             subjectId: d.subject || d.subjectId || 'General',
             fileReference: firstFile.fileUrl || d.fileUrl || '',
             fileName: firstFile.fileName || null,
@@ -103,8 +107,9 @@ export class StudyosService {
           id: doc.id,
           title: d.name ? `Experiment #${d.experimentNo ?? '-'}: ${d.name}` : (d.aim || 'Lab Experiment'),
           description: d.aim || d.procedure || '',
-          type: 'Lab Records',
-          category: 'Lab Records',
+          type: 'LAB_RECORD',
+          category: 'LAB_RECORD',
+          displayCategory: 'Lab Records',
           subjectId: d.subjectId || 'Lab Practicum',
           experimentNo: d.experimentNo,
           fileReference: d.fileUrl || '',
@@ -129,8 +134,9 @@ export class StudyosService {
           id: doc.id,
           title: d.name || d.title || 'Virtual Study Class',
           description: `${topicCount} topics · ${d.semester || 'Academic Session'}`,
-          type: 'Class',
-          category: 'Classes',
+          type: 'CLASS',
+          category: 'CLASS',
+          displayCategory: 'Classes',
           subjectId: d.subject || 'Classroom',
           fileReference: '',
           uploaderId: d.creatorId || '',
