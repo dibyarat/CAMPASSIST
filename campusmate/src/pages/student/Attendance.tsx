@@ -225,6 +225,21 @@ export const Attendance: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastTimeoutRef = useRef<any>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setIsSettingsOpen(false);
+      }
+    }
+    if (isSettingsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSettingsOpen]);
 
   // Load User Profile on mount
   useEffect(() => {
@@ -525,7 +540,7 @@ export const Attendance: React.FC = () => {
       />
 
       {/* TOP HEADER & TITLE */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100 relative z-30">
         <div>
           <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
             Student Attendance Portal
@@ -546,7 +561,7 @@ export const Attendance: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative">
+        <div className="relative" ref={settingsRef}>
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm shadow-2xs transition cursor-pointer"
@@ -556,16 +571,21 @@ export const Attendance: React.FC = () => {
           </button>
 
           {isSettingsOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-5 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                <h3 className="font-bold text-slate-900 text-sm">Register Options</h3>
-                <button
-                  onClick={() => setIsSettingsOpen(false)}
-                  className="text-slate-400 hover:text-slate-600 p-1"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsSettingsOpen(false)}
+              />
+              <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                  <h3 className="font-bold text-slate-900 text-sm">Register Options</h3>
+                  <button
+                    onClick={() => setIsSettingsOpen(false)}
+                    className="text-slate-400 hover:text-slate-600 p-1"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
 
               <div className="space-y-4">
                 <div>
@@ -618,6 +638,7 @@ export const Attendance: React.FC = () => {
                 </div>
               </div>
             </div>
+          </>
           )}
         </div>
       </div>
