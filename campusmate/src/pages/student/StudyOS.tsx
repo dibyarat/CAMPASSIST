@@ -107,16 +107,37 @@ export const StudyOS: React.FC = () => {
       return;
     }
 
-    // Direct web link
-    if (resource.fileReference.startsWith('http://') || resource.fileReference.startsWith('https://')) {
-      window.open(resource.fileReference, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
+    const preferredName = resource.fileName || `${resource.title || 'document'}${resource.type === 'LAB_RECORD' ? '.pdf' : ''}`;
     setOpeningId(resource.id);
     try {
-      const { url } = await studyosService.getDownloadUrl(resource.fileReference);
-      window.open(url, '_blank', 'noopener,noreferrer');
+      const targetUrl = (resource.fileReference.startsWith('http://') || resource.fileReference.startsWith('https://'))
+        ? resource.fileReference
+        : (await studyosService.getDownloadUrl(resource.fileReference)).url;
+
+      try {
+        const res = await fetch(targetUrl);
+        if (res.ok) {
+          const blob = await res.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = preferredName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+          return;
+        }
+      } catch (_) {}
+
+      const link = document.createElement('a');
+      link.href = targetUrl;
+      link.download = preferredName;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } catch (openError: any) {
       setError(openError.message || 'Unable to open this resource.');
     } finally {
@@ -174,10 +195,10 @@ export const StudyOS: React.FC = () => {
           <div className="space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold text-white tracking-wide uppercase">
               <Sparkles size={13} className="text-amber-300" />
-              Unified StudyOS Account
+              CampAssist & StudyOS
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-              Academic Hub & StudyOS
+              CampAssist & StudyOS
             </h1>
             <p className="text-white/80 text-sm md:text-base max-w-xl leading-relaxed">
               Seamlessly browse your notes, experiment records, and virtual classes synced with your personal StudyOS workspace.
