@@ -17,7 +17,7 @@ export class UsersService {
     id: string,
     email: string,
     fullName: string,
-    role: Role | string,
+    _role: Role | string,
     rollNumber: string,
     section: string,
     institutionCode?: string,
@@ -44,11 +44,15 @@ export class UsersService {
         })
       : null;
 
+    // Enforce least privilege: normal self-service onboarding MUST always assign STUDENT role.
+    // Privileged roles (CR, DEVELOPER) are strictly assigned via dedicated administrative workflows.
+    const assignedRole = Role.STUDENT;
+
     // 1. Dual-write to Prisma during migration
     const user = await this.prisma.user.upsert({
       where: { id },
-      update: { email, role: role as any, institutionId },
-      create: { id, email, role: role as any, institutionId },
+      update: { email, role: assignedRole, institutionId },
+      create: { id, email, role: assignedRole, institutionId },
     });
 
     const student = await this.prisma.student.upsert({
@@ -68,7 +72,7 @@ export class UsersService {
       const userDoc = {
         id,
         email,
-        role,
+        role: assignedRole,
         institutionId,
         institution: institutionName ? { id: institutionId, name: institutionName, code: institutionCode } : null,
         profile: {

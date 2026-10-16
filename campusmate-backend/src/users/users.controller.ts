@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums';
 import { UpdateUserDetailsDto } from './update-user-details.dto';
 
 @Controller('users')
@@ -15,7 +16,10 @@ export class UsersController {
   @Post('onboard')
   onboardUser(@Req() req: any, @Body() data: any) {
     const userId = req.user?.id;
-    return this.usersService.onboardUser(userId, data.email, data.fullName, data.role, data.rollNumber, data.section, data.institutionCode);
+    if (!userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    return this.usersService.onboardUser(userId, data.email, data.fullName, Role.STUDENT, data.rollNumber, data.section, data.institutionCode);
   }
 
   @Get('me')

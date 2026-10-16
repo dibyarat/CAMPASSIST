@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
 
@@ -99,11 +99,27 @@ export class RemindersService {
     return reminder;
   }
 
-  remove(userIdOrId: string, id?: string) {
-    const targetId = id || userIdOrId;
+  async remove(userId: string, id: string) {
+    const reminder = await this.prisma.reminder.findUnique({
+      where: { id },
+    });
+
+    if (!reminder) {
+      throw new NotFoundException(`Reminder with ID ${id} not found`);
+    }
+
+    if (reminder.creatorId !== userId) {
+      throw new ForbiddenException('You do not have permission to delete this reminder');
+    }
+
     try {
-      this.firebase.firestore.collection('reminders').doc(targetId).delete().catch(() => {});
-    } catch {}
-    return this.prisma.reminder.delete({ where: { id: targetId } });
+      await this.firebase.firestore.collection('reminders').doc(id).delete();
+    } catch (err: any) {
+      this.logger.warn(`Failed deleting reminder from Firestore: ${err?.message}`);
+    }
+
+    return this.prisma.reminder.delete({
+      where: { id },
+    });
   }
 }
