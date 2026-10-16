@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { AppThrottlerGuard } from './common/guards/app-throttler.guard';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './common/prisma.service';
@@ -47,7 +50,21 @@ import { FirebaseAdminModule } from './common/firebase/firebase-admin.module';
 import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [InstitutionsModule, SubjectsModule, GradesModule, FeedbackModule, FirebaseAdminModule, CloudinaryModule],
+  imports: [
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000,
+        limit: 120,
+      },
+    ]),
+    InstitutionsModule,
+    SubjectsModule,
+    GradesModule,
+    FeedbackModule,
+    FirebaseAdminModule,
+    CloudinaryModule,
+  ],
   controllers: [
     AppController,
     HealthController,
@@ -69,6 +86,10 @@ import { CloudinaryModule } from './common/cloudinary/cloudinary.module';
     AcademicTermsController
   ],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AppThrottlerGuard,
+    },
     AppService,
     PrismaService,
     UsersService,

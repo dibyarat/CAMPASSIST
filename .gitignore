@@ -10,3 +10,5 @@ CampusmateImage.png
 Campusmatelogo.png
 prompt.txt
 BackendPrompt.txt
+*.bak
+**/*.bak

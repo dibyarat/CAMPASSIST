@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { User, Bell, Shield, Camera, Save, Sparkles, MessageSquare } from 'lucide-react';
+import { User, Bell, Shield, Camera, Save, Sparkles, MessageSquare, Trash2 } from 'lucide-react';
 
-import { updatePassword as fbUpdatePassword } from 'firebase/auth';
+import { updatePassword as fbUpdatePassword, signOut as fbSignOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
+import { authService } from '../../services/authService';
 
 export interface ToneOption {
   id: string;
@@ -123,6 +124,10 @@ export const Settings = () => {
   const [savingPassword, setSavingPassword] = useState(false);
   const [securityError, setSecurityError] = useState('');
   const [securityMessage, setSecurityMessage] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [activeTab, setActiveTab] = useState<'Profile' | 'Notifications' | 'Security'>('Profile');
   const [notificationPreferences, setNotificationPreferences] = useState({
     classUpdates: true,
@@ -226,6 +231,43 @@ export const Settings = () => {
       setSecurityError(error instanceof Error ? error.message : 'Unable to update your password.');
     } finally {
       setSavingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmation !== 'DELETE_MY_ACCOUNT') {
+      setDeleteError('Confirmation mismatch. Please type DELETE_MY_ACCOUNT exactly as shown to confirm.');
+      return;
+    }
+    setDeletingAccount(true);
+    setDeleteError('');
+    try {
+      const res: any = await authService.deleteAccount('DELETE_MY_ACCOUNT');
+      if (res?.errors && res.errors.length > 0) {
+        setDeleteError(`Account deletion reported warnings: ${res.errors.join('; ')}`);
+        setDeletingAccount(false);
+        return;
+      }
+      if (res && res.success === false) {
+        setDeleteError('Failed to delete account. Please try again or contact support.');
+        setDeletingAccount(false);
+        return;
+      }
+      try {
+        await fbSignOut(auth);
+      } catch (e) {
+        console.warn('Sign out error:', e);
+      }
+      localStorage.removeItem('userFullName');
+      localStorage.removeItem('userRole');
+      window.location.href = '/login';
+    } catch (err: any) {
+      if (err?.message?.toLowerCase().includes('token') || err?.message?.toLowerCase().includes('unauthorized') || err?.message?.toLowerCase().includes('expired')) {
+        setDeleteError('Your session has expired. Please sign in again before deleting your account.');
+      } else {
+        setDeleteError(err instanceof Error ? err.message : 'Failed to delete account.');
+      }
+      setDeletingAccount(false);
     }
   };
 
@@ -462,27 +504,122 @@ export const Settings = () => {
           )}
 
           {activeTab === 'Security' && (
-            <form onSubmit={updatePassword} className="space-y-8">
-              <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Update Password</h3>
+            <div className="space-y-10">
+              <form onSubmit={updatePassword} className="space-y-8">
+                <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Update Password</h3>
 
-              <div className="space-y-4 max-w-md">
-                <div className="space-y-2">
-                  <label htmlFor="new-password" className="text-sm font-semibold text-slate-700">New Password</label>
-                  <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={event => setNewPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                <div className="space-y-4 max-w-md">
+                  <div className="space-y-2">
+                    <label htmlFor="new-password" className="text-sm font-semibold text-slate-700">New Password</label>
+                    <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={event => setNewPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="confirm-password" className="text-sm font-semibold text-slate-700">Confirm New Password</label>
+                    <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label htmlFor="confirm-password" className="text-sm font-semibold text-slate-700">Confirm New Password</label>
-                  <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                {securityError && <p role="alert" className="text-sm text-red-700">{securityError}</p>}
+                {securityMessage && <p role="status" className="text-sm text-emerald-700">{securityMessage}</p>}
+                <div className="flex justify-end border-t border-slate-100 pt-5">
+                  <button type="submit" disabled={savingPassword} className="flex items-center gap-2 rounded-xl bg-gradient-primary px-6 py-3 font-bold text-white shadow-md transition hover:shadow-lg disabled:opacity-50">
+                    <Save size={18} /> {savingPassword ? 'Updating...' : 'Update Password'}
+                  </button>
                 </div>
+              </form>
+
+              {/* Danger Zone: Account Deletion */}
+              <div className="border-t border-rose-100 pt-8 space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+                    <Trash2 size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-rose-900">Danger Zone</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">
+                      Permanently delete your CampusAssist account and all associated data.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 text-xs text-rose-800 leading-relaxed space-y-2">
+                  <p className="font-semibold text-rose-900">
+                    Warning: This action is irreversible and cannot be undone.
+                  </p>
+                  <p>
+                    Deleting your account permanently removes:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1 text-rose-700">
+                    <li>Student profile, enrollment, and academic records in PostgreSQL</li>
+                    <li>Timetable entries, attendance records, and section assignments</li>
+                    <li>Notifications, reminder preferences, and feedback history</li>
+                    <li>Firebase Authentication login credentials and active sessions</li>
+                  </ul>
+                </div>
+
+                {!showDeleteConfirm ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowDeleteConfirm(true);
+                      setDeleteConfirmation('');
+                      setDeleteError('');
+                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-rose-300 text-rose-700 font-bold hover:bg-rose-50 transition text-sm"
+                  >
+                    <Trash2 size={16} /> Delete My Account
+                  </button>
+                ) : (
+                  <div className="p-5 rounded-2xl border-2 border-rose-300 bg-white space-y-4 shadow-sm">
+                    <div className="space-y-1">
+                      <label htmlFor="confirm-delete-input" className="block text-xs font-bold text-slate-700">
+                        To confirm deletion, please type <code className="bg-slate-100 px-1.5 py-0.5 rounded text-rose-600 font-mono">DELETE_MY_ACCOUNT</code> below:
+                      </label>
+                      <input
+                        id="confirm-delete-input"
+                        type="text"
+                        value={deleteConfirmation}
+                        onChange={(e) => {
+                          setDeleteConfirmation(e.target.value);
+                          if (deleteError) setDeleteError('');
+                        }}
+                        placeholder="DELETE_MY_ACCOUNT"
+                        disabled={deletingAccount}
+                        className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-sm focus:border-rose-500 outline-none"
+                      />
+                    </div>
+
+                    {deleteError && (
+                      <p role="alert" className="text-xs font-medium text-rose-700 bg-rose-50 p-3 rounded-lg border border-rose-200">
+                        {deleteError}
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-3 justify-end pt-2">
+                      <button
+                        type="button"
+                        disabled={deletingAccount}
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeleteConfirmation('');
+                          setDeleteError('');
+                        }}
+                        className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={deletingAccount || deleteConfirmation !== 'DELETE_MY_ACCOUNT'}
+                        onClick={handleDeleteAccount}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700 disabled:opacity-50 transition text-sm shadow-sm"
+                      >
+                        {deletingAccount ? 'Deleting Account...' : 'Permanently Delete'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              {securityError && <p role="alert" className="text-sm text-red-700">{securityError}</p>}
-              {securityMessage && <p role="status" className="text-sm text-emerald-700">{securityMessage}</p>}
-              <div className="flex justify-end border-t border-slate-100 pt-5">
-                <button type="submit" disabled={savingPassword} className="flex items-center gap-2 rounded-xl bg-gradient-primary px-6 py-3 font-bold text-white shadow-md transition hover:shadow-lg disabled:opacity-50">
-                  <Save size={18} /> {savingPassword ? 'Updating...' : 'Update Password'}
-                </button>
-              </div>
-            </form>
+            </div>
           )}
 
           {activeTab === 'Profile' && (

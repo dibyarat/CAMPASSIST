@@ -9,5 +9,9 @@ export const authService = {
   updateProfile: (profileData: Record<string, any>) => apiClient('/users/me/profile', {
     method: 'PUT',
     body: JSON.stringify(profileData)
+  }),
+  deleteAccount: (confirmation: string) => apiClient('/users/me/account', {
+    method: 'DELETE',
+    body: JSON.stringify({ confirmation })
   })
 };

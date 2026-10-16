@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards, Req, ForbiddenException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { TimetableService } from './timetable.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -39,6 +40,7 @@ export class TimetableController {
     return this.timetableService.createDynamic(data, crSectionId);
   }
 
+  @Throttle({ default: { limit: 15, ttl: 60000 } })
   @Post('cr/import-csv')
   @Roles('CR', 'DEVELOPER')
   async crImportCsv(

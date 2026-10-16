@@ -533,4 +533,63 @@ export class UsersService {
 
     return this.prisma.user.delete({ where: { id } });
   }
+
+  async deleteSelfAccount(userId: string) {
+    const result: {
+      success: boolean;
+      userId: string;
+      steps: {
+        firebaseAuth: 'deleted' | 'failed' | 'not_found';
+        firestore: 'deleted' | 'failed';
+        database: 'deleted' | 'failed';
+      };
+      errors: string[];
+    } = {
+      success: false,
+      userId,
+      steps: {
+        firebaseAuth: 'not_found',
+        firestore: 'failed',
+        database: 'failed',
+      },
+      errors: [],
+    };
+
+    // 1. Delete Firestore user document
+    try {
+      await this.firebase.firestore.collection('users').doc(userId).delete();
+      result.steps.firestore = 'deleted';
+    } catch (err: any) {
+      result.steps.firestore = 'failed';
+      result.errors.push(`Firestore deletion: ${err?.message}`);
+      this.logger.warn(`Failed deleting user ${userId} from Firestore: ${err?.message}`);
+    }
+
+    // 2. Delete PostgreSQL records (cascades via Prisma foreign keys)
+    try {
+      await this.prisma.user.delete({ where: { id: userId } });
+      result.steps.database = 'deleted';
+    } catch (err: any) {
+      result.steps.database = 'failed';
+      result.errors.push(`Database deletion: ${err?.message}`);
+      this.logger.warn(`Failed deleting user ${userId} from PostgreSQL: ${err?.message}`);
+    }
+
+    // 3. Delete Firebase Auth account
+    try {
+      await this.firebase.auth.deleteUser(userId);
+      result.steps.firebaseAuth = 'deleted';
+    } catch (err: any) {
+      if (err?.code === 'auth/user-not-found') {
+        result.steps.firebaseAuth = 'not_found';
+      } else {
+        result.steps.firebaseAuth = 'failed';
+        result.errors.push(`Firebase Auth deletion: ${err?.message}`);
+        this.logger.warn(`Failed deleting user ${userId} from Firebase Auth: ${err?.message}`);
+      }
+    }
+
+    result.success = result.steps.database === 'deleted' || result.steps.firestore === 'deleted';
+    return result;
+  }
 }

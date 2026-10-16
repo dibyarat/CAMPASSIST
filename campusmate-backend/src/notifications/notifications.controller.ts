@@ -1,4 +1,5 @@
 import { Controller, Get, Patch, Post, Body, Param, UseGuards, Query, ForbiddenException } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { NotificationsService } from './notifications.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -19,6 +20,7 @@ export class NotificationsController {
     );
   }
 
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('announcement')
   @UseGuards(RolesGuard)
   @Roles('CR')
