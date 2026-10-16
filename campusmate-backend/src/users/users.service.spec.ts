@@ -20,6 +20,21 @@ const transaction = {
   },
 };
 
+const firebaseMock = {
+  firestore: {
+    collection: vi.fn(() => ({
+      doc: vi.fn(() => ({
+        set: vi.fn().mockResolvedValue({}),
+        get: vi.fn().mockResolvedValue({ exists: false, data: () => null }),
+      })),
+    })),
+  },
+  auth: {
+    getUser: vi.fn(),
+    deleteUser: vi.fn(),
+  },
+};
+
 const prismaMock = {
   user: {
     findMany: vi.fn(),
@@ -32,7 +47,7 @@ describe('UsersService.updateUserDetails', () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    service = new UsersService(prismaMock as never);
+    service = new UsersService(prismaMock as never, firebaseMock as never);
     prismaMock.user.findMany.mockResolvedValue([]);
     transaction.user.findUnique.mockResolvedValue({ id: 'user-1' });
     transaction.user.update.mockResolvedValue({ id: 'user-1', email: 'student@example.edu' });
@@ -46,7 +61,16 @@ describe('UsersService.updateUserDetails', () => {
 
     expect(prismaMock.user.findMany).toHaveBeenCalledWith(expect.objectContaining({
       include: expect.objectContaining({
-        student: { include: { section: true } },
+        student: {
+          include: {
+            section: {
+              include: {
+                department: true,
+                institution: true,
+              },
+            },
+          },
+        },
       }),
     }));
   });
