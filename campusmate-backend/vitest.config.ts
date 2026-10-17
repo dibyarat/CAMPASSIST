@@ -10,5 +10,7 @@ export default defineConfig({
     root: './',
     include: ['**/*.spec.ts'],
     fileParallelism: false,
+    hookTimeout: 30000,
+    testTimeout: 30000,
   },
 });

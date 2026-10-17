@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { User, Bell, Shield, Camera, Save, Sparkles, MessageSquare, Trash2 } from 'lucide-react';
+import { User, Bell, Shield, Camera, Save, Sparkles, MessageSquare, Trash2, Mail, Loader2 } from 'lucide-react';
 
-import { updatePassword as fbUpdatePassword, signOut as fbSignOut } from 'firebase/auth';
+import { updatePassword as fbUpdatePassword, sendPasswordResetEmail, signOut as fbSignOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
 import { authService } from '../../services/authService';
@@ -204,6 +204,26 @@ export const Settings = () => {
     }
   };
 
+  const [sendingResetEmail, setSendingResetEmail] = useState(false);
+
+  const handleSendResetEmail = async () => {
+    if (!auth.currentUser?.email) {
+      setSecurityError('No email associated with current account session.');
+      return;
+    }
+    setSendingResetEmail(true);
+    setSecurityError('');
+    setSecurityMessage('');
+    try {
+      await sendPasswordResetEmail(auth, auth.currentUser.email);
+      setSecurityMessage(`Password reset link sent to ${auth.currentUser.email}! Check your inbox (and spam folder).`);
+    } catch (error: any) {
+      setSecurityError(error instanceof Error ? error.message : 'Unable to send password reset email.');
+    } finally {
+      setSendingResetEmail(false);
+    }
+  };
+
   const updatePassword = async (event: React.FormEvent) => {
     event.preventDefault();
     setSecurityError('');
@@ -227,8 +247,12 @@ export const Settings = () => {
       setNewPassword('');
       setConfirmPassword('');
       setSecurityMessage('Password updated.');
-    } catch (error) {
-      setSecurityError(error instanceof Error ? error.message : 'Unable to update your password.');
+    } catch (error: any) {
+      if (error?.code === 'auth/requires-recent-login') {
+        setSecurityError('Direct password update requires a recent sign in. Please sign out and sign in again, or click "Send reset link to my email" below.');
+      } else {
+        setSecurityError(error instanceof Error ? error.message : 'Unable to update your password.');
+      }
     } finally {
       setSavingPassword(false);
     }
@@ -520,7 +544,17 @@ export const Settings = () => {
                 </div>
                 {securityError && <p role="alert" className="text-sm text-red-700">{securityError}</p>}
                 {securityMessage && <p role="status" className="text-sm text-emerald-700">{securityMessage}</p>}
-                <div className="flex justify-end border-t border-slate-100 pt-5">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-5">
+                  <button
+                    type="button"
+                    onClick={handleSendResetEmail}
+                    disabled={sendingResetEmail}
+                    className="text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-purple)] transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    {sendingResetEmail ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
+                    {sendingResetEmail ? 'Sending link...' : 'Send reset link to my email'}
+                  </button>
+
                   <button type="submit" disabled={savingPassword} className="flex items-center gap-2 rounded-xl bg-gradient-primary px-6 py-3 font-bold text-white shadow-md transition hover:shadow-lg disabled:opacity-50">
                     <Save size={18} /> {savingPassword ? 'Updating...' : 'Update Password'}
                   </button>

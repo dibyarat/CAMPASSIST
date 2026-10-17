@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { trackEvent } from '../../utils/analytics';
-import { Loader2, Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { Loader2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
 import logoIcon from '../../assets/logo-icon.png';
@@ -14,6 +14,13 @@ export const Login = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // Password reset state
+  const [isResetMode, setIsResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState('');
+  const [resetError, setResetError] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +47,53 @@ export const Login = () => {
     }
   };
 
+  const handleOpenReset = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResetMode(true);
+    setResetEmail(email);
+    setResetError('');
+    setResetSuccess('');
+    setError('');
+  };
+
+  const handleBackToLogin = () => {
+    setIsResetMode(false);
+    setResetError('');
+    setResetSuccess('');
+    setError('');
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const targetEmail = resetEmail.trim();
+    if (!targetEmail) {
+      setResetError('Please enter your email address.');
+      return;
+    }
+    setResetLoading(true);
+    setResetError('');
+    setResetSuccess('');
+
+    try {
+      await sendPasswordResetEmail(auth, targetEmail);
+      trackEvent('password_reset_request', { method: 'email' });
+      setResetSuccess(`Password reset link sent to ${targetEmail}! Please check your inbox (and spam folder).`);
+    } catch (err: any) {
+      const code = err?.code || '';
+      if (code === 'auth/user-not-found') {
+        setResetError('No account found with this email address. Please check your spelling or register.');
+      } else if (code === 'auth/invalid-email') {
+        setResetError('Please enter a valid email address.');
+      } else if (code === 'auth/too-many-requests') {
+        setResetError('Too many attempts. Please wait a moment before trying again.');
+      } else {
+        setResetError(err.message || 'Failed to send password reset email. Please try again.');
+      }
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-slate-50 to-pink-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -48,99 +102,177 @@ export const Login = () => {
           <span className="brand-wordmark text-3xl font-extrabold">CampAssist</span>
         </div>
         <h1 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
-          Sign in to CampAssist
+          {isResetMode ? 'Reset your password' : 'Sign in to CampAssist'}
         </h1>
         <p className="mt-2 text-center text-sm text-slate-600">
-          Continue to your campus account
+          {isResetMode ? 'Enter your registered email to receive a recovery link' : 'Continue to your campus account'}
         </p>
-        <p className="mt-4 text-center text-sm text-slate-600">
-          Or{' '}
-          <Link to="/register" className="font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-purple)]">
-            create a new account
-          </Link>
-        </p>
+        {!isResetMode && (
+          <p className="mt-4 text-center text-sm text-slate-600">
+            Or{' '}
+            <Link to="/register" className="font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-purple)]">
+              create a new account
+            </Link>
+          </p>
+        )}
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="overflow-hidden bg-white/95 py-8 px-4 shadow-xl shadow-slate-200/60 sm:rounded-2xl sm:px-10 border border-slate-200">
           <div className="h-1.5 rounded-full bg-gradient-primary mb-8" />
           
-          {error && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
-              <AlertCircle size={20} className="shrink-0 mt-0.5" />
-              <span className="text-sm font-medium">{error}</span>
-            </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleLogin}>
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Email address</label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+          {isResetMode ? (
+            resetSuccess ? (
+              <div className="space-y-6">
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex gap-3 text-emerald-800 items-start">
+                  <CheckCircle2 size={20} className="shrink-0 mt-0.5 text-emerald-600" />
+                  <div className="text-sm font-medium">
+                    <p>{resetSuccess}</p>
+                    <p className="mt-2 text-xs text-emerald-700">Follow the link in your email to set a new password, then return here to sign in.</p>
+                  </div>
                 </div>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
-                  placeholder="you@university.edu"
-                />
-              </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Password</label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
-                </div>
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
-                  placeholder="••••••••"
-                />
+                <button
+                  type="button"
+                  onClick={handleBackToLogin}
+                  className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-xl shadow-sm text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 transition"
+                >
+                  Return to Sign in
+                </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-[var(--brand-blue)] hover:text-[var(--brand-purple)]">
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] transition disabled:opacity-70"
-              >
-                {loading ? <Loader2 className="animate-spin h-5 w-5" /> : (
-                  <>Sign in <ArrowRight className="ml-2 h-5 w-5" /></>
+            ) : (
+              <form className="space-y-6" onSubmit={handleResetPassword}>
+                {resetError && (
+                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
+                    <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                    <span className="text-sm font-medium">{resetError}</span>
+                  </div>
                 )}
-              </button>
-            </div>
-          </form>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Registered Email address</label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      name="resetEmail"
+                      type="email"
+                      required
+                      autoFocus
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
+                      placeholder="you@university.edu"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <button
+                    type="submit"
+                    disabled={resetLoading}
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] transition disabled:opacity-70"
+                  >
+                    {resetLoading ? <Loader2 className="animate-spin h-5 w-5" /> : (
+                      <>Send Reset Link <ArrowRight className="ml-2 h-5 w-5" /></>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleBackToLogin}
+                    className="w-full flex justify-center py-2.5 px-4 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+                  >
+                    ← Back to Sign in
+                  </button>
+                </div>
+              </form>
+            )
+          ) : (
+            <>
+              {error && (
+                <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
+                  <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                  <span className="text-sm font-medium">{error}</span>
+                </div>
+              )}
+
+              <form className="space-y-6" onSubmit={handleLogin}>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Email address</label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      name="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
+                      placeholder="you@university.edu"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Password</label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      name="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                    />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
+                      Remember me
+                    </label>
+                  </div>
+
+                  <div className="text-sm">
+                    <button
+                      type="button"
+                      onClick={handleOpenReset}
+                      className="font-medium text-[var(--brand-blue)] hover:text-[var(--brand-purple)] transition cursor-pointer"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] transition disabled:opacity-70"
+                  >
+                    {loading ? <Loader2 className="animate-spin h-5 w-5" /> : (
+                      <>Sign in <ArrowRight className="ml-2 h-5 w-5" /></>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>
