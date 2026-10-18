@@ -241,23 +241,23 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
       
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        <header className="h-16 bg-[var(--glass-surface)] backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 shadow-xs">
-          <div className="flex items-center gap-4">
-            <button className="lg:hidden p-2 text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 rounded-xl" onClick={() => setIsSidebarOpen(true)}>
+        <header className="h-16 bg-[var(--glass-surface)] backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-3 sm:px-8 sticky top-0 z-20 shadow-xs gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+            <button className="lg:hidden p-2 text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 rounded-xl shrink-0" onClick={() => setIsSidebarOpen(true)}>
               <LayoutDashboard size={20} />
             </button>
-            <div className="w-64 sm:w-80 md:w-96">
+            <div className="flex-1 min-w-0 max-w-xs sm:w-80 md:w-96">
               <GlobalSearch role={role} />
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link to={`/${role}/notifications`} className="w-9 h-9 rounded-full bg-[var(--glass-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:shadow-xs transition relative" title="Notifications">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <Link to={`/${role}/notifications`} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[var(--glass-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:shadow-xs transition relative" title="Notifications">
               <Bell size={17} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D946A8] rounded-full ring-2 ring-white dark:ring-[#1B1733]"></span>
             </Link>
-            <Link to={role === 'student' ? '/student/profile' : `/${role}/settings`} className="flex items-center gap-2.5 hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded-full pr-3 transition cursor-pointer border border-transparent hover:border-[var(--color-border)]" title="Profile">
-              <img src={`https://ui-avatars.com/api/?name=${userName}&background=7140D8&color=fff`} alt="Avatar" className="w-7 h-7 rounded-full shadow-xs" />
-              <span className="text-xs font-semibold text-[var(--color-text)]">{userName.split(" ")[0]}</span>
+            <Link to={role === 'student' ? '/student/profile' : `/${role}/settings`} className="flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded-full sm:pr-3 transition cursor-pointer border border-transparent hover:border-[var(--color-border)]" title="Profile">
+              <img src={`https://ui-avatars.com/api/?name=${userName}&background=7140D8&color=fff`} alt="Avatar" className="w-7 h-7 rounded-full shadow-xs shrink-0" />
+              <span className="hidden sm:inline text-xs font-semibold text-[var(--color-text)]">{userName.split(" ")[0]}</span>
             </Link>
           </div>
         </header>
