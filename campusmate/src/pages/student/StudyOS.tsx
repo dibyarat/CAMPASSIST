@@ -119,6 +119,7 @@ export const StudyOS: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resourceToDelete, setResourceToDelete] = useState<NormalizedResource | null>(null);
   const [error, setError] = useState('');
 
   const rawUrl = overview?.studyosUrl || '';
@@ -314,10 +315,7 @@ export const StudyOS: React.FC = () => {
     }
   };
 
-  const handleDeleteResource = async (resource: NormalizedResource) => {
-    if (!window.confirm(`Are you sure you want to remove "${resource.title}" from your resources?`)) {
-      return;
-    }
+  const confirmDelete = async (resource: NormalizedResource) => {
     setDeletingId(resource.id);
     try {
       await studyosService.deleteResource(resource.id);
@@ -326,6 +324,7 @@ export const StudyOS: React.FC = () => {
       setError(delError.message || 'Unable to delete resource.');
     } finally {
       setDeletingId(null);
+      setResourceToDelete(null);
     }
   };
 
@@ -710,7 +709,7 @@ export const StudyOS: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={() => handleDeleteResource(resource)}
+                    onClick={() => setResourceToDelete(resource)}
                     disabled={deletingId === resource.id}
                     className="flex items-center gap-1 px-2.5 py-2 text-xs text-rose-400 hover:text-rose-300 glass hover:border-rose-500/50 rounded-xl transition border border-[var(--color-border)] disabled:opacity-50"
                     title="Delete resource"
@@ -728,6 +727,57 @@ export const StudyOS: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modern Glassmorphic Delete Confirmation Modal */}
+      {resourceToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl p-6 bg-[var(--glass-surface)] backdrop-blur-2xl border border-[var(--color-border)] shadow-2xl space-y-5 animate-in zoom-in-95 duration-200 text-left">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-500 shrink-0">
+                <Trash2 size={24} />
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-[var(--color-text)]">Remove Resource?</h3>
+                <p className="text-xs text-[var(--color-muted)]">This will delete the item from your workspace.</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-[var(--color-border)] flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${getIconBackground(resourceToDelete.canonicalCategory)}`}>
+                {getResourceIcon(resourceToDelete.canonicalCategory)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-[var(--color-text)] truncate">{resourceToDelete.title}</p>
+                <p className="text-xs text-[var(--color-muted)]">{resourceToDelete.displayCategory}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setResourceToDelete(null)}
+                disabled={deletingId === resourceToDelete.id}
+                className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-[var(--color-text)] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-[var(--color-border)] active:scale-95 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => confirmDelete(resourceToDelete)}
+                disabled={deletingId === resourceToDelete.id}
+                className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 active:scale-95 shadow-md shadow-rose-600/25 transition flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {deletingId === resourceToDelete.id ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Trash2 size={16} />
+                )}
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
