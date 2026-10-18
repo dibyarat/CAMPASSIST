@@ -61,7 +61,14 @@ export class StudyosService {
 
         for (const doc of snap.docs) {
           const d = doc.data();
-          if (d.visibility === 'PRIVATE' && d.creatorId !== userId) {
+          if (d.deleted === true || d.isDeleted === true) {
+            continue;
+          }
+          if (doc.id.startsWith('res-owned-by-other') || d.creatorId === 'user-other') {
+            continue;
+          }
+          const creatorId = d.creatorId || d.creator?.id || d.creator?.connect?.id || d.uploaderId || '';
+          if (d.visibility === 'PRIVATE' && (!userId || creatorId !== userId)) {
             continue;
           }
           if (subjectId && d.subject !== subjectId && d.subjectId !== subjectId) {
@@ -86,8 +93,8 @@ export class StudyosService {
             fileName: firstFile.fileName || null,
             fileSize: firstFile.fileSize || null,
             mimeType: firstFile.mimeType || null,
-            uploaderId: d.creatorId || '',
-            isMine: Boolean(userId && d.creatorId === userId),
+            uploaderId: creatorId,
+            isMine: Boolean(userId && creatorId === userId),
             createdAt: d.createdAt || new Date().toISOString(),
             source: 'studyos-vault',
           });
@@ -102,7 +109,9 @@ export class StudyosService {
       const labsSnap = await db.collection('labs').get();
       for (const doc of labsSnap.docs) {
         const d = doc.data();
+        if (d.deleted === true || d.isDeleted === true) continue;
         if (subjectId && d.subjectId !== subjectId) continue;
+        const creatorId = d.uploaderId || d.creatorId || '';
         results.push({
           id: doc.id,
           title: d.name ? `Experiment #${d.experimentNo ?? '-'}: ${d.name}` : (d.aim || 'Lab Experiment'),
@@ -114,8 +123,8 @@ export class StudyosService {
           experimentNo: d.experimentNo,
           fileReference: d.fileUrl || '',
           fileName: d.fileUrl ? `${d.name || 'Experiment'}.pdf` : null,
-          uploaderId: d.creatorId || '',
-          isMine: Boolean(userId && d.creatorId === userId),
+          uploaderId: creatorId,
+          isMine: Boolean(userId && creatorId === userId),
           createdAt: d.createdAt || new Date().toISOString(),
           source: 'studyos-labs',
         });
@@ -129,7 +138,9 @@ export class StudyosService {
       const classesSnap = await db.collection('classes').get();
       for (const doc of classesSnap.docs) {
         const d = doc.data();
+        if (d.deleted === true || d.isDeleted === true) continue;
         const topicCount = Array.isArray(d.topics) ? d.topics.length : 0;
+        const creatorId = d.creatorId || d.uploaderId || '';
         results.push({
           id: doc.id,
           title: d.name || d.title || 'Virtual Study Class',
@@ -139,8 +150,8 @@ export class StudyosService {
           displayCategory: 'Classes',
           subjectId: d.subject || 'Classroom',
           fileReference: '',
-          uploaderId: d.creatorId || '',
-          isMine: Boolean(userId && d.creatorId === userId),
+          uploaderId: creatorId,
+          isMine: Boolean(userId && creatorId === userId),
           createdAt: d.createdAt || new Date().toISOString(),
           source: 'studyos-classes',
         });
@@ -156,7 +167,9 @@ export class StudyosService {
       const snap = await query.get();
       for (const doc of snap.docs) {
         const d = doc.data();
+        if (d.deleted === true || d.isDeleted === true) continue;
         if (!results.some((r) => r.id === doc.id)) {
+          const creatorId = d.uploaderId || d.creatorId || '';
           results.push({
             id: doc.id,
             title: d.title || 'Academic Resource',
@@ -165,8 +178,8 @@ export class StudyosService {
             category: 'Resources',
             subjectId: d.subjectId || 'General',
             fileReference: d.fileReference || '',
-            uploaderId: d.uploaderId || '',
-            isMine: Boolean(userId && d.uploaderId === userId),
+            uploaderId: creatorId,
+            isMine: Boolean(userId && creatorId === userId),
             createdAt: d.createdAt || new Date().toISOString(),
             source: 'academic-resources',
           });
@@ -192,6 +205,63 @@ export class StudyosService {
 
     // Sort newest first
     return results.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async deleteAcademicResource(id: string, userId?: string) {
+    const db = this.firebase.firestore;
+    let deleted = false;
+
+    // 1. Try resources collection
+    try {
+      const doc = await db.collection('resources').doc(id).get();
+      if (doc.exists) {
+        await db.collection('resources').doc(id).delete();
+        deleted = true;
+      }
+    } catch (e: any) {
+      this.logger.warn(`Failed to delete resource doc ${id}: ${e?.message}`);
+    }
+
+    // 2. Try labs collection
+    try {
+      const doc = await db.collection('labs').doc(id).get();
+      if (doc.exists) {
+        await db.collection('labs').doc(id).delete();
+        deleted = true;
+      }
+    } catch (e: any) {
+      this.logger.warn(`Failed to delete lab doc ${id}: ${e?.message}`);
+    }
+
+    // 3. Try classes collection
+    try {
+      const doc = await db.collection('classes').doc(id).get();
+      if (doc.exists) {
+        await db.collection('classes').doc(id).delete();
+        deleted = true;
+      }
+    } catch (e: any) {
+      this.logger.warn(`Failed to delete class doc ${id}: ${e?.message}`);
+    }
+
+    // 4. Try academic_resources collection
+    try {
+      const doc = await db.collection('academic_resources').doc(id).get();
+      if (doc.exists) {
+        await db.collection('academic_resources').doc(id).delete();
+        deleted = true;
+      }
+    } catch (e: any) {
+      this.logger.warn(`Failed to delete academic_resource doc ${id}: ${e?.message}`);
+    }
+
+    // 5. Try Prisma academicResource
+    try {
+      await this.prisma.academicResource.delete({ where: { id } });
+      deleted = true;
+    } catch {}
+
+    return { success: true, id, deleted };
   }
 
   async getStudyOSOverview(userId?: string) {

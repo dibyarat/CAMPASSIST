@@ -59,6 +59,9 @@ export const studyosService = {
 	createResource: (data: Omit<AcademicResource, 'id' | 'uploaderId' | 'createdAt'>) => apiClient('/studyos/academic', {
 		method: 'POST',
 		body: JSON.stringify(data)
-	})
+	}),
+	deleteResource: (id: string) => apiClient(`/studyos/academic/${encodeURIComponent(id)}`, {
+		method: 'DELETE'
+	}) as Promise<{ success: boolean; id: string; deleted: boolean }>
 };
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { StudyosService } from './studyos.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -34,6 +34,11 @@ export class StudyosController {
     // Decodes the reference if passed as URL parameter
     const decodedRef = decodeURIComponent(fileReference);
     return this.studyosService.getDownloadUrl(decodedRef);
+  }
+
+  @Delete(':id')
+  deleteResource(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.studyosService.deleteAcademicResource(id, user?.id);
   }
 }
 

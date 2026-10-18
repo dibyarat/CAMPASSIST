@@ -17,7 +17,8 @@ import {
   AlertCircle,
   Download,
   Users,
-  MessageSquare
+  MessageSquare,
+  Trash2
 } from 'lucide-react';
 import { studyosService } from '../../services/studyosService';
 import type { AcademicResource, StudyOSOverview } from '../../services/studyosService';
@@ -116,6 +117,7 @@ export const StudyOS: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [openingId, setOpeningId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
   const rawUrl = overview?.studyosUrl || '';
@@ -308,6 +310,21 @@ export const StudyOS: React.FC = () => {
       setError(openError.message || 'Unable to open this resource.');
     } finally {
       setOpeningId(null);
+    }
+  };
+
+  const handleDeleteResource = async (resource: NormalizedResource) => {
+    if (!window.confirm(`Are you sure you want to remove "${resource.title}" from your resources?`)) {
+      return;
+    }
+    setDeletingId(resource.id);
+    try {
+      await studyosService.deleteResource(resource.id);
+      setRawResources((prev) => prev.filter((r) => r.id !== resource.id));
+    } catch (delError: any) {
+      setError(delError.message || 'Unable to delete resource.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -678,6 +695,20 @@ export const StudyOS: React.FC = () => {
                   >
                     <ExternalLink size={14} />
                     <span className="hidden md:inline">View in StudyOS</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteResource(resource)}
+                    disabled={deletingId === resource.id}
+                    className="flex items-center gap-1 px-2.5 py-2 text-xs text-rose-400 hover:text-rose-300 glass hover:border-rose-500/50 rounded-xl transition border border-[var(--color-border)] disabled:opacity-50"
+                    title="Delete resource"
+                  >
+                    {deletingId === resource.id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                    <span className="hidden md:inline">Delete</span>
                   </button>
                 </div>
               </div>
