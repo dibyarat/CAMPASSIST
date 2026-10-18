@@ -114,6 +114,7 @@ export const StudyOS: React.FC = () => {
   const [overview, setOverview] = useState<StudyOSOverview | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [openingId, setOpeningId] = useState<string | null>(null);
   const [error, setError] = useState('');
 
@@ -127,8 +128,12 @@ export const StudyOS: React.FC = () => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (silent: boolean = false) => {
+    if (!silent) {
+      setLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
     setError('');
     try {
       const [resList, overviewData] = await Promise.allSettled([
@@ -138,7 +143,7 @@ export const StudyOS: React.FC = () => {
 
       if (resList.status === 'fulfilled') {
         setRawResources(resList.value);
-      } else {
+      } else if (!silent) {
         setError(resList.reason?.message || 'Unable to load StudyOS resources.');
       }
 
@@ -146,14 +151,38 @@ export const StudyOS: React.FC = () => {
         setOverview(overviewData.value);
       }
     } catch (loadError: any) {
-      setError(loadError.message || 'Unable to connect to StudyOS.');
+      if (!silent) {
+        setError(loadError.message || 'Unable to connect to StudyOS.');
+      }
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
     loadData();
+
+    // Continuously update StudyOS resources every 8 seconds
+    const interval = setInterval(() => {
+      loadData(true);
+    }, 8000);
+
+    // Auto-sync immediately when returning to this tab from StudyOS workspace
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadData(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, []);
 
   // Centralized normalized list
@@ -285,32 +314,32 @@ export const StudyOS: React.FC = () => {
   const getResourceIcon = (category: CanonicalCategory) => {
     switch (category) {
       case 'NOTE':
-        return <FileText className="text-amber-600" size={20} />;
+        return <FileText className="text-amber-400" size={20} />;
       case 'LAB_RECORD':
-        return <FlaskConical className="text-emerald-600" size={20} />;
+        return <FlaskConical className="text-emerald-400" size={20} />;
       case 'CLASS':
-        return <Video className="text-purple-600" size={20} />;
+        return <Video className="text-[#D946A8]" size={20} />;
       case 'VIVA':
-        return <HelpCircle className="text-rose-600" size={20} />;
+        return <HelpCircle className="text-rose-400" size={20} />;
       case 'FILE':
       default:
-        return <Paperclip className="text-blue-600" size={20} />;
+        return <Paperclip className="text-[#19A3E9]" size={20} />;
     }
   };
 
   const getIconBackground = (category: CanonicalCategory) => {
     switch (category) {
       case 'NOTE':
-        return 'bg-amber-50 border-amber-100';
+        return 'bg-amber-500/15 border-amber-500/30';
       case 'LAB_RECORD':
-        return 'bg-emerald-50 border-emerald-100';
+        return 'bg-emerald-500/15 border-emerald-500/30';
       case 'CLASS':
-        return 'bg-purple-50 border-purple-100';
+        return 'bg-[rgba(217,70,168,0.15)] border-[#D946A8]/30';
       case 'VIVA':
-        return 'bg-rose-50 border-rose-100';
+        return 'bg-rose-500/15 border-rose-500/30';
       case 'FILE':
       default:
-        return 'bg-blue-50 border-blue-100';
+        return 'bg-[rgba(25,163,233,0.15)] border-[#19A3E9]/30';
     }
   };
 
@@ -320,25 +349,26 @@ export const StudyOS: React.FC = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* CampAssist & StudyOS Header Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white shadow-xl shadow-indigo-500/10">
-        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl glass p-8 text-[var(--color-text)] border border-[var(--color-border)] shadow-xl">
+        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[radial-gradient(circle,rgba(217,70,168,0.15)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -left-12 -top-12 w-64 h-64 bg-[radial-gradient(circle,rgba(25,163,233,0.12)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold text-white tracking-wide uppercase">
-              <Sparkles size={13} className="text-amber-300" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-[var(--color-border)] text-xs font-semibold text-[var(--color-text)] tracking-wide uppercase">
+              <Sparkles size={13} className="text-amber-400" />
               CampAssist & StudyOS
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
               CampAssist & StudyOS
             </h1>
-            <p className="text-white/80 text-sm md:text-base max-w-xl leading-relaxed">
+            <p className="text-[var(--color-muted)] text-sm md:text-base max-w-xl leading-relaxed">
               Seamlessly browse your notes, experiment records, and virtual classes synced with your personal StudyOS workspace.
             </p>
           </div>
 
           <button
             onClick={() => openStudyOS()}
-            className="self-start md:self-auto shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-white text-indigo-700 font-bold text-sm shadow-md hover:bg-white/95 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
+            className="self-start md:self-auto shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-primary text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <GraduationCap size={18} />
             Launch Full StudyOS
@@ -347,51 +377,51 @@ export const StudyOS: React.FC = () => {
         </div>
 
         {/* Live Metrics Row */}
-        <div className="mt-8 pt-6 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="mt-8 pt-6 border-t border-[var(--color-border)] grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div 
             onClick={() => openStudyOS('teams')}
-            className="bg-white/10 hover:bg-white/15 transition-all cursor-pointer backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3"
+            className="glass hover:border-[#19A3E9]/50 transition-all cursor-pointer rounded-2xl p-4 border border-[var(--color-border)] flex items-center gap-3"
             title="Open Team Finder in StudyOS"
           >
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <Users size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-xl bg-[rgba(25,163,233,0.15)] border border-[#19A3E9]/30 flex items-center justify-center shrink-0">
+              <Users size={20} className="text-[#19A3E9]" />
             </div>
             <div>
-              <div className="text-xs text-white/70 font-medium">Open Teams</div>
-              <div className="text-lg font-bold">
-                {stats.myTeams} <span className="text-xs font-normal text-white/60">mine / {stats.openTeams} total</span>
+              <div className="text-xs text-[var(--color-muted)] font-medium">Open Teams</div>
+              <div className="text-lg font-bold text-[var(--color-text)]">
+                {stats.myTeams} <span className="text-xs font-normal text-[var(--color-muted)]">mine / {stats.openTeams} total</span>
               </div>
             </div>
           </div>
 
           <div 
             onClick={() => openStudyOS('skills')}
-            className="bg-white/10 hover:bg-white/15 transition-all cursor-pointer backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3"
+            className="glass hover:border-[#D946A8]/50 transition-all cursor-pointer rounded-2xl p-4 border border-[var(--color-border)] flex items-center gap-3"
             title="Open Skills & Help in StudyOS"
           >
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <MessageSquare size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-xl bg-[rgba(217,70,168,0.15)] border border-[#D946A8]/30 flex items-center justify-center shrink-0">
+              <MessageSquare size={20} className="text-[#D946A8]" />
             </div>
             <div>
-              <div className="text-xs text-white/70 font-medium">Help Services</div>
-              <div className="text-lg font-bold">
-                {stats.myHelpServices} <span className="text-xs font-normal text-white/60">mine / {stats.helpServices} total</span>
+              <div className="text-xs text-[var(--color-muted)] font-medium">Help Services</div>
+              <div className="text-lg font-bold text-[var(--color-text)]">
+                {stats.myHelpServices} <span className="text-xs font-normal text-[var(--color-muted)]">mine / {stats.helpServices} total</span>
               </div>
             </div>
           </div>
 
           <div 
             onClick={() => openStudyOS('classes')}
-            className="bg-white/10 hover:bg-white/15 transition-all cursor-pointer backdrop-blur-md rounded-2xl p-4 border border-white/10 flex items-center gap-3"
+            className="glass hover:border-purple-400/50 transition-all cursor-pointer rounded-2xl p-4 border border-[var(--color-border)] flex items-center gap-3"
             title="Open Virtual Classes in StudyOS"
           >
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-              <Video size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center shrink-0">
+              <Video size={20} className="text-purple-400" />
             </div>
             <div>
-              <div className="text-xs text-white/70 font-medium">Virtual Classes</div>
-              <div className="text-lg font-bold">
-                {stats.myClasses} <span className="text-xs font-normal text-white/60">mine / {stats.totalClasses} total</span>
+              <div className="text-xs text-[var(--color-muted)] font-medium">Virtual Classes</div>
+              <div className="text-lg font-bold text-[var(--color-text)]">
+                {stats.myClasses} <span className="text-xs font-normal text-[var(--color-muted)]">mine / {stats.totalClasses} total</span>
               </div>
             </div>
           </div>
@@ -399,27 +429,27 @@ export const StudyOS: React.FC = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-100 shadow-sm p-6 space-y-6">
+      <div className="glass rounded-3xl border border-[var(--color-border)] shadow-sm p-6 space-y-6">
         {/* Controls Toolbar */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Navigation Tabs with Accurate Item Counts */}
-          <div className="flex flex-wrap bg-slate-100/80 p-1.5 rounded-2xl gap-1">
+          <div className="flex flex-wrap glass p-1.5 rounded-2xl border border-[var(--color-border)] gap-1">
             {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-xl transition-all duration-150 ${
                   activeTab === tab
-                    ? 'bg-white text-indigo-600 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                    ? 'bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30 shadow-sm'
+                    : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-white/5'
                 }`}
               >
                 <span>{tab}</span>
                 <span
                   className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${
                     activeTab === tab
-                      ? 'bg-indigo-100 text-indigo-700'
-                      : 'bg-slate-200/80 text-slate-600'
+                      ? 'bg-[#19A3E9]/20 text-[#19A3E9]'
+                      : 'glass text-[var(--color-muted)] border border-[var(--color-border)]'
                   }`}
                 >
                   {counts[tab]}
@@ -428,21 +458,27 @@ export const StudyOS: React.FC = () => {
             ))}
           </div>
 
-          {/* Search, My Items filter & Refresh */}
+          {/* Search, My Items filter & Refresh & Live Indicator */}
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Live Sync Status indicator */}
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl glass border border-[var(--color-border)] text-[11px] font-medium text-[var(--color-muted)]" title="Auto-syncing with StudyOS workspace in real time">
+              <span className={`w-2 h-2 rounded-full ${isRefreshing ? 'bg-[#19A3E9] animate-ping' : 'bg-emerald-400 animate-pulse'}`} />
+              <span>Live Sync Active</span>
+            </div>
+
             <button
               onClick={() => setOnlyMine(!onlyMine)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition border ${
                 onlyMine
-                  ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-[rgba(25,163,233,0.15)] border-[#19A3E9] text-[#19A3E9]'
+                  : 'glass border-[var(--color-border)] text-[var(--color-muted)] hover:text-[var(--color-text)]'
               }`}
               title="Show only items created by your account"
             >
               <UserCheck size={15} />
               My Items
               {myTotalCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[11px] bg-indigo-100 text-indigo-700 font-bold">
+                <span className="px-1.5 py-0.5 rounded-full text-[11px] bg-[rgba(25,163,233,0.2)] text-[#19A3E9] font-bold">
                   {myTotalCount}
                 </span>
               )}
@@ -454,13 +490,13 @@ export const StudyOS: React.FC = () => {
                 placeholder="Search resources, labs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-48 sm:w-60 pl-8 pr-7 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm outline-none bg-slate-50 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition"
+                className="w-48 sm:w-60 pl-8 pr-7 py-2 rounded-xl border border-[var(--color-border)] text-xs sm:text-sm outline-none glass text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:border-[#19A3E9] transition"
               />
-              <Search size={14} className="absolute left-2.5 top-3 text-slate-400" />
+              <Search size={14} className="absolute left-2.5 top-3 text-[var(--color-muted)]" />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-2.5 text-[var(--color-muted)] hover:text-[var(--color-text)]"
                 >
                   <X size={14} />
                 </button>
@@ -468,12 +504,12 @@ export const StudyOS: React.FC = () => {
             </div>
 
             <button
-              onClick={loadData}
-              disabled={loading}
-              className="flex items-center gap-1 px-3 py-2 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-100 active:scale-95 transition disabled:opacity-60"
-              title="Refresh resources"
+              onClick={() => loadData(false)}
+              disabled={loading || isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-2 bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30 rounded-xl text-xs sm:text-sm font-semibold hover:bg-[rgba(25,163,233,0.25)] active:scale-95 transition disabled:opacity-60"
+              title="Refresh resources from StudyOS"
             >
-              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              <RefreshCw size={14} className={loading || isRefreshing ? 'animate-spin' : ''} />
               <span>Refresh</span>
             </button>
           </div>
@@ -481,19 +517,19 @@ export const StudyOS: React.FC = () => {
 
         {/* Error notification with retry */}
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
-              <AlertCircle size={18} className="text-rose-600 shrink-0" />
+              <AlertCircle size={18} className="text-rose-400 shrink-0" />
               <span className="truncate">{error}</span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={loadData}
-                className="px-3 py-1 bg-white border border-rose-200 rounded-lg text-xs font-semibold text-rose-700 hover:bg-rose-100 transition"
+                onClick={() => loadData(false)}
+                className="px-3 py-1 glass border border-rose-500/30 rounded-lg text-xs font-semibold text-rose-300 hover:bg-rose-500/20 transition"
               >
                 Retry
               </button>
-              <button onClick={() => setError('')} className="text-rose-500 hover:text-rose-700">
+              <button onClick={() => setError('')} className="text-rose-400 hover:text-rose-300">
                 <X size={16} />
               </button>
             </div>
@@ -502,20 +538,20 @@ export const StudyOS: React.FC = () => {
 
         {/* Resource List / Grid */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-slate-500 space-y-3">
-            <Loader2 className="animate-spin text-indigo-600" size={32} />
+          <div className="flex flex-col items-center justify-center py-16 text-[var(--color-muted)] space-y-3">
+            <Loader2 className="animate-spin text-[#19A3E9]" size={32} />
             <p className="text-sm font-medium">Fetching your StudyOS workspace...</p>
           </div>
         ) : visibleResources.length === 0 ? (
-          <div className="py-16 text-center border-2 border-dashed border-slate-200 rounded-2xl p-8 space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+          <div className="py-16 text-center border-2 border-dashed border-[var(--color-border)] rounded-2xl p-8 space-y-4 glass">
+            <div className="w-14 h-14 rounded-2xl glass text-[#19A3E9] border border-[var(--color-border)] flex items-center justify-center mx-auto">
               <GraduationCap size={28} />
             </div>
             <div className="space-y-1">
-              <h3 className="font-bold text-slate-800 text-base">
+              <h3 className="font-bold text-[var(--color-text)] text-base">
                 {searchQuery ? 'No matching resources found' : `No ${activeTab.toLowerCase()} found`}
               </h3>
-              <p className="text-slate-500 text-xs sm:text-sm max-w-md mx-auto">
+              <p className="text-[var(--color-muted)] text-xs sm:text-sm max-w-md mx-auto">
                 {searchQuery || onlyMine
                   ? 'No resources match your active filters or search terms. Try clearing search or disabling My Items.'
                   : `You haven't uploaded or accessed any ${activeTab.toLowerCase()} yet in your StudyOS workspace.`}
@@ -534,7 +570,7 @@ export const StudyOS: React.FC = () => {
             {visibleResources.map((resource) => (
               <div
                 key={resource.id}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-slate-150 hover:border-indigo-200 hover:shadow-md transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-[var(--color-border)] hover:border-[#19A3E9]/50 hover:shadow-md transition-all duration-200 glass"
               >
                 <div className="flex items-start sm:items-center gap-3.5 min-w-0">
                   <div
@@ -547,39 +583,39 @@ export const StudyOS: React.FC = () => {
 
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="font-bold text-slate-900 text-sm sm:text-base truncate group-hover:text-indigo-600 transition">
+                      <h4 className="font-bold text-[var(--color-text)] text-sm sm:text-base truncate group-hover:text-[#19A3E9] transition">
                         {resource.title}
                       </h4>
 
                       {resource.isMine && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[rgba(217,70,168,0.15)] text-[#D946A8] border border-[#D946A8]/30">
                           ✦ Created by you
                         </span>
                       )}
 
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                      <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold glass text-[var(--color-text)] border border-[var(--color-border)]">
                         {resource.displayCategory}
                       </span>
 
                       {resource.experimentNo !== undefined && (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                           Exp #{resource.experimentNo}
                         </span>
                       )}
 
                       {resource.subjectId && (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700">
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30">
                           {resource.subjectId}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--color-muted)]">
                       <span>{new Date(resource.createdAt).toLocaleDateString()}</span>
                       {resource.fileName && (
                         <>
                           <span>•</span>
-                          <span className="truncate max-w-[240px] text-slate-600 font-medium">
+                          <span className="truncate max-w-[240px] text-[var(--color-text)] font-medium">
                             {resource.fileName}
                           </span>
                         </>
@@ -587,7 +623,7 @@ export const StudyOS: React.FC = () => {
                       {resource.fileSize && (
                         <>
                           <span>•</span>
-                          <span className="text-slate-400">
+                          <span className="text-[var(--color-muted)]">
                             {(resource.fileSize / (1024 * 1024)).toFixed(2)} MB
                           </span>
                         </>
@@ -595,7 +631,7 @@ export const StudyOS: React.FC = () => {
                     </div>
 
                     {resource.description && (
-                      <p className="text-xs text-slate-600 line-clamp-1 max-w-xl">
+                      <p className="text-xs text-[var(--color-muted)] line-clamp-1 max-w-xl">
                         {resource.description}
                       </p>
                     )}
@@ -607,7 +643,7 @@ export const StudyOS: React.FC = () => {
                     <button
                       onClick={() => openResource(resource)}
                       disabled={openingId === resource.id}
-                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 active:scale-95 disabled:opacity-60 transition"
+                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-[#19A3E9] bg-[rgba(25,163,233,0.15)] border border-[#19A3E9]/30 rounded-xl hover:bg-[rgba(25,163,233,0.25)] active:scale-95 disabled:opacity-60 transition"
                       title={resource.fileName ? `Download ${resource.fileName}` : 'Download file'}
                     >
                       {openingId === resource.id ? (
@@ -624,7 +660,7 @@ export const StudyOS: React.FC = () => {
                   ) : resource.canonicalCategory === 'CLASS' ? (
                     <button
                       onClick={() => openResource(resource)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-purple-700 bg-purple-50 border border-purple-200 rounded-xl hover:bg-purple-100 active:scale-95 transition"
+                      className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-[#D946A8] bg-[rgba(217,70,168,0.15)] border border-[#D946A8]/30 rounded-xl hover:bg-[rgba(217,70,168,0.25)] active:scale-95 transition"
                     >
                       <Video size={15} />
                       <span>Join Class</span>
@@ -637,7 +673,7 @@ export const StudyOS: React.FC = () => {
                       else if (resource.canonicalCategory === 'CLASS') openStudyOS('classes');
                       else openStudyOS('vault');
                     }}
-                    className="flex items-center gap-1 px-2.5 py-2 text-xs text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition"
+                    className="flex items-center gap-1 px-2.5 py-2 text-xs text-[var(--color-muted)] hover:text-[var(--color-text)] glass hover:border-[var(--color-primary)] rounded-xl transition border border-[var(--color-border)]"
                     title="View in StudyOS"
                   >
                     <ExternalLink size={14} />

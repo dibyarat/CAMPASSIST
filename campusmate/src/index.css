@@ -307,12 +307,19 @@ main [class*="rounded-3xl"][class*="border"] {
   color: var(--color-text) !important;
 }
 
-/* Translucent sub-surfaces (inner chips, nested items, secondary buttons) */
+/* Translucent sub-surfaces (inner chips, nested items, secondary buttons, pills) */
 div[class*="bg-slate-50"],
 div[class*="bg-slate-100"],
+div[class*="bg-slate-200"],
 div[class*="bg-gray-50"],
+span[class*="bg-slate-50"],
+span[class*="bg-slate-100"],
+span[class*="bg-slate-200"],
+span[class*="bg-gray-50"],
+span[class*="bg-gray-100"],
 button[class*="bg-slate-50"],
 button[class*="bg-slate-100"],
+button[class*="bg-slate-200"],
 tr[class*="bg-slate-50"] {
   background-color: var(--glass-sub-surface) !important;
   border-color: var(--color-border) !important;
