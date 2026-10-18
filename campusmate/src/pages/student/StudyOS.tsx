@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Trash2
 } from 'lucide-react';
+import studyosMark from '../../assets/studyos-mark.png';
 import { studyosService } from '../../services/studyosService';
 import type { AcademicResource, StudyOSOverview } from '../../services/studyosService';
 
@@ -367,27 +368,38 @@ export const StudyOS: React.FC = () => {
     <div className="max-w-5xl mx-auto space-y-6">
       {/* CampAssist & StudyOS Header Card */}
       <div className="relative overflow-hidden rounded-3xl glass p-8 text-[var(--color-text)] border border-[var(--color-border)] shadow-xl">
-        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[radial-gradient(circle,rgba(217,70,168,0.15)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute -left-12 -top-12 w-64 h-64 bg-[radial-gradient(circle,rgba(25,163,233,0.12)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[radial-gradient(circle,rgba(217,70,168,0.18)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -left-12 -top-12 w-64 h-64 bg-[radial-gradient(circle,rgba(25,163,233,0.15)_0%,transparent_70%)] rounded-full blur-2xl pointer-events-none" />
+        
+        {/* Ambient floating StudyOS symbol in background */}
+        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-48 h-48 opacity-[0.14] pointer-events-none select-none">
+          <img src={studyosMark} alt="" className="w-full h-full object-contain filter drop-shadow(0 0 25px rgba(113,64,216,0.6))" />
+        </div>
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-[var(--color-border)] text-xs font-semibold text-[var(--color-text)] tracking-wide uppercase">
-              <Sparkles size={13} className="text-amber-400" />
-              CampAssist & StudyOS
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl glass p-2.5 border border-[#7140D8]/30 flex items-center justify-center shrink-0 shadow-lg shadow-[#7140D8]/10 group hover:scale-105 transition">
+              <img src={studyosMark} alt="StudyOS Mark" className="w-full h-full object-contain drop-shadow" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">
-              CampAssist & StudyOS
-            </h1>
-            <p className="text-[var(--color-muted)] text-sm md:text-base max-w-xl leading-relaxed">
-              Seamlessly browse your notes, experiment records, and virtual classes synced with your personal StudyOS workspace.
-            </p>
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full glass border border-[var(--color-border)] text-xs font-semibold text-[var(--color-text)] tracking-wide uppercase">
+                <Sparkles size={13} className="text-amber-400" />
+                StudyOS Academic Hub
+              </div>
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--color-text)] flex items-center gap-2">
+                CampAssist & Study<span className="text-[#D946A8]">OS</span>
+              </h1>
+              <p className="text-[var(--color-muted)] text-sm md:text-base max-w-xl leading-relaxed">
+                Seamlessly browse your notes, experiment records, and virtual classes synced with your personal StudyOS workspace.
+              </p>
+            </div>
           </div>
 
           <button
             onClick={() => openStudyOS()}
-            className="self-start md:self-auto shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-primary text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
+            className="self-start md:self-auto shrink-0 inline-flex items-center gap-2.5 px-5 py-3 rounded-2xl bg-gradient-primary text-white font-bold text-sm shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200"
           >
-            <GraduationCap size={18} />
+            <img src={studyosMark} alt="" className="w-5 h-5 object-contain" />
             Launch Full StudyOS
             <ExternalLink size={15} className="opacity-75" />
           </button>

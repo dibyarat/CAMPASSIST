@@ -3,6 +3,7 @@ import { Calendar, Clock, MapPin, Bell, FileText, ChevronRight, GraduationCap, U
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../services/apiClient';
 import { academicTermService } from '../../services/academicTermService';
+import studyosMark from '../../assets/studyos-mark.png';
 
 export const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -196,8 +197,8 @@ export const Dashboard = () => {
                 <span className="text-xs font-semibold text-[var(--color-text)]">Attendance Planner</span>
               </Link>
               <Link to="/student/studyos" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
-                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#19A3E9] border border-[var(--color-border)] group-hover:scale-105 transition-transform">
-                  <FileText size={20} />
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center p-1.5 border border-[var(--color-border)] group-hover:scale-110 transition-transform">
+                  <img src={studyosMark} alt="StudyOS" className="w-full h-full object-contain" />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-text)]">StudyOS</span>
               </Link>
