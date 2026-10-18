@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export const ClosingCTA: React.FC = () => {
   return (
-    <section className="py-16 sm:py-24 px-5 sm:px-8 bg-[var(--color-bg)]">
+    <section className="py-16 sm:py-24 px-5 sm:px-8 bg-transparent">
       <div className="max-w-[1200px] mx-auto">
         <div
           className="rounded-[40px] px-8 py-16 sm:py-20 sm:px-16 text-center text-white relative overflow-hidden"

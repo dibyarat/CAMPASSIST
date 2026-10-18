@@ -213,11 +213,7 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-0 left-0 w-96 h-96 rounded-full pointer-events-none blur-[120px] bg-[var(--glow-blue)]" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full pointer-events-none blur-[120px] bg-[var(--glow-pink)]" />
-
+    <div className="min-h-screen bg-transparent flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative z-10 overflow-hidden">
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex items-center justify-center gap-3">
           <img src={logoIcon} alt="CampAssist Logo" className="h-12 w-12 object-contain" />

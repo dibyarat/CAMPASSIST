@@ -16,8 +16,9 @@
   --card-shadow: 0 30px 60px -30px rgb(113 64 216 / 20%);
   --glow-blue: rgba(25, 163, 233, 0.22);
   --glow-pink: rgba(217, 70, 168, 0.20);
+  --backdrop-mark-opacity: 0.24;
   --section-wash: linear-gradient(120deg, rgba(25, 163, 233, 0.08) 0%, rgba(113, 64, 216, 0.08) 50%, rgba(217, 70, 168, 0.08) 100%);
-  --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.28), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.24), transparent 70%), #FAFAFC;
+  --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.28), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.24), transparent 70%), transparent;
 
   /* Backward Compatibility Aliases */
   --color-ink: var(--color-text);
@@ -59,8 +60,9 @@
     --card-shadow: 0 30px 60px -30px rgb(0 0 0 / 55%);
     --glow-blue: rgba(25, 163, 233, 0.28);
     --glow-pink: rgba(217, 70, 168, 0.25);
+    --backdrop-mark-opacity: 0.30;
     --section-wash: linear-gradient(120deg, rgba(25, 163, 233, 0.12) 0%, rgba(135, 88, 245, 0.12) 50%, rgba(217, 70, 168, 0.12) 100%);
-    --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.32), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.28), transparent 70%), #120F24;
+    --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.32), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.28), transparent 70%), transparent;
     --border-color: var(--color-border);
   }
 }
@@ -71,6 +73,100 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================================
+   FIXED BACKGROUND (Brand Statement Backdrop & Ambient Glows)
+   ======================================================== */
+.fixed-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.backdrop-aura {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(680px, 80vw);
+  height: min(680px, 80vw);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(135, 88, 245, 0.35) 0%, rgba(217, 70, 168, 0.22) 42%, rgba(25, 163, 233, 0.12) 65%, transparent 75%);
+  filter: blur(80px);
+  pointer-events: none;
+  animation: auraPulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes auraPulse {
+  0% { transform: translate(-50%, -50%) scale(0.94); opacity: 0.8; }
+  50% { transform: translate(-50%, -50%) scale(1.06); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.97); opacity: 0.85; }
+}
+
+.backdrop-logo-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(760px, 85vw);
+  max-height: 82vh;
+  opacity: var(--backdrop-mark-opacity, 0.24);
+  filter: drop-shadow(0 0 35px rgba(135, 88, 245, 0.65))
+          drop-shadow(0 0 75px rgba(217, 70, 168, 0.45))
+          drop-shadow(0 20px 45px rgba(25, 163, 233, 0.35));
+  object-fit: contain;
+  user-select: none;
+  transition: opacity 0.3s ease;
+  animation: floatBackdrop 14s ease-in-out infinite alternate;
+}
+
+@keyframes floatBackdrop {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  50% { transform: translate(-50%, -52%) rotate(0.7deg); }
+  100% { transform: translate(-50%, -48%) rotate(-0.7deg); }
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  animation: slowDrift 16s ease-in-out infinite alternate;
+}
+
+.glow-top-left {
+  top: -12%;
+  left: -10%;
+  width: min(650px, 65vw);
+  height: min(650px, 65vw);
+  background: radial-gradient(circle, var(--glow-blue) 0%, transparent 70%);
+}
+
+.glow-bottom-right {
+  bottom: -15%;
+  right: -10%;
+  width: min(750px, 70vw);
+  height: min(750px, 70vw);
+  background: radial-gradient(circle, var(--glow-pink) 0%, transparent 70%);
+  animation-duration: 20s;
+  animation-delay: -6s;
+}
+
+@keyframes slowDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 25px) scale(1.08); }
+  100% { transform: translate(-25px, -20px) scale(0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop-aura,
+  .backdrop-logo-mark,
+  .glow-orb {
+    animation: none !important;
+  }
 }
 
 /* Glassmorphism utility */

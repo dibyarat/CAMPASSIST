@@ -23,7 +23,7 @@ export const ThreeSteps: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 sm:py-28 px-5 sm:px-8 bg-[var(--color-bg)] border-y border-[var(--color-border)]">
+    <section className="py-20 sm:py-28 px-5 sm:px-8 bg-transparent border-y border-[var(--color-border)]">
       <div className="max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
           {steps.map((item) => (

@@ -11,7 +11,7 @@ export const StudyOSBand: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 sm:py-20 px-5 sm:px-8 bg-[var(--color-bg)]">
+    <section className="py-16 sm:py-20 px-5 sm:px-8 bg-transparent">
       <div className="max-w-[1200px] mx-auto">
         <div
           className="relative rounded-[40px] overflow-hidden p-8 sm:p-12 lg:p-16 text-white border border-white/10 shadow-2xl"

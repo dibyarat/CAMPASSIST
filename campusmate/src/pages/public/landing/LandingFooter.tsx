@@ -7,7 +7,7 @@ export const LandingFooter: React.FC = () => {
   const contactEmail = 'support@campassist.me';
 
   return (
-    <footer id="contact" className="bg-[var(--color-bg)] border-t border-[var(--color-border)] py-16 sm:py-20 px-5 sm:px-8">
+    <footer id="contact" className="bg-transparent border-t border-[var(--color-border)] py-16 sm:py-20 px-5 sm:px-8">
       <div className="max-w-[1200px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-14 border-b border-[var(--color-border)]">
           {/* Brand Info */}

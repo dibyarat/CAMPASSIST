@@ -37,7 +37,7 @@ export const AttendancePlannerWidget: React.FC = () => {
   }
 
   return (
-    <section className="py-24 sm:py-32 px-5 sm:px-8 bg-[var(--color-bg)]">
+    <section className="py-24 sm:py-32 px-5 sm:px-8 bg-transparent">
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         {/* Left Column: Explanatory Copy & CTA */}
         <div className="lg:col-span-5 text-left">

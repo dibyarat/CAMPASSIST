@@ -9,6 +9,7 @@ import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './services/firebaseClient';
 import { RouteFallback } from './routeFallback';
 import { GlobalSearch } from './components/GlobalSearch';
+import { BrandBackdrop } from './components/BrandBackdrop';
 import { authService } from './services/authService';
 import {
   Landing, Login, Register,
@@ -109,11 +110,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
   }
 
   return (
-    <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans overflow-hidden relative selection:bg-purple-500/20 selection:text-purple-900">
-      {/* Ambient background glows */}
-      <div className="pointer-events-none fixed -top-40 -left-40 w-96 h-96 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(25,163,233,0.14),transparent_70%)] blur-3xl z-0" />
-      <div className="pointer-events-none fixed -bottom-40 -right-40 w-96 h-96 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(217,70,168,0.14),transparent_70%)] blur-3xl z-0" />
-
+    <div className="flex h-screen bg-transparent text-[var(--color-text)] font-sans overflow-hidden relative selection:bg-purple-500/20 selection:text-purple-900">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-30 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>
@@ -277,6 +274,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnalyticsTracker />
+      <BrandBackdrop />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
         <Route path="/" element={<Landing />} />

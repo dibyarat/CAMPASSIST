@@ -47,7 +47,7 @@ export const PageDirectory: React.FC = () => {
   ];
 
   return (
-    <section className="py-24 sm:py-32 px-5 sm:px-8 bg-[var(--color-bg)]">
+    <section className="py-24 sm:py-32 px-5 sm:px-8 bg-transparent">
       <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
