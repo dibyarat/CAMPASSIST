@@ -32,14 +32,14 @@ export const Timetable = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-10">
-      <div className="flex justify-between items-center bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex justify-between items-center glass p-6 rounded-2xl border border-[var(--color-border)]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Timetable</h1>
-          <p className="text-slate-500 font-medium mt-1">Your weekly schedule and class timings.</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">My Timetable</h1>
+          <p className="text-[var(--color-muted)] font-medium mt-1">Your weekly schedule and class timings.</p>
         </div>
       </div>
       
-      <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="glass p-6 rounded-2xl border border-[var(--color-border)]">
          <div className="space-y-8">
           {days.map((dayName, dayIndex) => {
             const dayClasses = timetable.filter(t => t.dayOfWeek === dayIndex + 1).sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -47,30 +47,30 @@ export const Timetable = () => {
             
             return (
               <div key={dayName}>
-                <h3 className="font-bold text-slate-800 text-lg mb-4 border-b pb-2">{dayName}</h3>
+                <h3 className="font-bold text-[var(--color-text)] text-lg mb-4 border-b border-[var(--color-border)] pb-2">{dayName}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {dayClasses.map(cls => (
-                    <div key={cls.id} className={`p-4 rounded-xl border ${cls.status === 'CANCELLED' ? 'bg-rose-50 border-rose-100' : 'bg-white border-slate-200'} shadow-sm relative group`}>
+                    <div key={cls.id} className={`p-4 rounded-xl border ${cls.status === 'CANCELLED' ? 'bg-rose-500/10 border-rose-500/20 text-rose-300' : 'glass border-[var(--color-border)]'} shadow-sm relative group`}>
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className={`font-bold ${cls.status === 'CANCELLED' ? 'text-rose-700' : 'text-slate-900'}`}>{cls.subject?.name}</h4>
+                        <h4 className={`font-bold ${cls.status === 'CANCELLED' ? 'text-rose-400' : 'text-[var(--color-text)]'}`}>{cls.subject?.name}</h4>
                       </div>
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
                           <Clock size={14} /> {cls.startTime} - {cls.endTime}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
                           <MapPin size={14} /> {cls.room?.roomNumber || 'TBA'}
                         </div>
                       </div>
-                      {cls.status === 'CANCELLED' && <div className="absolute top-4 right-4 bg-rose-100 text-rose-700 text-xs font-bold px-2 py-1 rounded">CANCELLED</div>}
-                      {cls.status === 'ROOM_CHANGED' && <div className="absolute top-4 right-4 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded">ROOM CHANGED</div>}
+                      {cls.status === 'CANCELLED' && <div className="absolute top-4 right-4 bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold px-2 py-1 rounded">CANCELLED</div>}
+                      {cls.status === 'ROOM_CHANGED' && <div className="absolute top-4 right-4 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold px-2 py-1 rounded">ROOM CHANGED</div>}
                     </div>
                   ))}
                 </div>
               </div>
             );
           })}
-          {timetable.length === 0 && <p className="text-slate-500 text-center py-10">No classes have been scheduled for your section yet. Your CR is probably building it now!</p>}
+          {timetable.length === 0 && <p className="text-[var(--color-muted)] text-center py-10">No classes have been scheduled for your section yet. Your CR is probably building it now!</p>}
          </div>
       </div>
     </div>

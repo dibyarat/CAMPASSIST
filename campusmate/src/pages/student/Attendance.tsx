@@ -705,16 +705,17 @@ export const Attendance: React.FC = () => {
       />
 
       {/* TOP HEADER & TITLE */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100 relative z-30">
+      {/* TOP HEADER & TITLE */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass p-6 rounded-2xl border border-[var(--color-border)] relative z-30">
         <div>
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">
+          <span className="text-xs font-bold text-[#19A3E9] uppercase tracking-wider block mb-1">
             Student Attendance Portal
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
             Attendance Register & Planner
           </h1>
-          <p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-2">
-            <Calendar size={14} className="text-slate-400" />
+          <p className="text-xs font-medium text-[var(--color-muted)] mt-1 flex items-center gap-2">
+            <Calendar size={14} className="text-[#19A3E9]" />
             {new Intl.DateTimeFormat('en-GB', {
               weekday: 'long',
               day: 'numeric',
@@ -729,7 +730,7 @@ export const Attendance: React.FC = () => {
         <div className="relative" ref={settingsRef}>
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm shadow-2xs transition cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-border)] glass hover:border-[var(--color-primary)] text-[var(--color-text)] font-semibold text-sm shadow-2xs transition cursor-pointer"
           >
             <SettingsIcon size={16} />
             <span>Options & Backup</span>
@@ -741,12 +742,12 @@ export const Attendance: React.FC = () => {
                 className="fixed inset-0 z-40"
                 onClick={() => setIsSettingsOpen(false)}
               />
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-                  <h3 className="font-bold text-slate-900 text-sm">Register Options</h3>
+              <div className="absolute right-0 mt-2 w-72 bg-[var(--color-card)] rounded-2xl shadow-2xl border border-[var(--color-border)] p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-2xl">
+                <div className="flex items-center justify-between pb-3 border-b border-[var(--color-border)] mb-4">
+                  <h3 className="font-bold text-[var(--color-text)] text-sm">Register Options</h3>
                   <button
                     onClick={() => setIsSettingsOpen(false)}
-                    className="text-slate-400 hover:text-slate-600 p-1"
+                    className="text-[var(--color-muted)] hover:text-[var(--color-text)] p-1 transition"
                   >
                     <X size={16} />
                   </button>
@@ -754,7 +755,7 @@ export const Attendance: React.FC = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-1.5">
                     Custom Target (%)
                   </label>
                   <div className="flex items-center gap-2">
@@ -769,33 +770,33 @@ export const Attendance: React.FC = () => {
                         v = Math.min(100, Math.max(1, v));
                         saveStore({ ...store, target: v });
                       }}
-                      className="w-24 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-24 px-3 py-1.5 glass border border-[var(--color-border)] rounded-xl font-bold text-[var(--color-text)] text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
                     />
-                    <span className="text-xs font-semibold text-slate-500">% target</span>
+                    <span className="text-xs font-semibold text-[var(--color-muted)]">% target</span>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-100 space-y-2">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                <div className="pt-2 border-t border-[var(--color-border)] space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)]">
                     Backup & Data
                   </p>
                   <button
                     onClick={handleExport}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg transition"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--color-text)] glass hover:border-[var(--color-primary)] rounded-lg transition"
                   >
-                    <Download size={14} className="text-blue-600" />
+                    <Download size={14} className="text-[#19A3E9]" />
                     <span>Export Backup (.json)</span>
                   </button>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-lg transition"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-[var(--color-text)] glass hover:border-[var(--color-primary)] rounded-lg transition"
                   >
-                    <Upload size={14} className="text-emerald-600" />
+                    <Upload size={14} className="text-[#10B981]" />
                     <span>Import Backup (.json)</span>
                   </button>
                   <button
                     onClick={handleEraseEverything}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition"
                   >
                     <Trash2 size={14} />
                     <span>Erase Everything</span>
@@ -810,17 +811,14 @@ export const Attendance: React.FC = () => {
 
       {/* TOP OVERALL ATTENDANCE CARD — ANIMATED REFERENCE DESIGN */}
       <div
-        className="rounded-[32px] p-6 sm:p-9 border border-white shadow-[0_20px_50px_rgba(26,134,224,0.12),0_10px_25px_rgba(210,58,160,0.08)] relative"
-        style={{
-          background: 'linear-gradient(135deg, #F0F6FF 0%, #FAF2FF 50%, #FFF0F7 100%)',
-        }}
+        className="glass rounded-[32px] p-6 sm:p-9 border border-[var(--color-border)] relative"
       >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6">
           <div>
-            <h2 className="text-xl sm:text-2xl font-black text-[#0B1020] tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-[var(--color-text)] tracking-tight">
               Overall Attendance
             </h2>
-            <p className="text-xs sm:text-sm font-semibold text-[#4A5270]">
+            <p className="text-xs sm:text-sm font-semibold text-[var(--color-muted)]">
               Track cumulative classes or simulate future absences in real time.
             </p>
           </div>
@@ -831,7 +829,7 @@ export const Attendance: React.FC = () => {
                 setSliderAttended(null);
                 setSliderTotal(null);
               }}
-              className="px-3 py-1.5 rounded-full text-xs font-bold bg-white text-blue-600 border border-blue-200 hover:bg-blue-50 transition shadow-2xs cursor-pointer flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-full text-xs font-bold glass text-[#19A3E9] border border-[var(--color-border)] hover:border-[#19A3E9] transition shadow-2xs cursor-pointer flex items-center gap-1.5"
             >
               <Undo2 size={13} />
               Reset to actual counts ({overall.p}/{overall.total})
@@ -844,11 +842,11 @@ export const Attendance: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <label
               htmlFor="classes-attended-range"
-              className="text-sm sm:text-base font-bold text-[#0B1020]"
+              className="text-sm sm:text-base font-bold text-[var(--color-text)]"
             >
               Classes attended
             </label>
-            <span className="text-base sm:text-lg font-extrabold text-[#1A86E0] font-mono">
+            <span className="text-base sm:text-lg font-extrabold text-[#19A3E9] font-mono">
               {attendedCount}
             </span>
           </div>
@@ -859,7 +857,7 @@ export const Attendance: React.FC = () => {
             max={totalCount}
             value={attendedCount}
             onChange={(e) => handleAttendedSliderChange(Number(e.target.value))}
-            className="w-full h-2.5 bg-white rounded-lg appearance-none cursor-pointer accent-[#1A86E0] shadow-inner"
+            className="w-full h-2.5 bg-black/10 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#19A3E9]"
             aria-label="Classes attended"
           />
         </div>
@@ -869,11 +867,11 @@ export const Attendance: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <label
               htmlFor="total-classes-range"
-              className="text-sm sm:text-base font-bold text-[#0B1020]"
+              className="text-sm sm:text-base font-bold text-[var(--color-text)]"
             >
               Total classes held
             </label>
-            <span className="text-base sm:text-lg font-extrabold text-[#7A5FD0] font-mono">
+            <span className="text-base sm:text-lg font-extrabold text-[#8758F5] font-mono">
               {totalCount}
             </span>
           </div>
@@ -884,14 +882,14 @@ export const Attendance: React.FC = () => {
             max={Math.max(150, totalCount + 20)}
             value={totalCount}
             onChange={(e) => handleTotalSliderChange(Number(e.target.value))}
-            className="w-full h-2.5 bg-white rounded-lg appearance-none cursor-pointer accent-[#7A5FD0] shadow-inner"
+            className="w-full h-2.5 bg-black/10 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#8758F5]"
             aria-label="Total classes held"
           />
         </div>
 
         {/* Target Attendance Buttons */}
         <div className="mb-8">
-          <label className="block text-xs uppercase tracking-wider font-bold text-[#4A5270] mb-3">
+          <label className="block text-xs uppercase tracking-wider font-bold text-[var(--color-muted)] mb-3">
             Required attendance
           </label>
           <div className="flex items-center gap-3" role="group" aria-label="Target attendance percentage">
@@ -905,8 +903,8 @@ export const Attendance: React.FC = () => {
                   onClick={() => saveStore({ ...store, target: t })}
                   className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 min-h-[44px] cursor-pointer ${
                     isSelected
-                      ? 'bg-[#0B1020] text-white shadow-md'
-                      : 'bg-white/80 text-[#4A5270] border border-slate-200 hover:bg-white'
+                      ? 'bg-gradient-brand text-white shadow-md'
+                      : 'glass text-[var(--color-muted)] border border-[var(--color-border)] hover:text-[var(--color-text)] hover:border-[var(--color-primary)]'
                   }`}
                 >
                   {t}%
@@ -917,26 +915,26 @@ export const Attendance: React.FC = () => {
         </div>
 
         {/* Result Panel */}
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl p-6 sm:p-7 border border-white shadow-sm">
+        <div className="glass rounded-2xl p-6 sm:p-7 border border-[var(--color-border)]">
           <div className="flex items-center justify-between mb-4">
-            <div className="text-4xl sm:text-5xl font-extrabold text-[#0B1020] font-mono tracking-tight">
+            <div className="text-4xl sm:text-5xl font-extrabold text-[var(--color-text)] font-mono tracking-tight">
               {activePct.toFixed(1)}%
             </div>
             <span
               className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-bold border ${
                 isSafe
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  : 'bg-rose-50 text-rose-700 border-rose-200'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                  : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
               }`}
             >
               {isSafe ? (
                 <>
-                  <ShieldCheck size={16} className="text-emerald-500" />
+                  <ShieldCheck size={16} className="text-emerald-400" />
                   Safe
                 </>
               ) : (
                 <>
-                  <TrendingUp size={16} className="text-rose-500" />
+                  <TrendingUp size={16} className="text-rose-400" />
                   Catch up
                 </>
               )}
@@ -944,12 +942,12 @@ export const Attendance: React.FC = () => {
           </div>
 
           {/* Progress Bar with Target Marker */}
-          <div className="relative w-full h-3.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+          <div className="relative w-full h-3.5 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden mb-2">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
                 width: `${Math.min(activePct, 100)}%`,
-                background: 'linear-gradient(to right, #1A86E0 0%, #D23AA0 100%)',
+                background: 'linear-gradient(to right, #19A3E9 0%, #D946A8 100%)',
               }}
             />
           </div>
@@ -960,25 +958,25 @@ export const Attendance: React.FC = () => {
               className="absolute -top-3.5 flex flex-col items-center -translate-x-1/2 pointer-events-none"
               style={{ left: `${store.target}%` }}
             >
-              <div className="w-1 h-3.5 bg-[#0B1020] rounded-full shadow-xs"></div>
-              <span className="text-[10px] font-bold text-[#0B1020] mt-0.5">
+              <div className="w-1 h-3.5 bg-[var(--color-text)] rounded-full shadow-xs"></div>
+              <span className="text-[10px] font-bold text-[var(--color-muted)] mt-0.5">
                 {store.target}% target
               </span>
             </div>
           </div>
 
           {/* Dynamic Personalized Message */}
-          <p className="text-sm sm:text-base font-semibold text-[#0B1020] mt-1 leading-snug">
+          <p className="text-sm sm:text-base font-semibold text-[var(--color-text)] mt-1 leading-snug">
             {dynamicMessage}
           </p>
         </div>
       </div>
 
       {/* ADD SUBJECT SECTION */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs">
+      <div className="glass rounded-3xl p-6 sm:p-7 border border-[var(--color-border)] shadow-xs">
         <div className="flex items-center gap-2 mb-4">
-          <Plus size={18} className="text-blue-600" />
-          <h2 className="text-base font-bold text-slate-900">Add New Subject</h2>
+          <Plus size={18} className="text-[#19A3E9]" />
+          <h2 className="text-base font-bold text-[var(--color-text)]">Add New Subject</h2>
         </div>
 
         <form
@@ -992,7 +990,7 @@ export const Attendance: React.FC = () => {
               value={newSubjName}
               onChange={(e) => setNewSubjName(e.target.value)}
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 placeholder-slate-400 outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] glass text-sm font-semibold text-[var(--color-text)] placeholder-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
           <div className="sm:col-span-3">
@@ -1001,7 +999,7 @@ export const Attendance: React.FC = () => {
               placeholder="Code (e.g. CS204)"
               value={newSubjCode}
               onChange={(e) => setNewSubjCode(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 placeholder-slate-400 outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] glass text-sm font-semibold text-[var(--color-text)] placeholder-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary)] uppercase"
             />
           </div>
           <div className="sm:col-span-2">
@@ -1010,13 +1008,13 @@ export const Attendance: React.FC = () => {
               placeholder="PR, TUT"
               value={newSubjComps}
               onChange={(e) => setNewSubjComps(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 placeholder-slate-400 outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-border)] glass text-sm font-semibold text-[var(--color-text)] placeholder-[var(--color-muted)] outline-none focus:ring-2 focus:ring-[var(--color-primary)] uppercase"
             />
           </div>
           <div className="sm:col-span-2">
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full py-2.5 px-4 bg-gradient-brand text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition cursor-pointer flex items-center justify-center gap-1.5"
             >
               <Plus size={16} />
               <span>Add Subject</span>
@@ -1027,11 +1025,11 @@ export const Attendance: React.FC = () => {
 
       {/* COMPACT INDIVIDUAL SUBJECT CARDS GRID */}
       {store.subjects.length === 0 ? (
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-12 border border-dashed border-slate-300 text-center space-y-3">
-          <p className="text-xl font-bold text-slate-800 font-serif italic">
+        <div className="glass rounded-3xl p-12 border border-dashed border-[var(--color-border)] text-center space-y-3">
+          <p className="text-xl font-bold text-[var(--color-text)] font-serif italic">
             "Every bunk starts with honest bookkeeping."
           </p>
-          <p className="text-sm text-slate-500 max-w-md mx-auto">
+          <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto">
             Add a subject above — include its components (PR, TUT...) — then mark each period. The
             register does the arithmetic.
           </p>
@@ -1057,7 +1055,7 @@ export const Attendance: React.FC = () => {
             return (
               <div
                 key={s.id}
-                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
+                className="glass rounded-2xl p-5 border border-[var(--color-border)] shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow"
               >
                 <div>
                   {/* Card Header */}
@@ -1074,28 +1072,28 @@ export const Attendance: React.FC = () => {
                               if (e.key === 'Escape') setRenamingSid(null);
                             }}
                             autoFocus
-                            className="px-2 py-1 text-sm font-bold rounded-lg border border-blue-500 outline-none w-full"
+                            className="px-2 py-1 text-sm font-bold rounded-lg border border-[var(--color-primary)] outline-none w-full glass text-[var(--color-text)]"
                           />
                           <button
                             onClick={() => handleCommitRename(s.id)}
-                            className="p-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="p-1 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90"
                           >
                             <Check size={14} />
                           </button>
                           <button
                             onClick={() => setRenamingSid(null)}
-                            className="p-1 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300"
+                            className="p-1 glass border border-[var(--color-border)] text-[var(--color-muted)] rounded-lg hover:text-[var(--color-text)]"
                           >
                             <X size={14} />
                           </button>
                         </div>
                       ) : (
                         <div>
-                          <h3 className="font-bold text-slate-900 text-base leading-snug truncate" title={s.name}>
+                          <h3 className="font-bold text-[var(--color-text)] text-base leading-snug truncate" title={s.name}>
                             {s.name}
                           </h3>
                           {s.code && (
-                            <span className="inline-block mt-0.5 px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px] font-mono font-bold">
+                            <span className="inline-block mt-0.5 px-2 py-0.5 rounded glass border border-[var(--color-border)] text-[var(--color-muted)] text-[11px] font-mono font-bold">
                               {s.code}
                             </span>
                           )}
@@ -1108,10 +1106,10 @@ export const Attendance: React.FC = () => {
                       <span
                         className={`px-2.5 py-1 rounded-md text-[11px] font-extrabold uppercase tracking-wider border shrink-0 ${
                           verd.key === 'safe'
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                             : verd.key === 'tight'
-                            ? 'bg-amber-50 border-amber-300 text-amber-700'
-                            : 'bg-rose-50 border-rose-300 text-rose-700'
+                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                            : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
                         }`}
                       >
                         {verd.key.toUpperCase()}
@@ -1124,29 +1122,29 @@ export const Attendance: React.FC = () => {
                     <span
                       className={`text-2xl font-black font-mono tracking-tight ${
                         verd.key === 'short'
-                          ? 'text-rose-600'
+                          ? 'text-rose-500'
                           : verd.key === 'tight'
-                          ? 'text-amber-600'
-                          : 'text-blue-600'
+                          ? 'text-amber-500'
+                          : 'text-[#19A3E9]'
                       }`}
                     >
                       {fmtPct(percentage)}%
                     </span>
-                    <span className="text-xs font-semibold text-slate-500">
-                      <b className="text-slate-900">{tally.p}</b>/{tally.total} attended
-                      {tally.c > 0 && <span className="text-slate-400"> · {tally.c} canc.</span>}
+                    <span className="text-xs font-semibold text-[var(--color-muted)]">
+                      <b className="text-[var(--color-text)]">{tally.p}</b>/{tally.total} attended
+                      {tally.c > 0 && <span className="text-[var(--color-muted)]"> · {tally.c} canc.</span>}
                     </span>
                   </div>
 
                   {/* Mini Segmented Progress bar */}
                   <div className="relative pt-2 pb-1.5 mb-2">
-                    <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
+                    <div className="h-2 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden flex shadow-inner">
                       {tally.total === 0 ? (
-                        <div className="w-full h-full bg-slate-200/50" />
+                        <div className="w-full h-full bg-black/15 dark:bg-white/15" />
                       ) : (
                         <>
                           <div
-                            className="bg-blue-600 h-full transition-all duration-300"
+                            className="bg-[#19A3E9] h-full transition-all duration-300"
                             style={{ flex: tally.p }}
                           />
                           {tally.a > 0 && (
@@ -1171,35 +1169,35 @@ export const Attendance: React.FC = () => {
                   })()}
 
                   {/* Component Rows with Quick Mark Buttons */}
-                  <div className="space-y-1.5 border-t border-slate-100 pt-2.5">
+                  <div className="space-y-1.5 border-t border-[var(--color-border)] pt-2.5">
                     {s.components.map((comp) => {
                       const ct = compTally(s, comp.key, store.logs);
                       const tc = getTodayCounts(s.id, comp.key);
                       return (
                         <div
                           key={comp.key}
-                          className="flex items-center justify-between gap-1.5 p-1.5 rounded-xl bg-slate-50 border border-slate-100 text-xs"
+                          className="flex items-center justify-between gap-1.5 p-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-[var(--color-border)] text-xs"
                         >
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono font-bold text-[11px] text-slate-700">
+                            <span className="px-1.5 py-0.5 rounded glass border border-[var(--color-border)] font-mono font-bold text-[11px] text-[var(--color-text)]">
                               {comp.key}
                             </span>
-                            <span className="text-[11px] font-semibold text-slate-600 truncate">
+                            <span className="text-[11px] font-semibold text-[var(--color-muted)] truncate">
                               {ct.p}/{ct.total}
                             </span>
                           </div>
 
                           {/* Quick Mark buttons */}
                           <div
-                            className="inline-flex rounded-lg overflow-hidden border border-slate-200 bg-white shadow-2xs shrink-0"
+                            className="inline-flex rounded-lg overflow-hidden border border-[var(--color-border)] glass shrink-0"
                             role="group"
                           >
                             <button
                               onClick={() => handleLog(s.id, comp.key, 'p')}
                               className={`px-2 py-1 text-[11px] font-bold transition flex items-center gap-0.5 cursor-pointer ${
                                 tc.p > 0
-                                  ? 'bg-blue-600 text-white'
-                                  : 'text-slate-700 hover:bg-slate-50'
+                                    ? 'bg-[#19A3E9] text-white'
+                                    : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/5'
                               }`}
                               title="Mark Present today"
                             >
@@ -1208,10 +1206,10 @@ export const Attendance: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleLog(s.id, comp.key, 'a')}
-                              className={`px-2 py-1 text-[11px] font-bold transition border-l border-slate-200 flex items-center gap-0.5 cursor-pointer ${
+                              className={`px-2 py-1 text-[11px] font-bold transition border-l border-[var(--color-border)] flex items-center gap-0.5 cursor-pointer ${
                                 tc.a > 0
                                   ? 'bg-rose-600 text-white'
-                                  : 'text-slate-700 hover:bg-slate-50'
+                                  : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/5'
                               }`}
                               title="Mark Absent today"
                             >
@@ -1220,10 +1218,10 @@ export const Attendance: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleLog(s.id, comp.key, 'c')}
-                              className={`px-1.5 py-1 text-[11px] font-bold transition border-l border-slate-200 flex items-center gap-0.5 cursor-pointer ${
+                              className={`px-1.5 py-1 text-[11px] font-bold transition border-l border-[var(--color-border)] flex items-center gap-0.5 cursor-pointer ${
                                 tc.c > 0
-                                  ? 'bg-slate-800 text-white'
-                                  : 'text-slate-400 hover:bg-slate-50'
+                                  ? 'bg-[var(--color-card)] text-[var(--color-text)]'
+                                  : 'text-[var(--color-muted)] hover:text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/5'
                               }`}
                               title="Mark Cancelled today"
                             >
@@ -1237,8 +1235,8 @@ export const Attendance: React.FC = () => {
                 </div>
 
                 {/* Collapsible Details */}
-                <details className="mt-3 border-t border-slate-100 pt-2 group">
-                  <summary className="cursor-pointer text-[11px] font-bold text-slate-500 hover:text-slate-800 select-none flex items-center justify-between py-1">
+                <details className="mt-3 border-t border-[var(--color-border)] pt-2 group">
+                  <summary className="cursor-pointer text-[11px] font-bold text-[var(--color-muted)] hover:text-[var(--color-text)] select-none flex items-center justify-between py-1">
                     <span>History, Past Logs & Options</span>
                     <ChevronDown
                       size={14}
@@ -1248,8 +1246,8 @@ export const Attendance: React.FC = () => {
 
                   <div className="pt-2.5 space-y-3">
                     {/* Log Past Date */}
-                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 text-xs">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <div className="p-2.5 bg-black/5 dark:bg-white/5 rounded-xl border border-[var(--color-border)] space-y-1.5 text-xs">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                         Log Past Class
                       </p>
                       <div className="flex flex-wrap items-center gap-1.5">
@@ -1263,7 +1261,7 @@ export const Attendance: React.FC = () => {
                               [s.id]: { ...pastState, date: e.target.value },
                             }))
                           }
-                          className="px-2 py-1 bg-white border border-slate-200 rounded text-[11px] outline-none"
+                          className="px-2 py-1 glass border border-[var(--color-border)] text-[var(--color-text)] rounded text-[11px] outline-none"
                         />
                         <select
                           value={pastState.comp}
@@ -1273,7 +1271,7 @@ export const Attendance: React.FC = () => {
                               [s.id]: { ...pastState, comp: e.target.value },
                             }))
                           }
-                          className="px-2 py-1 bg-white border border-slate-200 rounded text-[11px] font-bold outline-none"
+                          className="px-2 py-1 glass border border-[var(--color-border)] text-[var(--color-text)] rounded text-[11px] font-bold outline-none"
                         >
                           {s.components.map((c) => (
                             <option key={c.key} value={c.key}>
@@ -1281,22 +1279,22 @@ export const Attendance: React.FC = () => {
                             </option>
                           ))}
                         </select>
-                        <div className="inline-flex rounded overflow-hidden border border-slate-200 bg-white">
+                        <div className="inline-flex rounded overflow-hidden border border-[var(--color-border)] glass">
                           <button
                             onClick={() => handleLog(s.id, pastState.comp, 'p', pastState.date)}
-                            className="px-2 py-0.5 text-[10px] font-semibold hover:bg-slate-100"
+                            className="px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/5"
                           >
                             P
                           </button>
                           <button
                             onClick={() => handleLog(s.id, pastState.comp, 'a', pastState.date)}
-                            className="px-2 py-0.5 text-[10px] font-semibold border-l border-slate-200 hover:bg-slate-100 text-rose-600"
+                            className="px-2 py-0.5 text-[10px] font-semibold border-l border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/5 text-rose-500"
                           >
                             A
                           </button>
                           <button
                             onClick={() => handleLog(s.id, pastState.comp, 'c', pastState.date)}
-                            className="px-2 py-0.5 text-[10px] font-semibold border-l border-slate-200 hover:bg-slate-100 text-slate-500"
+                            className="px-2 py-0.5 text-[10px] font-semibold border-l border-[var(--color-border)] hover:bg-black/5 dark:hover:bg-white/5 text-[var(--color-muted)]"
                           >
                             ⊘
                           </button>
@@ -1306,7 +1304,7 @@ export const Attendance: React.FC = () => {
 
                     {/* Opening Balances */}
                     <div className="space-y-1.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                         Opening Balances
                       </p>
                       {s.components.map((comp) => {
@@ -1317,13 +1315,13 @@ export const Attendance: React.FC = () => {
                         return (
                           <div key={comp.key} className="space-y-1 text-xs">
                             {hasBase && (
-                              <div className="flex items-center justify-between text-[11px] bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                              <div className="flex items-center justify-between text-[11px] bg-black/5 dark:bg-white/5 p-1.5 rounded-lg border border-[var(--color-border)] text-[var(--color-text)]">
                                 <span>
                                   {comp.key}: {comp.base.p} att / {comp.base.a} miss
                                 </span>
                                 <button
                                   onClick={() => handleClearBase(s.id, comp.key)}
-                                  className="text-slate-400 hover:text-rose-600 p-0.5"
+                                  className="text-[var(--color-muted)] hover:text-rose-500 p-0.5 transition"
                                   title="Remove opening balance"
                                 >
                                   <X size={12} />
@@ -1335,7 +1333,7 @@ export const Attendance: React.FC = () => {
                               onSubmit={(e) => handleSetBase(s.id, comp.key, e)}
                               className="flex items-center gap-1.5 text-[11px]"
                             >
-                              <span className="w-8 font-mono font-bold text-slate-600">{comp.key}</span>
+                              <span className="w-8 font-mono font-bold text-[var(--color-muted)]">{comp.key}</span>
                               <input
                                 type="number"
                                 min="0"
@@ -1347,7 +1345,7 @@ export const Attendance: React.FC = () => {
                                     [keyId]: { ...currentInput, p: e.target.value },
                                   }))
                                 }
-                                className="w-12 px-1.5 py-0.5 bg-white border border-slate-200 rounded outline-none"
+                                className="w-12 px-1.5 py-0.5 glass border border-[var(--color-border)] text-[var(--color-text)] rounded outline-none"
                               />
                               <input
                                 type="number"
@@ -1360,11 +1358,11 @@ export const Attendance: React.FC = () => {
                                     [keyId]: { ...currentInput, t: e.target.value },
                                   }))
                                 }
-                                className="w-14 px-1.5 py-0.5 bg-white border border-slate-200 rounded outline-none"
+                                className="w-14 px-1.5 py-0.5 glass border border-[var(--color-border)] text-[var(--color-text)] rounded outline-none"
                               />
                               <button
                                 type="submit"
-                                className="px-2 py-0.5 bg-slate-800 text-white font-bold rounded hover:bg-black transition text-[10px]"
+                                className="px-2 py-0.5 bg-gradient-brand text-white font-bold rounded shadow-xs transition text-[10px]"
                               >
                                 Set
                               </button>
@@ -1376,28 +1374,28 @@ export const Attendance: React.FC = () => {
 
                     {/* Logged Entries List */}
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-muted)]">
                         History ({subjLogs.length})
                       </p>
                       {subjLogs.length === 0 ? (
-                        <p className="text-[11px] text-slate-400 italic">No entries yet.</p>
+                        <p className="text-[11px] text-[var(--color-muted)] italic">No entries yet.</p>
                       ) : (
                         <div className="max-h-28 overflow-y-auto space-y-1 pr-1">
                           {subjLogs.map((l) => (
                             <div
                               key={l.id}
-                              className="flex items-center justify-between text-[11px] py-1 px-2 rounded bg-slate-50 border border-slate-100"
+                              className="flex items-center justify-between text-[11px] py-1 px-2 rounded bg-black/5 dark:bg-white/5 border border-[var(--color-border)]"
                             >
                               <div className="flex items-center gap-1.5">
-                                <span className="font-mono text-slate-500">{fmtDate(l.date)}</span>
-                                <span className="font-mono font-bold text-slate-700">[{l.comp}]</span>
+                                <span className="font-mono text-[var(--color-muted)]">{fmtDate(l.date)}</span>
+                                <span className="font-mono font-bold text-[var(--color-text)]">[{l.comp}]</span>
                                 <span
                                   className={`font-bold ${
                                     l.status === 'p'
-                                      ? 'text-blue-600'
+                                      ? 'text-[#19A3E9]'
                                       : l.status === 'a'
-                                      ? 'text-rose-600'
-                                      : 'text-slate-500'
+                                      ? 'text-rose-500'
+                                      : 'text-[var(--color-muted)]'
                                   }`}
                                 >
                                   {l.status === 'p' ? 'Present' : l.status === 'a' ? 'Absent' : 'Cancelled'}
@@ -1405,7 +1403,7 @@ export const Attendance: React.FC = () => {
                               </div>
                               <button
                                 onClick={() => handleDeleteEntry(l.id)}
-                                className="text-slate-400 hover:text-rose-600 p-0.5"
+                                className="text-[var(--color-muted)] hover:text-rose-500 p-0.5 transition"
                                 title="Delete entry"
                               >
                                 <X size={12} />
@@ -1417,19 +1415,19 @@ export const Attendance: React.FC = () => {
                     </div>
 
                     {/* Card Actions */}
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs font-semibold">
+                    <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)] text-xs font-semibold">
                       <button
                         onClick={() => {
                           setRenamingSid(s.id);
                           setRenameVal(s.name);
                         }}
-                        className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        className="text-[#19A3E9] hover:underline flex items-center gap-1"
                       >
                         <Edit2 size={12} /> Rename
                       </button>
                       <button
                         onClick={() => handleDeleteSubject(s)}
-                        className="text-rose-600 hover:text-rose-800 flex items-center gap-1"
+                        className="text-rose-500 hover:underline flex items-center gap-1"
                       >
                         <Trash2 size={12} /> Delete
                       </button>
@@ -1443,9 +1441,9 @@ export const Attendance: React.FC = () => {
       )}
 
       {/* FOOTNOTE */}
-      <div className="p-6 bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-200/60 text-xs text-slate-500 space-y-1.5 leading-relaxed">
+      <div className="p-6 glass rounded-2xl border border-[var(--color-border)] text-xs text-[var(--color-muted)] space-y-1.5 leading-relaxed">
         <p>
-          <b className="text-slate-800 font-semibold">How it works:</b> Subject components (PR / TUT / TH)
+          <b className="text-[var(--color-text)] font-semibold">How it works:</b> Subject components (PR / TUT / TH)
           combine into one total with opening balances and logged periods.
         </p>
         <p>

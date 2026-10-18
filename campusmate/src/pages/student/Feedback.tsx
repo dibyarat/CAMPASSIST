@@ -34,17 +34,17 @@ export default function Feedback() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <MessageSquare className="text-blue-500 w-8 h-8" />
-        <h1 className="text-2xl font-bold text-slate-800">Send Feedback</h1>
+        <MessageSquare className="text-[#19A3E9] w-8 h-8" />
+        <h1 className="text-2xl font-bold text-[var(--color-text)]">Send Feedback</h1>
       </div>
       
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-        <p className="text-slate-600 mb-6">
+      <div className="glass rounded-2xl p-6 shadow-sm border border-[var(--color-border)]">
+        <p className="text-[var(--color-muted)] mb-6">
           We'd love to hear your thoughts! Whether you found a bug, have a feature request, or just want to share some general feedback, let us know below.
         </p>
 
         {statusMsg.text && (
-          <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+          <div className={`p-4 rounded-xl mb-6 flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>
             <AlertCircle size={20} />
             <p>{statusMsg.text}</p>
           </div>
@@ -52,11 +52,11 @@ export default function Feedback() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Feedback Type</label>
+            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Feedback Type</label>
             <select 
               value={type} 
               onChange={(e) => setType(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:outline-none focus:border-[#19A3E9] transition-all"
             >
               <option value="GENERAL">General Feedback</option>
               <option value="BUG">Report a Bug</option>
@@ -65,33 +65,33 @@ export default function Feedback() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Title</label>
+            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Title</label>
             <input 
               type="text" 
               value={title} 
               onChange={(e) => setTitle(e.target.value)}
               required
               placeholder="Brief summary of your feedback"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:outline-none focus:border-[#19A3E9] transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Details</label>
+            <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Details</label>
             <textarea 
               value={content} 
               onChange={(e) => setContent(e.target.value)}
               required
               rows={5}
               placeholder="Please provide as much detail as possible..."
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:outline-none focus:border-[#19A3E9] transition-all resize-none"
             ></textarea>
           </div>
 
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-gradient-primary text-white font-medium py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isLoading ? 'Submitting...' : 'Submit Feedback'}
             {!isLoading && <Send size={18} />}

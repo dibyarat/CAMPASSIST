@@ -34,26 +34,26 @@ export const Notifications = () => {
 
   const getIconAndColor = (type: string) => {
     switch(type) {
-      case 'CANCELLATION': return { icon: <AlertTriangle size={20} className="text-amber-500" />, bg: 'bg-amber-50' };
-      case 'ROOM_CHANGE': return { icon: <Info size={20} className="text-blue-500" />, bg: 'bg-blue-50' };
-      case 'GENERAL_ANNOUNCEMENT': return { icon: <Bell size={20} className="text-purple-500" />, bg: 'bg-purple-50' };
-      default: return { icon: <FileText size={20} className="text-slate-500" />, bg: 'bg-slate-50' };
+      case 'CANCELLATION': return { icon: <AlertTriangle size={20} className="text-amber-400" />, bg: 'bg-amber-500/15' };
+      case 'ROOM_CHANGE': return { icon: <Info size={20} className="text-[#19A3E9]" />, bg: 'bg-[rgba(25,163,233,0.15)]' };
+      case 'GENERAL_ANNOUNCEMENT': return { icon: <Bell size={20} className="text-[#D946A8]" />, bg: 'bg-[rgba(217,70,168,0.15)]' };
+      default: return { icon: <FileText size={20} className="text-[var(--color-muted)]" />, bg: 'bg-white/10' };
     }
   };
 
   return (
     <div className="max-w-4xl space-y-6 pb-10">
-      <div className="flex justify-between items-center bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
-        <h1 className="text-xl font-bold text-slate-900">Notifications Center</h1>
+      <div className="flex justify-between items-center glass p-6 rounded-2xl border border-[var(--color-border)]">
+        <h1 className="text-xl font-bold text-[var(--color-text)]">Notifications Center</h1>
       </div>
 
-      <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-sm p-2 flex gap-1">
+      <div className="glass rounded-2xl border border-[var(--color-border)] p-2 flex gap-1">
         {['All', 'Unread'].map((tab) => (
           <button 
             key={tab}
             onClick={() => setActiveTab(tab as any)}
             className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
-              activeTab === tab ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:bg-slate-50'
+              activeTab === tab ? 'bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30 shadow-sm' : 'text-[var(--color-muted)] hover:bg-white/5'
             }`}
           >
             {tab}
@@ -63,18 +63,18 @@ export const Notifications = () => {
 
       <div className="space-y-3">
         {loading ? (
-          <div className="flex justify-center py-10"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
+          <div className="flex justify-center py-10"><Loader2 className="animate-spin text-[#19A3E9] w-10 h-10" /></div>
         ) : filteredNotifs.length === 0 ? (
-          <div className="bg-white/60 backdrop-blur-xl p-10 rounded-2xl text-center border border-slate-100">
-            <p className="text-slate-500">No {activeTab.toLowerCase()} notifications found.</p>
+          <div className="glass p-10 rounded-2xl text-center border border-[var(--color-border)]">
+            <p className="text-[var(--color-muted)]">No {activeTab.toLowerCase()} notifications found.</p>
           </div>
-        ) : filteredNotifs.map((notif, idx) => {
+        ) : filteredNotifs.map((notif) => {
           const { icon, bg } = getIconAndColor(notif.type);
           
           return (
             <div 
               key={notif.id} 
-              className={`p-5 rounded-2xl border transition-all ${notif.isRead ? 'bg-white/40 border-slate-100 opacity-75 hover:opacity-100' : 'bg-white shadow-sm border-blue-100'}`}
+              className={`p-5 rounded-2xl border transition-all ${notif.isRead ? 'glass border-[var(--color-border)] opacity-75 hover:opacity-100' : 'glass border-[#19A3E9]/40 shadow-sm'}`}
             >
               <div className="flex gap-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${bg}`}>
@@ -84,25 +84,25 @@ export const Notifications = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className={`font-bold text-base ${notif.isRead ? 'text-slate-700' : 'text-slate-900'}`}>{notif.title}</h4>
+                        <h4 className={`font-bold text-base ${notif.isRead ? 'text-[var(--color-muted)]' : 'text-[var(--color-text)]'}`}>{notif.title}</h4>
                         {notif.isRead ? (
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-xs font-semibold border border-slate-200">Read</span>
+                          <span className="px-2 py-0.5 glass text-[var(--color-muted)] rounded text-xs font-semibold border border-[var(--color-border)]">Read</span>
                         ) : (
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-600 rounded text-xs font-semibold border border-blue-200">New</span>
+                          <span className="px-2 py-0.5 bg-[rgba(25,163,233,0.15)] text-[#19A3E9] rounded text-xs font-semibold border border-[#19A3E9]/30">New</span>
                         )}
                       </div>
-                      <p className={`text-sm leading-relaxed ${notif.isRead ? 'text-slate-500' : 'text-slate-600 font-medium'}`}>{notif.message}</p>
+                      <p className={`text-sm leading-relaxed ${notif.isRead ? 'text-[var(--color-muted)]' : 'text-[var(--color-text)] font-medium'}`}>{notif.message}</p>
                     </div>
                     {!notif.isRead && (
                       <button 
                         onClick={() => handleMarkAsRead(notif.id)}
-                        className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-2 shadow-sm shadow-blue-200 cursor-pointer" 
+                        className="w-2.5 h-2.5 rounded-full bg-[#19A3E9] shrink-0 mt-2 shadow-sm shadow-[#19A3E9]/50 cursor-pointer" 
                         title="Mark as read"
                       />
                     )}
                   </div>
                   <div className="flex items-center gap-4 mt-3">
-                    <span className="text-xs font-semibold text-slate-400">{new Date(notif.createdAt).toLocaleString()}</span>
+                    <span className="text-xs font-semibold text-[var(--color-muted)]">{new Date(notif.createdAt).toLocaleString()}</span>
                   </div>
                 </div>
               </div>

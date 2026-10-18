@@ -115,6 +115,18 @@ export const Settings = () => {
   const [studentType, setStudentType] = useState<'HOSTELLER' | 'DAY_SCHOLAR'>('DAY_SCHOLAR');
   const [gender, setGender] = useState('Prefer not to say');
   const [tonePreference, setTonePreference] = useState('buddy');
+  const [department, setDepartment] = useState('');
+  const [departmentsList, setDepartmentsList] = useState<string[]>([
+    'Computer Science & Engineering',
+    'Information Technology',
+    'Electronics & Communication Engineering',
+    'Electrical & Electronics Engineering',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Biotechnology',
+    'Chemical Engineering',
+    'Artificial Intelligence & Data Science'
+  ]);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileError, setProfileError] = useState('');
@@ -138,6 +150,16 @@ export const Settings = () => {
   React.useEffect(() => {
     let isMounted = true;
 
+    apiClient('/departments')
+      .then((data) => {
+        if (!isMounted || !Array.isArray(data)) return;
+        const names = data.map((d: any) => d.name || d.code).filter(Boolean);
+        if (names.length > 0) {
+          setDepartmentsList(prev => Array.from(new Set([...names, ...prev])));
+        }
+      })
+      .catch((err) => console.warn('Could not fetch departments for selector:', err));
+
     apiClient('/users/me')
       .then((data) => {
         if (!isMounted) return;
@@ -156,6 +178,10 @@ export const Settings = () => {
         const rawTone = data?.profile?.tonePreference || data?.tonePreference || data?.academicIdentity?.tonePreference;
         if (rawTone) {
           setTonePreference(rawTone);
+        }
+        const rawDept = data?.student?.section?.department?.name || data?.profile?.department || data?.department || '';
+        if (rawDept) {
+          setDepartment(rawDept);
         }
         setProfileError('');
       })
@@ -186,6 +212,7 @@ export const Settings = () => {
         residency: studentType === 'HOSTELLER' ? 'HOSTELER' : 'DAY_SCHOLAR',
         gender,
         tonePreference,
+        department: department.trim(),
       };
       const updatedProfile = await apiClient('/users/me/profile', {
         method: 'PUT',
@@ -196,7 +223,7 @@ export const Settings = () => {
         profile: { ...current?.profile, ...updatedProfile, ...payload },
         tonePreference,
       }));
-      setSaveMessage('Profile and communication tone saved.');
+      setSaveMessage('Profile and department preferences saved.');
     } catch (error) {
       setProfileError(error instanceof Error ? error.message : 'Unable to save your profile.');
     } finally {
@@ -297,24 +324,23 @@ export const Settings = () => {
 
   const fullName = profile?.profile?.fullName?.trim() || '';
   const assignedSection = profile?.student?.section?.name || profile?.profile?.section || '';
-  const department = profile?.student?.section?.department?.name || profile?.profile?.department || '';
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-10">
-      <div className="flex justify-between items-center bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex justify-between items-center glass p-6 rounded-2xl border border-[var(--color-border)]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Account Settings</h1>
-          <p className="text-slate-500 font-medium mt-1">Manage your account preferences</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text)]">Account Settings</h1>
+          <p className="text-[var(--color-muted)] font-medium mt-1">Manage your account preferences</p>
         </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Sidebar Nav */}
-        <div className="w-full md:w-64 shrink-0 space-y-2 bg-white/60 backdrop-blur-xl rounded-2xl p-4 border border-slate-100 shadow-sm h-max">
+        <div className="w-full md:w-64 shrink-0 space-y-2 glass rounded-2xl p-4 border border-[var(--color-border)] h-max">
           <button 
             onClick={() => setActiveTab('Profile')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition font-semibold text-sm ${
-              activeTab === 'Profile' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'
+              activeTab === 'Profile' ? 'bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30' : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
             }`}
           >
             <User size={18} /> Edit Profile
@@ -322,7 +348,7 @@ export const Settings = () => {
           <button 
             onClick={() => setActiveTab('Notifications')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition font-semibold text-sm ${
-              activeTab === 'Notifications' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'
+              activeTab === 'Notifications' ? 'bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30' : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
             }`}
           >
             <Bell size={18} /> Notifications
@@ -330,7 +356,7 @@ export const Settings = () => {
           <button 
             onClick={() => setActiveTab('Security')}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition font-semibold text-sm ${
-              activeTab === 'Security' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'
+              activeTab === 'Security' ? 'bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30' : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
             }`}
           >
             <Shield size={18} /> Security
@@ -338,20 +364,20 @@ export const Settings = () => {
         </div>
 
         {/* Form Content */}
-        <div className="flex-1 bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-sm p-6 sm:p-8">
+        <div className="flex-1 glass rounded-2xl border border-[var(--color-border)] p-6 sm:p-8">
           {activeTab === 'Profile' && (
             <div className="space-y-8">
-              {loadingProfile && <p role="status" className="text-sm text-slate-500">Loading account details...</p>}
-              {profileError && <p role="alert" className="text-sm text-red-700">{profileError}</p>}
-              <div className="flex items-center gap-6 pb-6 border-b border-slate-100">
+              {loadingProfile && <p role="status" className="text-sm text-[var(--color-muted)]">Loading account details...</p>}
+              {profileError && <p role="alert" className="text-sm text-red-500">{profileError}</p>}
+              <div className="flex items-center gap-6 pb-6 border-b border-[var(--color-border)]">
                 <div className="relative group cursor-pointer">
-                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-slate-50">
+                  <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-black/5 dark:ring-white/10">
                     {profile?.profile?.avatarUrl ? (
                       <img src={profile.profile.avatarUrl} alt={`${fullName || 'Account'} profile`} className="w-full h-full object-cover" />
                     ) : fullName ? (
-                      <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=3B82F6&color=fff&size=128`} alt={`${fullName} avatar`} className="w-full h-full object-cover" />
+                      <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=7140D8&color=fff&size=128`} alt={`${fullName} avatar`} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-slate-100 text-slate-400"><User size={32} /></div>
+                      <div className="w-full h-full flex items-center justify-center bg-black/5 dark:bg-white/5 text-[var(--color-muted)]"><User size={32} /></div>
                     )}
                   </div>
                   <div className="absolute inset-0 bg-slate-900/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
@@ -359,63 +385,94 @@ export const Settings = () => {
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-bold text-xl text-slate-900">{loadingProfile ? 'Loading profile' : fullName || 'Name not set'}</h3>
-                  <p className="text-slate-500 font-medium">{profile?.email || (loadingProfile ? '' : 'Email not available')}</p>
+                  <h3 className="font-bold text-xl text-[var(--color-text)]">{loadingProfile ? 'Loading profile' : fullName || 'Name not set'}</h3>
+                  <p className="text-[var(--color-muted)] font-medium">{profile?.email || (loadingProfile ? '' : 'Email not available')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">First Name</label>
-                  <input type="text" value={firstName} onChange={(event) => setFirstName(event.target.value)} disabled={loadingProfile || savingProfile} autoComplete="given-name" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">First Name</label>
+                  <input type="text" value={firstName} onChange={(event) => setFirstName(event.target.value)} disabled={loadingProfile || savingProfile} autoComplete="given-name" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium disabled:opacity-60" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Last Name</label>
-                  <input type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} disabled={loadingProfile || savingProfile} autoComplete="family-name" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Last Name</label>
+                  <input type="text" value={lastName} onChange={(event) => setLastName(event.target.value)} disabled={loadingProfile || savingProfile} autoComplete="family-name" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium disabled:opacity-60" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Email</label>
-                  <input type="email" value={profile?.email || ''} readOnly aria-readonly="true" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Email</label>
+                  <input type="email" value={profile?.email || ''} readOnly aria-readonly="true" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-muted)] opacity-80 cursor-not-allowed outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Roll Number</label>
-                  <input type="text" value={profile?.profile?.rollNumber || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Roll Number</label>
+                  <input type="text" value={profile?.profile?.rollNumber || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-muted)] opacity-80 cursor-not-allowed outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Section</label>
-                  <input type="text" value={assignedSection} readOnly aria-readonly="true" placeholder="Not assigned" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Section</label>
+                  <input type="text" value={assignedSection} readOnly aria-readonly="true" placeholder="Not assigned" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-muted)] opacity-80 cursor-not-allowed outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Department</label>
-                  <input type="text" value={department} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Department</label>
+                  <div className="space-y-2">
+                    <select
+                      value={departmentsList.includes(department) ? department : (department ? 'OTHER' : '')}
+                      onChange={(e) => {
+                        if (e.target.value === 'OTHER') {
+                          if (departmentsList.includes(department)) setDepartment('');
+                        } else {
+                          setDepartment(e.target.value);
+                        }
+                      }}
+                      disabled={loadingProfile || savingProfile}
+                      className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium"
+                    >
+                      <option value="">Select your department</option>
+                      {departmentsList.map((deptName) => (
+                        <option key={deptName} value={deptName}>
+                          {deptName}
+                        </option>
+                      ))}
+                      <option value="OTHER">Other / Custom Department</option>
+                    </select>
+                    {(!departmentsList.includes(department) && department !== '') && (
+                      <input
+                        type="text"
+                        placeholder="Type custom department name"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        disabled={loadingProfile || savingProfile}
+                        className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium placeholder-[var(--color-muted)]"
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Institution</label>
-                  <input type="text" value={profile?.Institution?.name || profile?.Institution?.code || ''} readOnly aria-readonly="true" placeholder="Not assigned" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Institution</label>
+                  <input type="text" value={profile?.Institution?.name || profile?.Institution?.code || ''} readOnly aria-readonly="true" placeholder="Not assigned" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-muted)] opacity-80 cursor-not-allowed outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Semester</label>
-                  <input type="text" value={profile?.profile?.semester || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-slate-200 bg-slate-100 text-slate-600 outline-none font-medium" />
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Semester</label>
+                  <input type="text" value={profile?.profile?.semester || ''} readOnly aria-readonly="true" placeholder="Not provided" className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-muted)] opacity-80 cursor-not-allowed outline-none font-medium" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Living Arrangement</label>
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Living Arrangement</label>
                   <select
                     value={studentType}
                     onChange={(e) => setStudentType(e.target.value as any)}
                     disabled={loadingProfile || savingProfile}
-                    className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-400 outline-none transition font-medium"
+                    className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium"
                   >
                     <option value="DAY_SCHOLAR">🎒 Day Scholar</option>
                     <option value="HOSTELLER">🏠 Hosteller (Hostel Resident)</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Gender (Optional)</label>
+                  <label className="text-sm font-semibold text-[var(--color-text)]">Gender (Optional)</label>
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
                     disabled={loadingProfile || savingProfile}
-                    className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white focus:border-blue-400 outline-none transition font-medium"
+                    className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium"
                   >
                     <option value="Prefer not to say">Prefer not to say</option>
                     <option value="Boy">Boy / Male</option>
@@ -426,18 +483,18 @@ export const Settings = () => {
               </div>
 
               {/* Communication Style / Message Tone Preference */}
-              <div className="pt-6 border-t border-slate-100 space-y-4">
+              <div className="pt-6 border-t border-[var(--color-border)] space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <h3 className="text-base font-bold text-[var(--color-text)] flex items-center gap-2">
                       <Sparkles size={18} className="text-amber-500" />
                       Communication Style / Message Tone
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-[var(--color-muted)] mt-0.5">
                       Choose how CampAssist speaks to you across attendance alerts, timetable reminders, and campus nudges.
                     </p>
                   </div>
-                  <span className="self-start sm:self-auto text-xs px-3 py-1 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-100 flex items-center gap-1.5 shadow-sm">
+                  <span className="self-start sm:self-auto text-xs px-3 py-1 bg-[rgba(25,163,233,0.15)] text-[#19A3E9] font-bold rounded-xl border border-[#19A3E9]/30 flex items-center gap-1.5 shadow-sm">
                     <span>{TONE_OPTIONS.find(t => t.id === tonePreference)?.emoji || '🤝'}</span>
                     Active: {TONE_OPTIONS.find(t => t.id === tonePreference)?.label || 'Buddy'}
                   </span>
@@ -454,27 +511,27 @@ export const Settings = () => {
                         onClick={() => !tone.disabled && setTonePreference(tone.id)}
                         className={`text-left p-3.5 rounded-2xl border transition relative flex flex-col justify-between ${
                           tone.disabled
-                            ? 'opacity-60 bg-slate-50/70 border-dashed border-slate-200 cursor-not-allowed'
+                            ? 'opacity-60 glass border-dashed border-[var(--color-border)] cursor-not-allowed'
                             : isSelected
-                            ? 'bg-blue-50/80 border-blue-400 ring-2 ring-blue-500/20 shadow-sm'
-                            : 'bg-white/90 border-slate-200/90 hover:border-slate-300 hover:bg-slate-50/70'
+                            ? 'bg-[rgba(25,163,233,0.15)] border-[#19A3E9] ring-2 ring-[#19A3E9]/20 shadow-sm'
+                            : 'glass border-[var(--color-border)] hover:border-[#19A3E9]/60'
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between gap-1 mb-1">
-                            <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                            <span className="text-sm font-bold text-[var(--color-text)] flex items-center gap-1.5">
                               <span>{tone.emoji}</span> {tone.label}
                             </span>
                             {tone.disabled ? (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-200 text-slate-600">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md glass text-[var(--color-muted)] border border-[var(--color-border)]">
                                 Coming Soon
                               </span>
                             ) : isSelected ? (
-                              <span className="w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-blue-100" />
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#19A3E9] ring-4 ring-[#19A3E9]/20" />
                             ) : null}
                           </div>
-                          <p className="text-[11px] font-semibold text-slate-600 mb-1">{tone.tagline}</p>
-                          <p className="text-[11px] text-slate-500 leading-snug">{tone.description}</p>
+                          <p className="text-[11px] font-semibold text-[var(--color-muted)] mb-1">{tone.tagline}</p>
+                          <p className="text-[11px] text-[var(--color-muted)] leading-snug">{tone.description}</p>
                         </div>
                       </button>
                     );
@@ -485,14 +542,14 @@ export const Settings = () => {
                 {(() => {
                   const activeTone = TONE_OPTIONS.find((t) => t.id === tonePreference) || TONE_OPTIONS[0];
                   return (
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50/70 border border-blue-100/90 shadow-sm">
+                    <div className="p-4 rounded-2xl glass border border-[var(--color-border)] shadow-sm">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-xs font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
+                        <span className="text-xs font-bold uppercase tracking-wider text-[#19A3E9] flex items-center gap-1.5">
                           <span>{activeTone.emoji}</span> Live Tone Preview — {activeTone.label}
                         </span>
-                        <span className="text-[11px] text-slate-500 font-medium">Sample Attendance Warning</span>
+                        <span className="text-[11px] text-[var(--color-muted)] font-medium">Sample Attendance Warning</span>
                       </div>
-                      <p className="text-sm font-medium text-slate-800 italic">
+                      <p className="text-sm font-medium text-[var(--color-text)] italic">
                         {activeTone.preview}
                       </p>
                     </div>
@@ -504,52 +561,52 @@ export const Settings = () => {
 
           {activeTab === 'Notifications' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Notification Preferences</h3>
+              <h3 className="text-lg font-bold text-[var(--color-text)] border-b border-[var(--color-border)] pb-4">Notification Preferences</h3>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
                   ['classUpdates', 'Class updates', 'Room changes and cancellations'],
                   ['attendance', 'Attendance', 'Attendance reminders and alerts'],
                   ['announcements', 'Announcements', 'Section and institution announcements']
                 ].map(([key, label, description]) => (
-                  <label key={key} className="cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-200">
+                  <label key={key} className="cursor-pointer rounded-xl border border-[var(--color-border)] glass p-4 transition hover:border-[#19A3E9]/60">
                     <input
                       type="checkbox"
                       checked={notificationPreferences[key as keyof typeof notificationPreferences]}
                       onChange={event => setNotificationPreferences(current => ({ ...current, [key]: event.target.checked }))}
-                      className="mb-3 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      className="mb-3 h-4 w-4 rounded border-[var(--color-border)] text-[#19A3E9] focus:ring-[#19A3E9]"
                     />
-                    <span className="block text-sm font-bold text-slate-800">{label}</span>
-                    <span className="mt-1 block text-xs leading-relaxed text-slate-500">{description}</span>
+                    <span className="block text-sm font-bold text-[var(--color-text)]">{label}</span>
+                    <span className="mt-1 block text-xs leading-relaxed text-[var(--color-muted)]">{description}</span>
                   </label>
                 ))}
               </div>
-              <p className="text-xs text-slate-500">Changes are stored in this browser session. Connect the preference API to persist them across devices.</p>
+              <p className="text-xs text-[var(--color-muted)]">Changes are stored in this browser session. Connect the preference API to persist them across devices.</p>
             </div>
           )}
 
           {activeTab === 'Security' && (
             <div className="space-y-10">
               <form onSubmit={updatePassword} className="space-y-8">
-                <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-4">Update Password</h3>
+                <h3 className="text-lg font-bold text-[var(--color-text)] border-b border-[var(--color-border)] pb-4">Update Password</h3>
 
                 <div className="space-y-4 max-w-md">
                   <div className="space-y-2">
-                    <label htmlFor="new-password" className="text-sm font-semibold text-slate-700">New Password</label>
-                    <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={event => setNewPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                    <label htmlFor="new-password" className="text-sm font-semibold text-[var(--color-text)]">New Password</label>
+                    <input id="new-password" type="password" autoComplete="new-password" minLength={8} required value={newPassword} onChange={event => setNewPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium disabled:opacity-60" />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="confirm-password" className="text-sm font-semibold text-slate-700">Confirm New Password</label>
-                    <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 focus:bg-white/60 backdrop-blur-xl focus:border-blue-400 outline-none transition font-medium disabled:opacity-60" />
+                    <label htmlFor="confirm-password" className="text-sm font-semibold text-[var(--color-text)]">Confirm New Password</label>
+                    <input id="confirm-password" type="password" autoComplete="new-password" minLength={8} required value={confirmPassword} onChange={event => setConfirmPassword(event.target.value)} disabled={savingPassword} className="w-full p-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:border-[var(--color-primary)] outline-none transition font-medium disabled:opacity-60" />
                   </div>
                 </div>
-                {securityError && <p role="alert" className="text-sm text-red-700">{securityError}</p>}
-                {securityMessage && <p role="status" className="text-sm text-emerald-700">{securityMessage}</p>}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-5">
+                {securityError && <p role="alert" className="text-sm text-red-500">{securityError}</p>}
+                {securityMessage && <p role="status" className="text-sm text-emerald-500">{securityMessage}</p>}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[var(--color-border)] pt-5">
                   <button
                     type="button"
                     onClick={handleSendResetEmail}
                     disabled={sendingResetEmail}
-                    className="text-sm font-medium text-[var(--brand-blue)] hover:text-[var(--brand-purple)] transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                    className="text-sm font-medium text-[#19A3E9] hover:text-[var(--brand-purple)] transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                   >
                     {sendingResetEmail ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
                     {sendingResetEmail ? 'Sending link...' : 'Send reset link to my email'}
@@ -562,27 +619,27 @@ export const Settings = () => {
               </form>
 
               {/* Danger Zone: Account Deletion */}
-              <div className="border-t border-rose-100 pt-8 space-y-4">
+              <div className="border-t border-rose-500/20 pt-8 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 shrink-0">
+                  <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 shrink-0">
                     <Trash2 size={20} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-rose-900">Danger Zone</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">
+                    <h3 className="text-lg font-bold text-rose-500">Danger Zone</h3>
+                    <p className="text-sm text-[var(--color-muted)] mt-0.5">
                       Permanently delete your CampusAssist account and all associated data.
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 text-xs text-rose-800 leading-relaxed space-y-2">
-                  <p className="font-semibold text-rose-900">
+                <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-200 leading-relaxed space-y-2">
+                  <p className="font-semibold text-rose-400">
                     Warning: This action is irreversible and cannot be undone.
                   </p>
                   <p>
                     Deleting your account permanently removes:
                   </p>
-                  <ul className="list-disc pl-5 space-y-1 text-rose-700">
+                  <ul className="list-disc pl-5 space-y-1 text-rose-300">
                     <li>Student profile, enrollment, and academic records in PostgreSQL</li>
                     <li>Timetable entries, attendance records, and section assignments</li>
                     <li>Notifications, reminder preferences, and feedback history</li>
@@ -598,15 +655,15 @@ export const Settings = () => {
                       setDeleteConfirmation('');
                       setDeleteError('');
                     }}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-rose-300 text-rose-700 font-bold hover:bg-rose-50 transition text-sm"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-rose-500/40 text-rose-400 font-bold hover:bg-rose-500/10 transition text-sm"
                   >
                     <Trash2 size={16} /> Delete My Account
                   </button>
                 ) : (
-                  <div className="p-5 rounded-2xl border-2 border-rose-300 bg-white space-y-4 shadow-sm">
+                  <div className="p-5 rounded-2xl border-2 border-rose-500/40 glass space-y-4 shadow-sm">
                     <div className="space-y-1">
-                      <label htmlFor="confirm-delete-input" className="block text-xs font-bold text-slate-700">
-                        To confirm deletion, please type <code className="bg-slate-100 px-1.5 py-0.5 rounded text-rose-600 font-mono">DELETE_MY_ACCOUNT</code> below:
+                      <label htmlFor="confirm-delete-input" className="block text-xs font-bold text-[var(--color-text)]">
+                        To confirm deletion, please type <code className="bg-white/10 px-1.5 py-0.5 rounded text-rose-400 font-mono">DELETE_MY_ACCOUNT</code> below:
                       </label>
                       <input
                         id="confirm-delete-input"
@@ -618,12 +675,12 @@ export const Settings = () => {
                         }}
                         placeholder="DELETE_MY_ACCOUNT"
                         disabled={deletingAccount}
-                        className="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-sm focus:border-rose-500 outline-none"
+                        className="w-full p-2.5 rounded-xl border border-rose-500/30 glass font-mono text-sm focus:border-rose-500 text-[var(--color-text)] outline-none"
                       />
                     </div>
 
                     {deleteError && (
-                      <p role="alert" className="text-xs font-medium text-rose-700 bg-rose-50 p-3 rounded-lg border border-rose-200">
+                      <p role="alert" className="text-xs font-medium text-rose-400 bg-rose-500/10 p-3 rounded-lg border border-rose-500/30">
                         {deleteError}
                       </p>
                     )}
@@ -637,7 +694,7 @@ export const Settings = () => {
                           setDeleteConfirmation('');
                           setDeleteError('');
                         }}
-                        className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold text-sm transition"
+                        className="px-4 py-2 rounded-xl text-[var(--color-muted)] hover:bg-white/5 font-semibold text-sm transition"
                       >
                         Cancel
                       </button>
@@ -657,14 +714,14 @@ export const Settings = () => {
           )}
 
           {activeTab === 'Profile' && (
-            <div className="mt-10 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="mt-10 pt-6 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-3">
               {saveMessage ? (
-                <p role="status" className="text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-xl flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                <p role="status" className="text-sm font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2 rounded-xl flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   {saveMessage}
                 </p>
               ) : profileError ? (
-                <p role="alert" className="text-sm font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-3.5 py-2 rounded-xl">
+                <p role="alert" className="text-sm font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3.5 py-2 rounded-xl">
                   {profileError}
                 </p>
               ) : <div />}

@@ -275,11 +275,9 @@ body {
    ========================================================================== */
 
 /* Universal translucent card surfaces across all pages */
-[class*="bg-white/50"],
-[class*="bg-white/60"],
-[class*="bg-white/70"],
-[class*="bg-white/80"],
-[class*="bg-white/90"],
+.bg-white,
+[class*="bg-white"],
+[class*="bg-white/"],
 div[class*="rounded-"][class*="bg-white"],
 section[class*="rounded-"][class*="bg-white"],
 article[class*="rounded-"][class*="bg-white"],
@@ -290,6 +288,23 @@ main [class*="rounded-3xl"][class*="border"] {
   -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
   border-color: var(--color-border) !important;
   box-shadow: var(--card-shadow) !important;
+}
+
+/* Modals, popovers, dropdown menus, context menus, and tooltips */
+.popover,
+.dropdown-menu,
+[role="dialog"],
+[role="menu"],
+[role="listbox"],
+[class*="shadow-2xl"][class*="absolute"],
+[class*="shadow-xl"][class*="absolute"],
+[class*="shadow-lg"][class*="absolute"],
+[class*="bg-white"][class*="rounded-2xl"][class*="max-w-"] {
+  background-color: var(--color-card) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
 }
 
 /* Translucent sub-surfaces (inner chips, nested items, secondary buttons) */
@@ -383,6 +398,27 @@ select option {
   .text-gray-500,
   .text-gray-400 {
     color: var(--color-muted) !important;
+  }
+
+  .text-indigo-900,
+  .text-indigo-800,
+  .text-indigo-700,
+  .text-blue-900,
+  .text-blue-800,
+  .text-blue-700 {
+    color: #38bdf8 !important;
+  }
+
+  .text-rose-900,
+  .text-rose-800,
+  .text-rose-700 {
+    color: #fb7185 !important;
+  }
+
+  .text-emerald-900,
+  .text-emerald-800,
+  .text-emerald-700 {
+    color: #34d399 !important;
   }
 
   /* Structural borders */
