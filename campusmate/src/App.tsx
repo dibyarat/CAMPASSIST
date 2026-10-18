@@ -53,6 +53,35 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
   const [authState, setAuthState] = React.useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const location = useLocation();
+
+  // Automatically close sidebar when navigating to any route on mobile/app
+  React.useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Expose global handlers for the Native Android Shell top-bar menu button
+  React.useEffect(() => {
+    const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+    const openSidebar = () => setIsSidebarOpen(true);
+    const closeSidebar = () => setIsSidebarOpen(false);
+
+    (window as any).__toggleAppSidebar = toggleSidebar;
+    (window as any).__openAppSidebar = openSidebar;
+    (window as any).__closeAppSidebar = closeSidebar;
+    (window as any).__isAppSidebarOpen = () => isSidebarOpen;
+
+    const handleToggleEvent = () => toggleSidebar();
+    window.addEventListener('toggle-app-sidebar', handleToggleEvent);
+
+    return () => {
+      window.removeEventListener('toggle-app-sidebar', handleToggleEvent);
+      delete (window as any).__toggleAppSidebar;
+      delete (window as any).__openAppSidebar;
+      delete (window as any).__closeAppSidebar;
+      delete (window as any).__isAppSidebarOpen;
+    };
+  }, [isSidebarOpen]);
 
   React.useEffect(() => {
     let isMounted = true;

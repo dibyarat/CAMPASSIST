@@ -41,6 +41,9 @@ export function useAndroidAppShell() {
         case 'roomfinder':
           navigate('/student/find-room');
           break;
+        case 'studyos':
+          navigate('/student/studyos');
+          break;
         case 'profile':
           navigate('/student/profile');
           break;
@@ -55,3 +58,4 @@ export function useAndroidAppShell() {
 
   return { isApp, bridge: androidBridge };
 }
+
