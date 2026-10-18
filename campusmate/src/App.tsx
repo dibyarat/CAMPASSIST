@@ -25,10 +25,13 @@ const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: st
   return (
     <Link 
       to={to} 
-      className={`flex items-center gap-3 py-2.5 rounded-xl transition font-medium text-sm ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${isActive ? 'bg-gradient-primary text-white font-semibold shadow-md' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
-      
+      className={`flex items-center gap-3 py-2.5 rounded-full transition-all duration-150 font-medium text-sm ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${
+        isActive 
+          ? 'bg-gradient-brand text-white font-semibold shadow-[0_4px_16px_rgba(113,64,216,0.35)]' 
+          : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
+      }`}
     >
-      <Icon size={18} className={isActive ? 'text-white shrink-0' : 'text-slate-400 shrink-0'} />
+      <Icon size={18} className={isActive ? 'text-white shrink-0' : 'text-[var(--color-muted)] shrink-0'} />
       {!isCollapsed && <span className="whitespace-nowrap">{children}</span>}
     </Link>
   );
@@ -106,25 +109,36 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100 font-sans text-slate-900 overflow-hidden">
+    <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans overflow-hidden relative selection:bg-purple-500/20 selection:text-purple-900">
+      {/* Ambient background glows */}
+      <div className="pointer-events-none fixed -top-40 -left-40 w-96 h-96 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(25,163,233,0.14),transparent_70%)] blur-3xl z-0" />
+      <div className="pointer-events-none fixed -bottom-40 -right-40 w-96 h-96 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(217,70,168,0.14),transparent_70%)] blur-3xl z-0" />
+
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 z-20 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-30 lg:hidden" onClick={() => setIsSidebarOpen(false)}></div>
       )}
+
       {/* Sidebar */}
-      <div className={`fixed lg:static inset-y-0 left-0 bg-white border-r border-slate-200 flex flex-col z-30 transform transition-all duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${isCollapsed ? 'w-20' : 'w-72'}`}>
-        <div className={'h-16 flex items-center border-b border-slate-100 justify-between lg:justify-start cursor-pointer select-none ' + (isCollapsed ? 'px-4 justify-center' : 'px-6')} onClick={() => setIsCollapsed(!isCollapsed)}>
-          <div className="hidden lg:flex items-center gap-2 overflow-hidden">
+      <div className={`fixed lg:static inset-y-0 left-0 bg-[var(--glass-surface)] backdrop-blur-2xl border-r border-[var(--color-border)] flex flex-col z-40 transform transition-all duration-300 ease-in-out shadow-[var(--card-shadow)] ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} ${isCollapsed ? 'w-20' : 'w-72'}`}>
+        <div className={'h-16 flex items-center border-b border-[var(--color-border)] justify-between lg:justify-start cursor-pointer select-none ' + (isCollapsed ? 'px-4 justify-center' : 'px-6')} onClick={() => setIsCollapsed(!isCollapsed)}>
+          <div className="hidden lg:flex items-center gap-2.5 overflow-hidden">
             <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain hover:scale-105 transition-transform" />
-            {!isCollapsed && <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>}
+            {!isCollapsed && (
+              <span className="font-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">
+                <span className="text-[#19A3E9]">Camp</span><span className="text-[#D946A8]">Assist</span>
+              </span>
+            )}
           </div>
-          <Link to="/" className="flex lg:hidden items-center gap-2 overflow-hidden">
+          <Link to="/" className="flex lg:hidden items-center gap-2.5 overflow-hidden">
             <img src={logoIcon} alt="CampAssist Logo" className="w-8 h-8 shrink-0 object-contain" />
-            <span className="brand-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">CampAssist</span>
+            <span className="font-wordmark font-extrabold text-xl tracking-tight whitespace-nowrap">
+              <span className="text-[#19A3E9]">Camp</span><span className="text-[#D946A8]">Assist</span>
+            </span>
           </Link>
           <div className="flex items-center gap-2 lg:hidden">
-            <button className="p-1 text-slate-500" onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(false); }}>
-              <ChevronLeft size={24} />
+            <button className="p-1.5 rounded-lg text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5" onClick={(e) => { e.stopPropagation(); setIsSidebarOpen(false); }}>
+              <ChevronLeft size={22} />
             </button>
           </div>
         </div>
@@ -132,20 +146,20 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
         <div className="flex-1 overflow-y-auto p-4 space-y-1">
           {role === 'student' && (
             <>
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-2">Main Menu</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-2">Main Menu</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}`} icon={LayoutDashboard}>Dashboard</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/find-room`} icon={MapPin}>Find Room</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/studyos`} icon={FileText}>StudyOS</SidebarLink>
               
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Academics</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Academics</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/submissions`} icon={UploadCloud}>Submissions</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/sgpa-cgpa`} icon={GraduationCap}>SGPA/CGPA</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/exam-schedule`} icon={CalendarDays}>Exam Schedule</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/exam-seat`} icon={MapPin}>Exam Seating</SidebarLink>
               
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Campus</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Campus</div>}
 
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/college-map`} icon={MapPin}>College Map</SidebarLink>
@@ -162,16 +176,16 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
 
           {role === 'cr' && (
             <>
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-2">Overview</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-2">Overview</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}`} icon={LayoutDashboard}>CR Dashboard</SidebarLink>
               
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">My Board</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">My Board</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/find-room`} icon={MapPin}>Find Room</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/announcements`} icon={Bell}>Announcements</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/cancellations`} icon={MapPin}>Cancellations</SidebarLink>
               
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Other</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Other</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/reports`} icon={FileText}>Reports</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/polls`} icon={BarChart2}>Polls</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/reminders`} icon={Bookmark}>Reminders</SidebarLink>
@@ -183,13 +197,13 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
 
           {role === 'developer' && (
             <>
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-2">Overview</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-2">Overview</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}`} icon={LayoutDashboard}>Dashboard</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/users`} icon={Users}>Users</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/institutions`} icon={Building2}>Institutions</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/sections`} icon={FileText}>Sections</SidebarLink>
               
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">Management</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Management</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/subjects`} icon={Bookmark}>Subjects</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/timetable`} icon={Calendar}>Timetable</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/rooms`} icon={MapPin}>Rooms & Facilities</SidebarLink>
@@ -200,57 +214,57 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/map`} icon={MapPin}>Map Moderation</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/feedbacks`} icon={MessageSquare}>Feedbacks</SidebarLink>
               
-              {!isCollapsed && <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-4 mt-6">System</div>}
+              {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">System</div>}
 
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/settings`} icon={Users}>Settings</SidebarLink>
             </>
           )}
         </div>
         
-        <div className="p-4 border-t border-slate-100 space-y-2">
+        <div className="p-4 border-t border-[var(--color-border)] space-y-2">
           {isCollapsed && (
-            <button onClick={() => setIsCollapsed(false)} className="w-full flex items-center justify-center p-2 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition">
+            <button onClick={() => setIsCollapsed(false)} className="w-full flex items-center justify-center p-2 rounded-xl text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)] transition">
               <ChevronRight size={24} />
             </button>
           )}
 
           {actualRole === 'CR' && (
-            <Link to={role === 'student' ? '/cr' : '/student'} className={`flex items-center gap-3 py-3 rounded-xl transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${role === 'student' ? 'text-purple-600 bg-purple-50 hover:bg-purple-100' : 'text-blue-600 bg-blue-50 hover:bg-blue-100'}`}>
-              <ArrowRightLeft size={20} className="shrink-0" />
+            <Link to={role === 'student' ? '/cr' : '/student'} className={`flex items-center gap-3 py-2.5 rounded-full transition-all font-medium text-sm ${isCollapsed ? 'justify-center px-0' : 'px-4'} ${role === 'student' ? 'text-[#8758F5] bg-[rgba(135,88,245,0.1)] hover:bg-[rgba(135,88,245,0.18)]' : 'text-[#19A3E9] bg-[rgba(25,163,233,0.1)] hover:bg-[rgba(25,163,233,0.18)]'}`}>
+              <ArrowRightLeft size={18} className="shrink-0" />
               {!isCollapsed && <span>{role === 'student' ? 'Switch to CR Mode' : 'Switch to Student Mode'}</span>}
             </Link>
           )}
 
-          <Link to="/" onClick={async (event) => { event.preventDefault(); try { await signOut(auth); } catch {} localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 hover:text-red-600 transition font-medium ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
-            <LogOut size={20} className="shrink-0" />
+          <Link to="/" onClick={async (event) => { event.preventDefault(); try { await signOut(auth); } catch {} localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-2.5 rounded-full text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all font-medium text-sm ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+            <LogOut size={18} className="shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </Link>
         </div>
       </div>
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-10">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+        <header className="h-16 bg-[var(--glass-surface)] backdrop-blur-xl border-b border-[var(--color-border)] flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 shadow-xs">
           <div className="flex items-center gap-4">
-            <button className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg" onClick={() => setIsSidebarOpen(true)}>
+            <button className="lg:hidden p-2 text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 rounded-xl" onClick={() => setIsSidebarOpen(true)}>
               <LayoutDashboard size={20} />
             </button>
             <div className="w-64 sm:w-80 md:w-96">
               <GlobalSearch role={role} />
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link to={`/${role}/notifications`} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition relative" title="Notifications">
-              <Bell size={18} />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link to={`/${role}/notifications`} className="w-9 h-9 rounded-full bg-[var(--glass-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:shadow-xs transition relative" title="Notifications">
+              <Bell size={17} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D946A8] rounded-full ring-2 ring-white dark:ring-[#1B1733]"></span>
             </Link>
-            <Link to={`/${role}/settings`} className="flex items-center gap-3 hover:bg-slate-50 p-1.5 rounded-full pr-4 transition cursor-pointer">
-              <img src={`https://ui-avatars.com/api/?name=${userName}&background=3B82F6&color=fff`} alt="Avatar" className="w-8 h-8 rounded-full" />
-              <span className="text-sm font-semibold">{userName.split(" ")[0]}</span>
+            <Link to={`/${role}/settings`} className="flex items-center gap-2.5 hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded-full pr-3 transition cursor-pointer border border-transparent hover:border-[var(--color-border)]">
+              <img src={`https://ui-avatars.com/api/?name=${userName}&background=7140D8&color=fff`} alt="Avatar" className="w-7 h-7 rounded-full shadow-xs" />
+              <span className="text-xs font-semibold text-[var(--color-text)]">{userName.split(" ")[0]}</span>
             </Link>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

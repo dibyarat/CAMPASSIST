@@ -283,13 +283,13 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
     <div ref={containerRef} className="relative w-full max-w-md">
       {/* Search Input Bar */}
       <div
-        className={`flex items-center bg-slate-100 rounded-full px-4 py-2 border transition duration-200 ${
+        className={`flex items-center bg-[var(--glass-surface)] backdrop-blur-xl rounded-full px-4 py-2 border transition duration-200 ${
           isOpen
-            ? 'border-blue-400 bg-white ring-2 ring-blue-100 shadow-md'
-            : 'border-slate-200 hover:border-slate-300'
+            ? 'border-[#7140D8] ring-2 ring-[#7140D8]/20 shadow-md'
+            : 'border-[var(--color-border)] hover:border-black/20 dark:hover:border-white/20'
         }`}
       >
-        <Search size={18} className="text-slate-400 shrink-0" />
+        <Search size={17} className="text-[var(--color-muted)] shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -301,7 +301,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
           }}
           onKeyDown={handleInputKeyDown}
           placeholder="Search rooms, notes, subjects, pages..."
-          className="bg-transparent border-none outline-none ml-2 text-sm w-full text-slate-800 placeholder-slate-400 font-medium"
+          className="bg-transparent border-none outline-none ml-2 text-sm w-full text-[var(--color-text)] placeholder-[var(--color-muted)] font-medium"
         />
 
         {query ? (
@@ -310,13 +310,13 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
               setQuery('');
               inputRef.current?.focus();
             }}
-            className="p-1 text-slate-400 hover:text-slate-600 rounded-full transition"
+            className="p-1 text-[var(--color-muted)] hover:text-[var(--color-text)] rounded-full transition"
             title="Clear"
           >
             <X size={15} />
           </button>
         ) : (
-          <div className="hidden lg:flex items-center gap-1 text-[11px] font-semibold text-slate-400 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-xs shrink-0 select-none">
+          <div className="hidden lg:flex items-center gap-1 text-[10px] font-semibold text-[var(--color-muted)] bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-md border border-[var(--color-border)] shadow-xs shrink-0 select-none">
             <span>⌘</span>
             <span>K</span>
           </div>
@@ -325,25 +325,25 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
 
       {/* Floating Results Dropdown */}
       {isOpen && (
-        <div className="absolute top-12 left-0 right-0 sm:w-[480px] sm:-left-4 z-50 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute top-12 left-0 right-0 sm:w-[480px] sm:-left-4 z-50 bg-[var(--glass-surface)] backdrop-blur-2xl rounded-2xl shadow-2xl border border-[var(--color-border)] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header metadata */}
-          <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+          <div className="px-4 py-2.5 bg-black/5 dark:bg-white/5 border-b border-[var(--color-border)] flex items-center justify-between text-xs font-semibold text-[var(--color-text)]">
             <span className="flex items-center gap-1.5">
-              <Sparkles size={14} className="text-blue-500" />
+              <Sparkles size={14} className="text-[#8758F5]" />
               {query ? `Search results for "${query}"` : 'Quick Navigation & Suggestions'}
             </span>
-            <span className="text-slate-400 font-normal">
+            <span className="text-[var(--color-muted)] font-normal">
               {filteredResults.length} {filteredResults.length === 1 ? 'item' : 'items'}
             </span>
           </div>
 
           {/* Results List */}
-          <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-50 py-1">
+          <div className="max-h-[380px] overflow-y-auto divide-y divide-[var(--color-border)] py-1">
             {filteredResults.length === 0 ? (
-              <div className="p-8 text-center text-slate-500 space-y-2">
-                <Search size={28} className="mx-auto text-slate-300" />
-                <p className="text-sm font-semibold text-slate-700">No matching results found</p>
-                <p className="text-xs text-slate-400">
+              <div className="p-8 text-center text-[var(--color-muted)] space-y-2">
+                <Search size={28} className="mx-auto text-[var(--color-muted)] opacity-50" />
+                <p className="text-sm font-semibold text-[var(--color-text)]">No matching results found</p>
+                <p className="text-xs text-[var(--color-muted)]">
                   Try searching for room numbers (e.g. "Room 101"), courses ("CS"), notes, or pages.
                 </p>
               </div>
@@ -359,50 +359,50 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
                     onMouseEnter={() => setSelectedIndex(idx)}
                     className={`flex items-center justify-between px-4 py-3 cursor-pointer transition ${
                       isSelected
-                        ? 'bg-blue-50/90 text-blue-900 border-l-4 border-blue-600 pl-3'
-                        : 'hover:bg-slate-50/80 text-slate-800'
+                        ? 'bg-[#7140D8]/10 text-[var(--color-text)] border-l-4 border-[#7140D8] pl-3'
+                        : 'hover:bg-black/5 dark:hover:bg-white/5 text-[var(--color-text)]'
                     }`}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div
                         className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition ${
                           isSelected
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-200'
-                            : 'bg-slate-100 text-slate-600'
+                            ? 'bg-gradient-brand text-white shadow-md shadow-[#7140D8]/30'
+                            : 'bg-black/5 dark:bg-white/10 text-[var(--color-muted)]'
                         }`}
                       >
                         <IconComponent size={18} />
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold truncate text-slate-900">
+                          <span className="text-sm font-bold truncate text-[var(--color-text)]">
                             {item.title}
                           </span>
                           <span
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 border border-[var(--color-border)] ${
                               item.category === 'Pages & Tools'
-                                ? 'bg-purple-100 text-purple-700'
+                                ? 'bg-purple-500/10 text-purple-600 dark:text-purple-300'
                                 : item.category === 'Rooms & Facilities'
-                                ? 'bg-amber-100 text-amber-700'
+                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300'
                                 : item.category === 'Subjects & Courses'
-                                ? 'bg-emerald-100 text-emerald-700'
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
                                 : item.category === 'Notes & Resources'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-rose-100 text-rose-700'
+                                ? 'bg-sky-500/10 text-sky-600 dark:text-sky-300'
+                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-300'
                             }`}
                           >
                             {item.category}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 truncate font-medium mt-0.5">
+                        <p className="text-xs text-[var(--color-muted)] truncate font-medium mt-0.5">
                           {item.desc}
                         </p>
                       </div>
                     </div>
 
-                    <div className="shrink-0 ml-3 flex items-center gap-1 text-slate-400">
+                    <div className="shrink-0 ml-3 flex items-center gap-1 text-[var(--color-muted)]">
                       {isSelected ? (
-                        <div className="flex items-center gap-1 text-xs font-semibold text-blue-600 bg-white px-2 py-1 rounded-md shadow-xs border border-blue-200">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-[#7140D8] dark:text-[#8758F5] bg-[var(--glass-surface)] px-2 py-1 rounded-md shadow-xs border border-[var(--color-border)]">
                           <span>Jump</span>
                           <CornerDownLeft size={12} />
                         </div>
@@ -417,24 +417,25 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ role }) => {
           </div>
 
           {/* Footer keyboard helpers */}
-          <div className="px-4 py-2 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+          <div className="px-4 py-2 bg-black/5 dark:bg-white/5 border-t border-[var(--color-border)] flex items-center justify-between text-[11px] text-[var(--color-muted)]">
             <div className="flex items-center gap-3">
               <span>
-                <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px] shadow-xs">↑</kbd>{' '}
-                <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px] shadow-xs">↓</kbd> Navigate
+                <kbd className="px-1.5 py-0.5 bg-[var(--glass-surface)] border border-[var(--color-border)] rounded text-[10px] shadow-xs">↑</kbd>{' '}
+                <kbd className="px-1.5 py-0.5 bg-[var(--glass-surface)] border border-[var(--color-border)] rounded text-[10px] shadow-xs">↓</kbd> Navigate
               </span>
               <span>
-                <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px] shadow-xs">Enter</kbd> Select
+                <kbd className="px-1.5 py-0.5 bg-[var(--glass-surface)] border border-[var(--color-border)] rounded text-[10px] shadow-xs">Enter</kbd> Select
               </span>
               <span>
-                <kbd className="px-1.5 py-0.5 bg-white border rounded text-[10px] shadow-xs">Esc</kbd> Close
+                <kbd className="px-1.5 py-0.5 bg-[var(--glass-surface)] border border-[var(--color-border)] rounded text-[10px] shadow-xs">Esc</kbd> Close
               </span>
             </div>
-            <span className="font-medium text-slate-500 hidden sm:inline">CampAssist Instant Search</span>
+            <span className="font-medium text-[var(--color-muted)] hidden sm:inline">CampAssist Instant Search</span>
           </div>
         </div>
       )}
     </div>
   );
+
 };
 
