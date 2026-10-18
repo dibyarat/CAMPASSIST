@@ -483,4 +483,35 @@ select option {
   }
 }
 
+/* ========================================================
+   HYBRID ANDROID APP SHELL ADAPTATIONS
+   ======================================================== */
+body.in-android-shell {
+  /* Prevent tap highlight blue flash on Android WebView */
+  -webkit-tap-highlight-color: transparent;
+  /* Prevent pinch/double-tap zoom inside embedded native container */
+  touch-action: pan-x pan-y;
+  overscroll-behavior-y: none;
+}
+
+/* Disable text selection on UI interactive elements */
+body.in-android-shell button,
+body.in-android-shell a,
+body.in-android-shell nav,
+body.in-android-shell .sidebar,
+body.in-android-shell [role="tab"],
+body.in-android-shell [role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Hide duplicate web header and footer when rendered in Native Android Shell */
+body.in-android-shell header,
+body.in-android-shell .site-navbar,
+body.in-android-shell footer,
+body.in-android-shell .site-footer {
+  display: none !important;
+}
+
+
 

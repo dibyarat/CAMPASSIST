@@ -18,6 +18,12 @@ import {
   DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters, DevFeedbacks
 } from './lazyRoutes';
 import logoIcon from './assets/logo-icon.png';
+import { useAndroidAppShell } from './hooks/useAndroidAppShell';
+
+function AndroidBridgeInitializer() {
+  useAndroidAppShell();
+  return null;
+}
 
 const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: string, icon: any, children: React.ReactNode, isCollapsed?: boolean }) => {
   const location = useLocation();
@@ -274,6 +280,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AnalyticsTracker />
+      <AndroidBridgeInitializer />
       <BrandBackdrop />
       <Suspense fallback={<RouteFallback />}>
         <Routes>
