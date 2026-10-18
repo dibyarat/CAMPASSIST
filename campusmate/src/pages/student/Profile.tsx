@@ -62,37 +62,37 @@ export const Profile = () => {
 
 	return (
 		<section className="max-w-4xl mx-auto space-y-6 pb-10">
-			<header className="flex flex-wrap items-end justify-between gap-4">
+			<header className="flex flex-wrap items-end justify-between gap-4 bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] text-[var(--color-text)]">
 				<div>
-					<h1 className="text-2xl font-bold text-slate-900">My Profile</h1>
-					<p className="mt-1 text-sm text-slate-500">Account and academic details</p>
+					<h1 className="text-2xl font-bold text-[var(--color-text)]">My Profile</h1>
+					<p className="mt-1 text-sm text-[var(--color-muted)]">Account and academic details</p>
 				</div>
-				<Link to="/student/settings" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-					<UserRoundPen size={16} /> Edit profile
+				<Link to="/student/settings" className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 px-4 py-2 text-sm font-semibold text-[var(--color-text)] transition shadow-xs">
+					<UserRoundPen size={16} className="text-[#8758F5]" /> Edit profile
 				</Link>
 			</header>
 
-			{error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+			{error && <p role="alert" className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm font-medium text-rose-400">{error}</p>}
 			{loading ? (
-				<p role="status" className="py-12 text-center text-sm text-slate-500">Loading profile...</p>
+				<p role="status" className="py-12 text-center text-sm text-[var(--color-muted)]">Loading profile...</p>
 			) : profile && (
-				<div className="rounded-xl border border-slate-200 bg-white p-6">
-					<div className="flex items-center gap-4 border-b border-slate-100 pb-6">
+				<div className="rounded-2xl border border-[var(--color-border)] bg-[var(--glass-surface)] backdrop-blur-xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">
+					<div className="flex items-center gap-4 border-b border-[var(--color-border)] pb-6">
 						{profile.profile?.avatarUrl ? (
-							<img src={profile.profile.avatarUrl} alt="Profile" className="h-16 w-16 rounded-full object-cover" />
+							<img src={profile.profile.avatarUrl} alt="Profile" className="h-16 w-16 rounded-full object-cover border border-[var(--color-border)] shadow-xs" />
 						) : (
-							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500"><User size={26} /></div>
+							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/5 dark:bg-white/5 text-[#8758F5] border border-[var(--color-border)]"><User size={26} /></div>
 						)}
 						<div>
-							<h2 className="text-xl font-bold text-slate-900">{profile.profile?.fullName || 'Name not provided'}</h2>
-							<p className="text-sm text-slate-500">Student account</p>
+							<h2 className="text-xl font-bold text-[var(--color-text)]">{profile.profile?.fullName || 'Name not provided'}</h2>
+							<p className="text-sm font-medium text-[var(--color-muted)]">Student account</p>
 						</div>
 					</div>
 					<dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
 						{details.map(([label, value]) => (
-							<div key={label} className="border-b border-slate-100 py-4">
-								<dt className="text-xs font-semibold uppercase text-slate-500">{label}</dt>
-								<dd className="mt-1 text-sm font-medium text-slate-800">{value || 'Not provided'}</dd>
+							<div key={label} className="border-b border-[var(--color-border)] py-4">
+								<dt className="text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">{label}</dt>
+								<dd className="mt-1 text-sm font-medium text-[var(--color-text)]">{value || 'Not provided'}</dd>
 							</div>
 						))}
 					</dl>

@@ -258,7 +258,7 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <Bell size={17} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D946A8] rounded-full ring-2 ring-white dark:ring-[#1B1733]"></span>
             </Link>
-            <Link to={`/${role}/settings`} className="flex items-center gap-2.5 hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded-full pr-3 transition cursor-pointer border border-transparent hover:border-[var(--color-border)]">
+            <Link to={role === 'student' ? '/student/profile' : `/${role}/settings`} className="flex items-center gap-2.5 hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded-full pr-3 transition cursor-pointer border border-transparent hover:border-[var(--color-border)]" title="Profile">
               <img src={`https://ui-avatars.com/api/?name=${userName}&background=7140D8&color=fff`} alt="Avatar" className="w-7 h-7 rounded-full shadow-xs" />
               <span className="text-xs font-semibold text-[var(--color-text)]">{userName.split(" ")[0]}</span>
             </Link>
@@ -308,6 +308,12 @@ export default function App() {
         <Route path="/student/academic-pdfs" element={<MainLayout role="student"><StudentAcademicPdfs /></MainLayout>} />
         <Route path="/student/profile" element={<MainLayout role="student"><StudentProfile /></MainLayout>} />
         <Route path="/student/feedback" element={<MainLayout role="student"><StudentFeedback /></MainLayout>} />
+
+        {/* Student Route Aliases */}
+        <Route path="/student/calculator" element={<Navigate to="/student/sgpa-cgpa" replace />} />
+        <Route path="/student/exams" element={<Navigate to="/student/exam-schedule" replace />} />
+        <Route path="/student/map" element={<Navigate to="/student/college-map" replace />} />
+        <Route path="/student/reminders" element={<Navigate to="/student/reminder-center" replace />} />
 
         <Route path="/student/*" element={<Navigate to="/student" replace />} />
         

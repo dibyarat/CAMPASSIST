@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Users, Layout, GraduationCap, Database, UserPlus, FilePlus, Server, Activity, HardDrive, Loader2, Building2 } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 
@@ -103,18 +104,18 @@ export const Dashboard = () => {
           <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">
             <h3 className="font-bold text-[var(--color-text)] mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center gap-3.5 p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/10 transition group text-left backdrop-blur-md shadow-xs">
+              <Link to="/developer/users" className="w-full flex items-center gap-3.5 p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/10 transition group text-left backdrop-blur-md shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-gradient-brand text-white flex items-center justify-center shadow-xs">
                   <UserPlus size={16} />
                 </div>
                 <span className="font-semibold text-sm">Manage Users</span>
-              </button>
-              <button className="w-full flex items-center gap-3.5 p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/10 transition group text-left backdrop-blur-md shadow-xs">
+              </Link>
+              <Link to="/developer/institutions" className="w-full flex items-center gap-3.5 p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-black/5 dark:hover:bg-white/10 transition group text-left backdrop-blur-md shadow-xs">
                 <div className="w-9 h-9 rounded-xl bg-gradient-brand text-white flex items-center justify-center shadow-xs">
                   <Building2 size={16} />
                 </div>
                 <span className="font-semibold text-sm">Manage Institutions</span>
-              </button>
+              </Link>
             </div>
           </div>
 

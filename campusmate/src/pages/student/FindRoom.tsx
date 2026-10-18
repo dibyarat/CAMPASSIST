@@ -87,19 +87,19 @@ export const FindRoom = () => {
   return (
     <div className="max-w-4xl space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] text-[var(--color-text)]">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">
+          <h1 className="text-xl font-bold text-[var(--color-text)]">
             {canManageRooms ? 'Room Status & Availability' : 'Find a Room'}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-[var(--color-muted)] mt-1">
             {canManageRooms 
               ? 'Check live classroom vacancy and manage occupancy status as CR.'
               : 'Check real-time classroom and laboratory availability across campus.'}
           </p>
         </div>
         {canManageRooms && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-xl border border-purple-200 self-start sm:self-auto">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#8758F5]/10 text-[#8758F5] text-xs font-semibold rounded-xl border border-[#8758F5]/20 self-start sm:self-auto">
             <ShieldCheck size={14} />
             CR Controls Enabled
           </span>
@@ -108,14 +108,14 @@ export const FindRoom = () => {
 
       {/* Helpful banner for CR/Dev viewing the student side */}
       {isAuthorizedCRorDev && isStudentView && (
-        <div className="bg-purple-50/80 border border-purple-200 rounded-2xl p-4 flex items-center justify-between gap-4 text-xs text-purple-900 shadow-sm">
+        <div className="bg-[#8758F5]/10 border border-[#8758F5]/20 rounded-2xl p-4 flex items-center justify-between gap-4 text-xs text-[var(--color-text)] shadow-xs">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={16} className="text-purple-600 shrink-0" />
+            <ShieldCheck size={16} className="text-[#8758F5] shrink-0" />
             <span>You are viewing the student room finder (read-only). To report or revoke occupancy, use CR Room Management.</span>
           </div>
           <Link 
             to="/cr/find-room" 
-            className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition shrink-0"
+            className="px-3 py-1.5 bg-[#8758F5] hover:bg-[#7140D8] text-white font-semibold rounded-lg transition shrink-0 shadow-xs"
           >
             Go to CR Find Room &rarr;
           </Link>
@@ -124,66 +124,66 @@ export const FindRoom = () => {
 
       {/* Action feedback toast */}
       {feedback && (
-        <div className={`p-4 rounded-xl text-sm font-medium flex items-center justify-between border ${feedback.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'}`}>
+        <div className={`p-4 rounded-xl text-sm font-medium flex items-center justify-between border ${feedback.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
           <div className="flex items-center gap-2">
-            {feedback.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-600" /> : <AlertCircle size={16} className="text-rose-600" />}
+            {feedback.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-400" /> : <AlertCircle size={16} className="text-rose-400" />}
             <span>{feedback.message}</span>
           </div>
           <button onClick={() => setFeedback(null)} className="text-xs font-bold underline opacity-80 hover:opacity-100">Dismiss</button>
         </div>
       )}
 
-      <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-sm p-6">
+      <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl border border-[var(--color-border)] shadow-[var(--card-shadow)] p-6 text-[var(--color-text)]">
         {/* Search Form */}
         <div className="mb-6">
           <div className="relative">
-            <Search className="absolute left-3 top-3 text-slate-400" size={18} />
+            <Search className="absolute left-3.5 top-3 text-[var(--color-muted)]" size={18} />
             <input 
               type="text" 
               placeholder="Search by room number or building..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500" 
+              className="w-full pl-10 pr-4 py-2.5 bg-black/5 dark:bg-white/5 border border-[var(--color-border)] rounded-xl outline-none focus:ring-2 focus:ring-[#19A3E9] text-[var(--color-text)] font-medium" 
             />
           </div>
         </div>
 
         {/* Results List */}
         <div className="space-y-4">
-          <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h3 className="font-bold text-[var(--color-text)] mb-4 flex items-center gap-2">
             Current Status
           </h3>
           
           {loading ? (
-             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-blue-500" /></div>
+             <div className="flex justify-center p-10"><Loader2 className="animate-spin text-[#19A3E9] w-8 h-8" /></div>
           ) : filteredRooms.length === 0 ? (
-             <div className="text-center text-slate-500 py-10">No rooms found.</div>
+             <div className="text-center text-[var(--color-muted)] py-10">No rooms found.</div>
           ) : (
             filteredRooms.map((room, i) => {
               const isFree = room.status === 'FREE_BY_TIMETABLE' || room.status === 'REPORTED_FREE';
               return (
-                <div key={i} className={`p-4 rounded-xl border ${isFree ? 'border-emerald-100 bg-emerald-50/30' : 'border-rose-100 bg-rose-50/30'} flex items-start justify-between`}>
+                <div key={i} className={`p-4 rounded-xl border ${isFree ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-rose-500/20 bg-rose-500/5'} flex items-start justify-between`}>
                   <div className="flex gap-4">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isFree ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isFree ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                       {isFree ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h4 className="font-bold text-slate-900 text-lg">{room.roomNumber}</h4>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${room.isLab ? 'bg-purple-100 text-purple-700' : 'bg-slate-200 text-slate-700'}`}>
+                        <h4 className="font-bold text-[var(--color-text)] text-lg">{room.roomNumber}</h4>
+                        <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded ${room.isLab ? 'bg-[#8758F5]/15 text-[#8758F5]' : 'bg-black/10 dark:bg-white/10 text-[var(--color-muted)]'}`}>
                           {room.isLab ? 'Lab' : 'Classroom'}
                         </span>
                       </div>
-                      <p className="text-sm font-medium text-slate-500 mt-1">{room.building || 'Main Block'}</p>
+                      <p className="text-sm font-medium text-[var(--color-muted)] mt-1">{room.building || 'Main Block'}</p>
                       
                       <div className="flex items-center gap-4 mt-3">
-                        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                          <Users size={14} className="text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted)]">
+                          <Users size={14} className="opacity-70" />
                           Capacity: {room.capacity}
                         </div>
                         {room.hasProjector && (
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                            <Airplay size={14} className="text-slate-400" />
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted)]">
+                            <Airplay size={14} className="opacity-70" />
                             Projector
                           </div>
                         )}
@@ -192,12 +192,12 @@ export const FindRoom = () => {
                   </div>
                   
                   <div className="text-right flex flex-col items-end gap-1.5">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-lg border ${isFree ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}`}>
+                    <span className={`px-3 py-1 text-xs font-bold rounded-lg border ${isFree ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
                       {String(room.status || 'UNKNOWN').replace(/_/g, ' ')}
                     </span>
                     
                     {room.notes && (
-                      <p className="text-[11px] text-slate-500 font-medium max-w-[200px] text-right truncate" title={room.notes}>
+                      <p className="text-[11px] text-[var(--color-muted)] font-medium max-w-[200px] text-right truncate" title={room.notes}>
                         {room.notes}
                       </p>
                     )}
@@ -209,7 +209,7 @@ export const FindRoom = () => {
                           <button 
                             onClick={() => handleReportInUse(room.id)} 
                             disabled={reportingId === room.id} 
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition disabled:opacity-60 shadow-sm"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg transition disabled:opacity-60 shadow-xs cursor-pointer"
                             title="Report this room as occupied"
                           >
                             {reportingId === room.id ? (
@@ -225,7 +225,7 @@ export const FindRoom = () => {
                           <button 
                             onClick={() => handleRevokeReport(room.id)} 
                             disabled={reportingId === room.id} 
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition disabled:opacity-60 shadow-sm"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-lg transition disabled:opacity-60 shadow-xs cursor-pointer"
                             title="Undo report and mark room as free"
                           >
                             {reportingId === room.id ? (

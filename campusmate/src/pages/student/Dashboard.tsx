@@ -51,10 +51,10 @@ export const Dashboard = () => {
           </h1>
           <p className="text-[var(--color-muted)] mt-1">Make today productive!</p>
         </div>
-        <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 px-4 py-2 rounded-full border border-[var(--color-border)]">
+        <Link to="/student/timetable" className="flex items-center gap-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 px-4 py-2 rounded-full border border-[var(--color-border)] transition" title="View Timetable">
           <Calendar size={18} className="text-[#8758F5]" />
           <span className="font-semibold text-xs sm:text-sm text-[var(--color-text)]">{new Date().toDateString()}</span>
-        </div>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -65,8 +65,8 @@ export const Dashboard = () => {
           {/* Quick Stats / Next Class */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Next Class */}
-            <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-start gap-4 col-span-1 md:col-span-1">
-              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 text-[#19A3E9] mt-1 border border-blue-500/20">
+            <Link to="/student/timetable" className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-start gap-4 col-span-1 md:col-span-1 hover:border-[#19A3E9]/50 hover:bg-black/5 dark:hover:bg-white/5 transition-all group" title="View Class Schedule">
+              <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 text-[#19A3E9] mt-1 border border-blue-500/20 group-hover:scale-105 transition-transform">
                 <PlayCircle size={20} />
               </div>
               <div>
@@ -83,11 +83,11 @@ export const Dashboard = () => {
                   <h3 className="font-bold text-[var(--color-text)] leading-tight mt-2">No Classes Left</h3>
                 )}
               </div>
-            </div>
+            </Link>
 
             {/* Attendance Ring */}
-            <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center gap-5 justify-center col-span-1 md:col-span-1">
-              <div className="relative flex items-center justify-center">
+            <Link to="/student/attendance" className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center gap-5 justify-center col-span-1 md:col-span-1 hover:border-emerald-500/50 hover:bg-black/5 dark:hover:bg-white/5 transition-all group" title="View Full Attendance Register">
+              <div className="relative flex items-center justify-center group-hover:scale-105 transition-transform">
                 <svg className="w-16 h-16 transform -rotate-90">
                   <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-black/10 dark:text-white/10" />
                   <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" strokeDasharray="175" strokeDashoffset={175 - (175 * overallPercentage) / 100} className="text-emerald-500" />
@@ -98,24 +98,24 @@ export const Dashboard = () => {
                 <p className="text-sm font-semibold text-[var(--color-text)]">Attendance</p>
                 <p className="text-xs text-[var(--color-muted)] mt-1">Overall</p>
               </div>
-            </div>
+            </Link>
 
             {/* Minor Stats */}
             <div className="flex flex-col gap-4">
-              <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-4 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center justify-between">
+              <Link to="/student/timetable" className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-4 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center justify-between hover:border-emerald-500/50 hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="View Today's Routine">
                 <div>
                   <p className="text-xs font-medium text-[var(--color-muted)]">Today's Classes</p>
                   <p className="font-bold text-xl text-[var(--color-text)] mt-1">{timetable.length}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><Calendar size={14}/></div>
-              </div>
-              <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-4 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center justify-between">
+              </Link>
+              <Link to="/student/requests" className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-4 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center justify-between hover:border-orange-500/50 hover:bg-black/5 dark:hover:bg-white/5 transition-all" title="View Academic Requests">
                 <div>
                   <p className="text-xs font-medium text-[var(--color-muted)]">Pending Requests</p>
                   <p className="font-bold text-xl text-[var(--color-text)] mt-1">0</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center"><AlertCircle size={14}/></div>
-              </div>
+              </Link>
             </div>
           </div>
 
@@ -123,6 +123,7 @@ export const Dashboard = () => {
           <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl shadow-[var(--card-shadow)] overflow-hidden">
             <div className="p-5 border-b border-[var(--color-border)] flex justify-between items-center">
               <h3 className="font-bold text-[var(--color-text)]">Today's Timetable</h3>
+              <Link to="/student/timetable" className="text-xs font-semibold text-[#19A3E9] hover:underline">View All &rarr;</Link>
             </div>
             
             <div className="p-0 overflow-x-auto">
@@ -164,26 +165,38 @@ export const Dashboard = () => {
           <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)]">
             <h3 className="font-bold text-[var(--color-text)] mb-4">Quick Tools</h3>
             <div className="grid grid-cols-2 gap-4">
-              <Link to="/student/attendance-planner" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#19A3E9] border border-[var(--color-border)]">
-                  <BarChart3Icon size={20} />
+              <Link to="/student/attendance" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#19A3E9] border border-[var(--color-border)] group-hover:scale-105 transition-transform">
+                  <Clock size={20} />
                 </div>
-                <span className="text-xs font-semibold text-[var(--color-text)]">Attendance Planner</span>
+                <span className="text-xs font-semibold text-[var(--color-text)]">Attendance</span>
               </Link>
-              <Link to="/student/find-room" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#7140D8] border border-[var(--color-border)]">
+              <Link to="/student/timetable" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#7140D8] border border-[var(--color-border)] group-hover:scale-105 transition-transform">
+                  <Calendar size={20} />
+                </div>
+                <span className="text-xs font-semibold text-[var(--color-text)]">Timetable</span>
+              </Link>
+              <Link to="/student/find-room" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-emerald-500 border border-[var(--color-border)] group-hover:scale-105 transition-transform">
                   <MapPin size={20} />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-text)]">Find Room</span>
               </Link>
-              <Link to="/student/sgpa-cgpa" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#D946A8] border border-[var(--color-border)]">
+              <Link to="/student/sgpa-cgpa" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#D946A8] border border-[var(--color-border)] group-hover:scale-105 transition-transform">
                   <GraduationCap size={20} />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-text)]">SGPA/CGPA</span>
               </Link>
-              <Link to="/student/studyos" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#8758F5] border border-[var(--color-border)]">
+              <Link to="/student/attendance-planner" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#8758F5] border border-[var(--color-border)] group-hover:scale-105 transition-transform">
+                  <BarChart3Icon size={20} />
+                </div>
+                <span className="text-xs font-semibold text-[var(--color-text)]">Attendance Planner</span>
+              </Link>
+              <Link to="/student/studyos" className="bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 p-4 rounded-xl border border-[var(--color-border)] transition flex flex-col items-center justify-center text-center gap-3 group">
+                <div className="w-10 h-10 rounded-full bg-[var(--glass-surface)] shadow-xs flex items-center justify-center text-[#19A3E9] border border-[var(--color-border)] group-hover:scale-105 transition-transform">
                   <FileText size={20} />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-text)]">StudyOS</span>
