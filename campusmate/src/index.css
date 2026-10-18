@@ -486,12 +486,72 @@ select option {
 /* ========================================================
    HYBRID ANDROID APP SHELL ADAPTATIONS
    ======================================================== */
+html:has(body.in-android-shell),
 body.in-android-shell {
   /* Prevent tap highlight blue flash on Android WebView */
   -webkit-tap-highlight-color: transparent;
   /* Prevent pinch/double-tap zoom inside embedded native container */
   touch-action: pan-x pan-y;
   overscroll-behavior-y: none;
+
+  /* Force dark cosmic theme tokens to seamlessly match the dark native shell */
+  --color-bg: #120F24 !important;
+  --color-text: #FFFFFF !important;
+  --color-card: #1B1733 !important;
+  --color-muted: #A9A4C4 !important;
+  --color-border: rgba(255, 255, 255, 0.12) !important;
+  --color-primary: #8758F5 !important;
+  --color-accent: #D946A8 !important;
+  --color-blue: #19A3E9 !important;
+  --gradient-brand: linear-gradient(120deg, #19A3E9, #8758F5 50%, #D946A8) !important;
+  --glass-surface: rgba(255, 255, 255, 0.06) !important;
+  --glass-sub-surface: rgba(255, 255, 255, 0.04) !important;
+  --card-shadow: 0 30px 60px -30px rgb(0 0 0 / 55%) !important;
+  --glow-blue: rgba(25, 163, 233, 0.28) !important;
+  --glow-pink: rgba(217, 70, 168, 0.25) !important;
+  --backdrop-mark-opacity: 0.30 !important;
+  --section-wash: linear-gradient(120deg, rgba(25, 163, 233, 0.12) 0%, rgba(135, 88, 245, 0.12) 50%, rgba(217, 70, 168, 0.12) 100%) !important;
+  --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.32), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.28), transparent 70%), transparent !important;
+  --border-color: rgba(255, 255, 255, 0.12) !important;
+
+  background-color: #120F24 !important;
+  color: #FFFFFF !important;
+}
+
+/* Force dark text and contrast in Android shell regardless of phone daylight settings */
+body.in-android-shell .text-slate-900,
+body.in-android-shell .text-slate-800,
+body.in-android-shell .text-slate-700,
+body.in-android-shell .text-gray-900,
+body.in-android-shell .text-gray-800,
+body.in-android-shell .text-gray-700,
+body.in-android-shell h1,
+body.in-android-shell h2,
+body.in-android-shell h3,
+body.in-android-shell h4,
+body.in-android-shell h5,
+body.in-android-shell h6 {
+  color: #FFFFFF !important;
+}
+
+body.in-android-shell .text-slate-600,
+body.in-android-shell .text-slate-500,
+body.in-android-shell .text-slate-400,
+body.in-android-shell .text-gray-600,
+body.in-android-shell .text-gray-500,
+body.in-android-shell .text-gray-400 {
+  color: #A9A4C4 !important;
+}
+
+body.in-android-shell .border-slate-100,
+body.in-android-shell .border-slate-200,
+body.in-android-shell .border-slate-300,
+body.in-android-shell .border-gray-100,
+body.in-android-shell .border-gray-200,
+body.in-android-shell .border-gray-300,
+body.in-android-shell .divide-slate-100 > * + *,
+body.in-android-shell .divide-slate-200 > * + * {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Disable text selection on UI interactive elements */
