@@ -1,34 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  /* Prompt Homepage Tokens */
-  --color-ink: #0B1020;
-  --color-muted: #4A5270;
-  --color-white: #FFFFFF;
-  --brand-blue: #1A86E0;
-  --brand-pink: #D23AA0;
-  --brand-purple: #7A5FD0;
-  --gradient-brand: linear-gradient(90deg, #1A86E0, #D23AA0);
-  --section-wash: linear-gradient(100deg, #D9E7FF 0%, #EEE5FC 52%, #FBE1EE 100%);
-  --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(36,150,255,.40), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(255,72,172,.34), transparent 70%);
+  /* Semantic Tokens (HayonCampus Design System) */
+  --color-bg: #FAFAFC;
+  --color-text: #17181C;
+  --color-card: #FFFFFF;
+  --color-muted: #615B76;
+  --color-border: rgb(37 28 61 / 14%);
+  --color-primary: #7140D8;
+  --color-accent: #D946A8;
+  --color-blue: #19A3E9;
+  --gradient-brand: linear-gradient(120deg, #087DB7, #7140D8 50%, #B92A88);
+  --glass-surface: color-mix(in srgb, #FFFFFF 82%, transparent);
+  --card-shadow: 0 30px 60px -30px rgb(113 64 216 / 20%);
+  --glow-blue: rgba(25, 163, 233, 0.22);
+  --glow-pink: rgba(217, 70, 168, 0.20);
+  --section-wash: linear-gradient(120deg, rgba(25, 163, 233, 0.08) 0%, rgba(113, 64, 216, 0.08) 50%, rgba(217, 70, 168, 0.08) 100%);
+  --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.28), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.24), transparent 70%), #FAFAFC;
 
-  /* Existing tokens preserved */
+  /* Backward Compatibility Aliases */
+  --color-ink: var(--color-text);
+  --color-white: #FFFFFF;
+  --brand-blue: var(--color-blue);
+  --brand-pink: var(--color-accent);
+  --brand-purple: var(--color-primary);
   --brand-cyan: #0ea5e9;
   --brand-navy: #0f172a;
-  --gradient-primary: linear-gradient(to right, #0ea5e9, #8b5cf6, #ec4899);
-  --gradient-wordmark: linear-gradient(90deg, #1A56DB 0%, #1775E0 15%, #2B95EC 35%, #587AF1 52%, #8560F6 70%, #B847DC 85%, #EA489A 100%);
-  --gradient-secondary: linear-gradient(to right, #3b82f6, #8b5cf6);
+  --gradient-primary: var(--gradient-brand);
+  --gradient-wordmark: linear-gradient(90deg, #19A3E9 0%, #7140D8 50%, #D946A8 100%);
+  --gradient-secondary: linear-gradient(to right, #19A3E9, #7140D8);
 
-  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  /* Typography */
+  --font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-wordmark: 'Baloo 2', cursive, sans-serif;
 
-  --bg-primary: #f4f7fb;
-  --bg-card: #ffffff;
-
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
+  --bg-primary: var(--color-bg);
+  --bg-card: var(--color-card);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-muted);
   --text-tertiary: #94a3b8;
+  --border-color: var(--color-border);
+}
 
-  --border-color: #e2e8f0;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #120F24;
+    --color-text: #FFFFFF;
+    --color-card: #1B1733;
+    --color-muted: #A9A4C4;
+    --color-border: rgb(255 255 255 / 13%);
+    --color-primary: #8758F5;
+    --color-accent: #D946A8;
+    --color-blue: #19A3E9;
+    --gradient-brand: linear-gradient(120deg, #19A3E9, #8758F5 50%, #D946A8);
+    --glass-surface: color-mix(in srgb, #FFFFFF 7%, transparent);
+    --card-shadow: 0 30px 60px -30px rgb(0 0 0 / 55%);
+    --glow-blue: rgba(25, 163, 233, 0.28);
+    --glow-pink: rgba(217, 70, 168, 0.25);
+    --section-wash: linear-gradient(120deg, rgba(25, 163, 233, 0.12) 0%, rgba(135, 88, 245, 0.12) 50%, rgba(217, 70, 168, 0.12) 100%);
+    --hero-glows: radial-gradient(55% 60% at 0% 38%, rgba(25, 163, 233, 0.32), transparent 70%), radial-gradient(55% 60% at 100% 28%, rgba(217, 70, 168, 0.28), transparent 70%), #120F24;
+    --border-color: var(--color-border);
+  }
 }
 
 body {
@@ -37,6 +69,15 @@ body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--glass-surface);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--card-shadow);
 }
 
 /* Base utility for gradient text */
@@ -48,11 +89,18 @@ body {
 }
 
 .brand-wordmark {
-  background-image: var(--gradient-wordmark);
+  font-family: var(--font-wordmark);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background-image: var(--gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   display: inline-block;
+}
+
+.font-wordmark {
+  font-family: var(--font-wordmark);
 }
 
 /* Background gradient utility */
@@ -66,7 +114,7 @@ body {
 
 /* Accessible focus ring */
 :focus-visible {
-  outline: 3px solid var(--color-ink);
+  outline: 2px solid var(--color-primary);
   outline-offset: 3px;
 }
 

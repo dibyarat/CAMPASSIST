@@ -47,14 +47,14 @@ export const PageDirectory: React.FC = () => {
   ];
 
   return (
-    <section className="py-24 sm:py-32 px-5 sm:px-8 bg-white">
+    <section className="py-24 sm:py-32 px-5 sm:px-8 bg-[var(--color-bg)]">
       <div className="max-w-[1200px] mx-auto">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
-          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-[#0B1020] tracking-tight leading-tight mb-3">
+          <h2 className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold text-[var(--color-text)] tracking-tight leading-tight mb-3">
             The rest of campus, one click away
           </h2>
-          <p className="text-base sm:text-lg text-[#4A5270]">
+          <p className="text-base sm:text-lg text-[var(--color-muted)]">
             Jump straight to any page in your student dashboard.
           </p>
         </div>
@@ -64,23 +64,23 @@ export const PageDirectory: React.FC = () => {
           {directoryCards.map((card, idx) => (
             <div
               key={idx}
-              className={`${card.bg} border ${card.borderColor} rounded-[28px] p-6 sm:p-7 shadow-xs flex flex-col`}
+              className="glass rounded-[28px] border border-[var(--color-border)] p-6 sm:p-7 shadow-sm hover:shadow-[0_20px_45px_rgba(113,64,216,0.15)] transition-all duration-300 flex flex-col hover:-translate-y-1"
             >
-              <h3 className="text-xl font-extrabold text-[#0B1020] mb-5 px-2">
+              <h3 className="text-xl font-extrabold text-[var(--color-text)] mb-5 px-2">
                 {card.title}
               </h3>
 
-              <div className="flex-1 flex flex-col divide-y divide-slate-200/50">
+              <div className="flex-1 flex flex-col divide-y divide-[var(--color-border)]">
                 {card.items.map((item, itemIdx) => (
                   <Link
                     key={itemIdx}
                     to={item.to}
-                    className="group flex items-center justify-between min-h-[46px] px-2 py-2 text-sm sm:text-base font-semibold text-[#0B1020] hover:text-[#1A86E0] transition-colors rounded-lg"
+                    className="group flex items-center justify-between min-h-[46px] px-2 py-2 text-sm sm:text-base font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors rounded-lg"
                   >
                     <span>{item.label}</span>
                     <ArrowRight
                       size={16}
-                      className="text-slate-400 group-hover:text-[#1A86E0] group-hover:translate-x-1 transition-all"
+                      className="text-[var(--color-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all"
                     />
                   </Link>
                 ))}

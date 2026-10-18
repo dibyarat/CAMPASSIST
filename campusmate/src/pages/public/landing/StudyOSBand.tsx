@@ -11,29 +11,29 @@ export const StudyOSBand: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 sm:py-20 px-5 sm:px-8 bg-white">
+    <section className="py-16 sm:py-20 px-5 sm:px-8 bg-[var(--color-bg)]">
       <div className="max-w-[1200px] mx-auto">
         <div
-          className="relative rounded-[40px] overflow-hidden p-8 sm:p-12 lg:p-16 text-[#F4F6FF] border border-slate-800 shadow-2xl"
+          className="relative rounded-[40px] overflow-hidden p-8 sm:p-12 lg:p-16 text-white border border-white/10 shadow-2xl"
           style={{
-            backgroundColor: '#0B1020',
+            backgroundColor: '#120F24',
           }}
         >
           {/* Bottom-left Blue Glow & Top-right Pink Glow */}
           <div
             className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full pointer-events-none blur-[100px]"
-            style={{ background: 'rgba(26, 134, 224, 0.40)' }}
+            style={{ background: 'rgba(25, 163, 233, 0.35)' }}
           />
           <div
             className="absolute -top-24 -right-24 w-96 h-96 rounded-full pointer-events-none blur-[100px]"
-            style={{ background: 'rgba(210, 58, 160, 0.35)' }}
+            style={{ background: 'rgba(217, 70, 168, 0.32)' }}
           />
 
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
             {/* Left Content Column */}
             <div className="lg:col-span-6 text-left">
-              <span className="text-sm font-bold text-[#38BDF8] uppercase tracking-wider block mb-3">
-                StudyOS
+              <span className="text-sm font-bold text-[#19A3E9] uppercase tracking-wider block mb-3 font-wordmark">
+                Study<span className="text-[#D946A8]">OS</span>
               </span>
 
               <h2 className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold text-white tracking-tight leading-tight mb-5">
@@ -47,22 +47,26 @@ export const StudyOSBand: React.FC = () => {
               {/* 3 Bullets with Colored Dots */}
               <ul className="space-y-3.5 mb-10 text-sm sm:text-base font-semibold text-slate-200">
                 <li className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#1A86E0] shadow-[0_0_8px_#1A86E0]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#19A3E9] shadow-[0_0_8px_#19A3E9]"></span>
                   <span>Lab records</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#7A5FD0] shadow-[0_0_8px_#7A5FD0]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#7140D8] shadow-[0_0_8px_#7140D8]"></span>
                   <span>Notes</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#D23AA0] shadow-[0_0_8px_#D23AA0]"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#D946A8] shadow-[0_0_8px_#D946A8]"></span>
                   <span>Academic PDFs</span>
                 </li>
               </ul>
 
               <Link
                 to="/student/studyos"
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-white text-[#0B1020] font-bold text-base hover:bg-slate-100 transition-all duration-200 shadow-lg hover:shadow-xl min-h-[44px]"
+                style={{
+                  background: 'var(--gradient-brand)',
+                  boxShadow: '0 4px 20px rgba(113, 64, 216, 0.4)',
+                }}
+                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-white font-bold text-base hover:scale-[1.02] transition-all duration-200 shadow-lg min-h-[44px]"
               >
                 <span>Open StudyOS</span>
                 <ArrowRight size={18} />

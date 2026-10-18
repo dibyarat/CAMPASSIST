@@ -95,31 +95,37 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-slate-50 to-pink-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-0 left-0 w-96 h-96 rounded-full pointer-events-none blur-[120px] bg-[var(--glow-blue)]" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full pointer-events-none blur-[120px] bg-[var(--glow-pink)]" />
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex items-center justify-center gap-3">
-          <img src={logoIcon} alt="CampAssist Logo" className="h-14 w-14 object-contain" />
-          <span className="brand-wordmark text-3xl font-extrabold">CampAssist</span>
+          <img src={logoIcon} alt="CampAssist Logo" className="h-12 w-12 object-contain" />
+          <span className="font-wordmark text-3xl font-extrabold flex items-center">
+            <span className="text-[#19A3E9]">Camp</span><span className="text-[#D946A8]">Assist</span>
+          </span>
         </div>
-        <h1 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
+        <h1 className="mt-6 text-center text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
           {isResetMode ? 'Reset your password' : 'Sign in to CampAssist'}
         </h1>
-        <p className="mt-2 text-center text-sm text-slate-600">
+        <p className="mt-2 text-center text-sm text-[var(--color-muted)]">
           {isResetMode ? 'Enter your registered email to receive a recovery link' : 'Continue to your campus account'}
         </p>
         {!isResetMode && (
-          <p className="mt-4 text-center text-sm text-slate-600">
+          <p className="mt-4 text-center text-sm text-[var(--color-muted)]">
             Or{' '}
-            <Link to="/register" className="font-semibold text-[var(--brand-blue)] hover:text-[var(--brand-purple)]">
+            <Link to="/register" className="font-semibold text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors">
               create a new account
             </Link>
           </p>
         )}
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="overflow-hidden bg-white/95 py-8 px-4 shadow-xl shadow-slate-200/60 sm:rounded-2xl sm:px-10 border border-slate-200">
-          <div className="h-1.5 rounded-full bg-gradient-primary mb-8" />
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="overflow-hidden glass py-8 px-4 sm:rounded-3xl sm:px-10 border border-[var(--color-border)] shadow-xl">
+          <div className="h-1.5 rounded-full mb-8" style={{ background: 'var(--gradient-brand)' }} />
           
           {isResetMode ? (
             resetSuccess ? (
@@ -263,7 +269,11 @@ export const Login = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] transition disabled:opacity-70"
+                    style={{
+                      background: 'var(--gradient-brand)',
+                      boxShadow: '0 4px 18px rgba(113, 64, 216, 0.35)',
+                    }}
+                    className="w-full flex justify-center items-center py-3.5 px-4 rounded-full text-sm font-bold text-white hover:scale-[1.01] hover:shadow-lg focus:outline-none transition disabled:opacity-70 cursor-pointer"
                   >
                     {loading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                       <>Sign in <ArrowRight className="ml-2 h-5 w-5" /></>

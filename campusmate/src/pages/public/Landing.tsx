@@ -12,7 +12,7 @@ import { LandingFooter } from './landing/LandingFooter';
 
 export const Landing: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white text-[#0B1020] flex flex-col font-sans selection:bg-[#1A86E0]/20 selection:text-[#0B1020]">
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex flex-col font-sans selection:bg-[var(--color-primary)] selection:text-white">
       {/* 1. Header (sticky, with logo, nav links, login & sign up) */}
       <LandingHeader />
 
