@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, UseGuards, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards, Param, Delete, Query } from '@nestjs/common';
 import { SectionsService } from './sections.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -23,8 +23,11 @@ export class SectionsController {
   }
 
   @Get()
-  findAll() {
-    return this.sectionsService.findAll();
+  findAll(
+    @Query('institutionCode') institutionCode?: string,
+    @Query('institutionId') institutionId?: string,
+  ) {
+    return this.sectionsService.findAll({ institutionCode, institutionId });
   }
 
   @Post('assign-cr')

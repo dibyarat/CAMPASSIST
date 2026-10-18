@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { trackEvent } from '../../utils/analytics';
 import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2 } from 'lucide-react';
@@ -34,9 +34,6 @@ export const Register = () => {
         const data = await apiClient('/sections');
         if (Array.isArray(data)) {
           setSections(data);
-          if (data.length > 0) {
-            setFormData(prev => ({ ...prev, section: data[0].name }));
-          }
         }
       } catch (err) {
         console.error('Failed to fetch sections', err);
@@ -57,14 +54,56 @@ export const Register = () => {
     institutionCode: ''
   });
 
+  const selectedInstitution = useMemo(() => {
+    if (!formData.institutionCode) return null;
+    return institutions.find(
+      (inst) => inst.code?.toUpperCase() === formData.institutionCode?.toUpperCase()
+    ) || null;
+  }, [institutions, formData.institutionCode]);
+
+  const availableSections = useMemo(() => {
+    if (!formData.institutionCode) return [];
+    return sections.filter((sec) => {
+      if (sec.institution?.code) {
+        return sec.institution.code.toUpperCase() === formData.institutionCode.toUpperCase();
+      }
+      if (selectedInstitution?.id && sec.institutionId) {
+        return sec.institutionId === selectedInstitution.id;
+      }
+      return false;
+    });
+  }, [sections, formData.institutionCode, selectedInstitution]);
+
+  useEffect(() => {
+    if (availableSections.length > 0) {
+      const isValid = availableSections.some((sec) => sec.name === formData.section);
+      if (!isValid) {
+        setFormData((prev) => ({ ...prev, section: availableSections[0].name }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, section: '' }));
+    }
+  }, [availableSections, formData.section]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+
+    if (!formData.institutionCode) {
+      setError('Please select an institution.');
+      return;
+    }
+
+    if (availableSections.length > 0 && !formData.section) {
+      setError('Please select a valid section for your institution.');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -232,16 +271,25 @@ export const Register = () => {
                     <MapPin className="h-5 w-5 text-slate-400" />
                   </div>
                   <select
-                      name="section"
-                      required
-                      value={formData.section}
+                    name="section"
+                    required={availableSections.length > 0}
+                    disabled={availableSections.length === 0}
+                    value={formData.section}
                     onChange={handleChange}
-                    className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
+                    className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white disabled:bg-slate-100 disabled:text-slate-400"
                   >
-                    <option value="">Select a section...</option>
-                      {sections.map(sec => (
-                        <option key={sec.id} value={sec.name}>{sec.name}</option>
-                      ))}
+                    {availableSections.length === 0 ? (
+                      <option value="" disabled>
+                        {institutions.length === 0 ? 'Loading institutions...' : 'No sections available for this institution'}
+                      </option>
+                    ) : (
+                      <>
+                        <option value="" disabled>Select a section...</option>
+                        {availableSections.map(sec => (
+                          <option key={sec.id} value={sec.name}>{sec.name}</option>
+                        ))}
+                      </>
+                    )}
                   </select>
                 </div>
               </div>

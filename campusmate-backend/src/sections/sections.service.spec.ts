@@ -4,7 +4,7 @@ import { SectionsService } from './sections.service';
 const prismaMock = {
   department: { findFirst: vi.fn(), create: vi.fn() },
   semester: { findFirst: vi.fn(), create: vi.fn() },
-  section: { create: vi.fn() },
+  section: { create: vi.fn(), findMany: vi.fn() },
 };
 
 const firestoreDocMock = {
@@ -15,6 +15,7 @@ const firebaseMock = {
   firestore: {
     collection: vi.fn(() => ({
       doc: vi.fn(() => firestoreDocMock),
+      get: vi.fn().mockResolvedValue({ empty: true }),
     })),
   },
 };
@@ -31,6 +32,7 @@ describe('SectionsService.create', () => {
       semesterId: 'semester-1',
       institutionId: 'institution-1',
     });
+    prismaMock.section.findMany.mockResolvedValue([]);
   });
 
   it('persists the selected institution on the new section with relation metadata', async () => {
@@ -81,5 +83,69 @@ describe('SectionsService.create', () => {
     expect(prismaMock.semester.create).toHaveBeenCalledWith({
       data: { name: 'Semester 2', number: 2 },
     });
+  });
+});
+
+describe('SectionsService.findAll', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('returns all sections when no filter is provided', async () => {
+    const mockSections = [
+      { id: 'sec-1', name: 'CT-A', institutionId: 'cutm-id', institution: { id: 'cutm-id', code: 'CUTM' } },
+      { id: 'sec-2', name: 'Trail Section', institutionId: 'tat-id', institution: { id: 'tat-id', code: 'TAT' } },
+    ];
+    prismaMock.section.findMany.mockResolvedValue(mockSections);
+
+    const service = new SectionsService(prismaMock as never, firebaseMock as never);
+    const result = await service.findAll();
+
+    expect(prismaMock.section.findMany).toHaveBeenCalledWith({
+      where: {},
+      include: { department: true, semester: true, institution: true },
+      orderBy: { name: 'asc' },
+    });
+    expect(result).toHaveLength(2);
+  });
+
+  it('filters sections by institutionCode when provided', async () => {
+    const mockSections = [
+      { id: 'sec-2', name: 'Trail Section', institutionId: 'tat-id', institution: { id: 'tat-id', code: 'TAT' } },
+    ];
+    prismaMock.section.findMany.mockResolvedValue(mockSections);
+
+    const service = new SectionsService(prismaMock as never, firebaseMock as never);
+    const result = await service.findAll({ institutionCode: 'TAT' });
+
+    expect(prismaMock.section.findMany).toHaveBeenCalledWith({
+      where: {
+        institution: {
+          code: { equals: 'TAT', mode: 'insensitive' },
+        },
+      },
+      include: { department: true, semester: true, institution: true },
+      orderBy: { name: 'asc' },
+    });
+    expect(result).toEqual(mockSections);
+  });
+
+  it('filters sections by institutionId when provided', async () => {
+    const mockSections = [
+      { id: 'sec-2', name: 'Trail Section', institutionId: 'tat-id' },
+    ];
+    prismaMock.section.findMany.mockResolvedValue(mockSections);
+
+    const service = new SectionsService(prismaMock as never, firebaseMock as never);
+    const result = await service.findAll({ institutionId: 'tat-id' });
+
+    expect(prismaMock.section.findMany).toHaveBeenCalledWith({
+      where: {
+        institutionId: 'tat-id',
+      },
+      include: { department: true, semester: true, institution: true },
+      orderBy: { name: 'asc' },
+    });
+    expect(result).toEqual(mockSections);
   });
 });

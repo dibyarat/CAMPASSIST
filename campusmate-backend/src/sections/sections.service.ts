@@ -68,9 +68,19 @@ export class SectionsService {
     return section;
   }
 
-  async findAll() {
+  async findAll(filter?: { institutionCode?: string; institutionId?: string }) {
     try {
+      const where: any = {};
+      if (filter?.institutionId) {
+        where.institutionId = filter.institutionId;
+      } else if (filter?.institutionCode) {
+        where.institution = {
+          code: { equals: filter.institutionCode, mode: 'insensitive' },
+        };
+      }
+
       const sections = await this.prisma.section.findMany({
+        where,
         include: { department: true, semester: true, institution: true },
         orderBy: { name: 'asc' },
       });
@@ -99,7 +109,15 @@ export class SectionsService {
       this.logger.warn(`Failed fetching sections from Prisma, falling back to Firestore: ${err?.message}`);
       const snap = await this.firebase.firestore.collection('sections').get();
       if (!snap.empty) {
-        return snap.docs.map((doc) => doc.data());
+        let docs = snap.docs.map((doc) => doc.data());
+        if (filter?.institutionId) {
+          docs = docs.filter((s: any) => s.institutionId === filter.institutionId);
+        } else if (filter?.institutionCode) {
+          docs = docs.filter(
+            (s: any) => s.institution?.code?.toUpperCase() === filter.institutionCode?.toUpperCase(),
+          );
+        }
+        return docs;
       }
       return [];
     }
