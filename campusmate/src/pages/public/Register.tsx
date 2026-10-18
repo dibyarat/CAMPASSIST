@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { trackEvent } from '../../utils/analytics';
-import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2 } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2, BookOpen, ChevronDown } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
@@ -12,6 +12,7 @@ export const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [institutions, setInstitutions] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
 
   useEffect(() => {
@@ -29,6 +30,17 @@ export const Register = () => {
       }
     };
 
+    const fetchDepartments = async () => {
+      try {
+        const data = await apiClient('/departments');
+        if (Array.isArray(data)) {
+          setDepartments(data);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch departments directly, will infer from sections', err);
+      }
+    };
+
     const fetchSections = async () => {
       try {
         const data = await apiClient('/sections');
@@ -41,6 +53,7 @@ export const Register = () => {
     };
 
     fetchInstitutions();
+    fetchDepartments();
     fetchSections();
   }, []);
   
@@ -49,6 +62,7 @@ export const Register = () => {
     email: '',
     password: '',
     rollNumber: '',
+    department: '',
     section: '',
     role: 'STUDENT',
     institutionCode: ''
@@ -61,7 +75,7 @@ export const Register = () => {
     ) || null;
   }, [institutions, formData.institutionCode]);
 
-  const availableSections = useMemo(() => {
+  const institutionSections = useMemo(() => {
     if (!formData.institutionCode) return [];
     return sections.filter((sec) => {
       if (sec.institution?.code) {
@@ -73,6 +87,64 @@ export const Register = () => {
       return false;
     });
   }, [sections, formData.institutionCode, selectedInstitution]);
+
+  const availableDepartments = useMemo(() => {
+    const deptMap = new Map<string, { id?: string; name: string; code?: string }>();
+
+    // 1. First add departments linked through this institution's sections
+    institutionSections.forEach((sec) => {
+      if (sec.department?.name) {
+        deptMap.set(sec.department.name.toUpperCase(), {
+          id: sec.department.id,
+          name: sec.department.name,
+          code: sec.department.code,
+        });
+      }
+    });
+
+    // 2. If no institution sections have department relations, include master departments
+    if (deptMap.size === 0 && departments.length > 0) {
+      departments.forEach((dept) => {
+        if (dept.name) {
+          deptMap.set(dept.name.toUpperCase(), {
+            id: dept.id,
+            name: dept.name,
+            code: dept.code,
+          });
+        }
+      });
+    }
+
+    return Array.from(deptMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [departments, institutionSections]);
+
+  const availableSections = useMemo(() => {
+    if (!formData.department) {
+      return institutionSections;
+    }
+    const filtered = institutionSections.filter((sec) => {
+      const secDeptName = sec.department?.name || '';
+      const secDeptCode = sec.department?.code || '';
+      return (
+        secDeptName.toUpperCase() === formData.department.toUpperCase() ||
+        secDeptCode.toUpperCase() === formData.department.toUpperCase()
+      );
+    });
+    return filtered.length > 0 ? filtered : institutionSections;
+  }, [institutionSections, formData.department]);
+
+  useEffect(() => {
+    if (availableDepartments.length > 0) {
+      const isValid = availableDepartments.some(
+        (dept) => dept.name.toUpperCase() === formData.department.toUpperCase()
+      );
+      if (!isValid) {
+        setFormData((prev) => ({ ...prev, department: availableDepartments[0].name }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, department: '' }));
+    }
+  }, [availableDepartments]);
 
   useEffect(() => {
     if (availableSections.length > 0) {
@@ -120,6 +192,7 @@ export const Register = () => {
           fullName: formData.fullName,
           role: formData.role,
           rollNumber: formData.rollNumber,
+          department: formData.department,
           section: formData.section,
           institutionCode: formData.institutionCode
         })
@@ -157,7 +230,7 @@ export const Register = () => {
         </h2>
         <p className="mt-2 text-center text-sm text-[var(--color-muted)]">
           Or{' '}
-          <Link to="/login" className="font-semibold text-[var(--color-primary)] hover:text-[var(--color-accent)] transition-colors">
+          <Link to="/login" className="font-semibold text-[#19A3E9] hover:text-[#D946A8] transition-colors">
             sign in to your existing account
           </Link>
         </p>
@@ -167,18 +240,18 @@ export const Register = () => {
         <div className="glass py-8 px-4 sm:rounded-3xl sm:px-10 border border-[var(--color-border)] shadow-xl">
           
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
+            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 flex gap-3 text-rose-400 items-start">
               <AlertCircle size={20} className="shrink-0 mt-0.5" />
               <span className="text-sm font-medium">{error}</span>
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleRegister}>
+          <form className="space-y-4 sm:space-y-5" onSubmit={handleRegister}>
             <div>
-              <label className="block text-sm font-medium text-slate-700">Full Name</label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-slate-400" />
+              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Full Name</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <input
                   name="fullName"
@@ -186,17 +259,17 @@ export const Register = () => {
                   required
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                   placeholder="John Doe"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700">Email address</label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Email address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <input
                   name="email"
@@ -204,17 +277,17 @@ export const Register = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                   placeholder="you@university.edu"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700">Password</label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-400" />
+              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Password</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <input
                   name="password"
@@ -222,41 +295,78 @@ export const Register = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                   placeholder="••••••••"
                 />
               </div>
             </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700">Institution Code</label>
-                <div className="mt-1 relative">
-                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Building2 className="h-5 w-5 text-slate-400" />
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Institution Code</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Building2 className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <select
                   name="institutionCode"
                   required
                   value={formData.institutionCode}
                   onChange={handleChange}
-                  className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white"
+                  className="w-full pl-11 pr-10 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs appearance-none cursor-pointer"
                 >
-                  {institutions.length === 0 && <option value="">Loading institutions...</option>}
+                  {institutions.length === 0 && <option value="" className="bg-[#1B1733] text-white">Loading institutions...</option>}
                   {institutions.map(inst => (
-                    <option key={inst.id} value={inst.code}>
+                    <option key={inst.id} value={inst.code} className="bg-[#1B1733] text-white">
                       {inst.name} ({inst.code})
                     </option>
                   ))}
                 </select>
+                <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-[var(--color-muted)]">
+                  <ChevronDown className="h-4 w-4" />
                 </div>
               </div>
+            </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Department</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <BookOpen className="h-5 w-5 text-[var(--color-muted)]" />
+                </div>
+                <select
+                  name="department"
+                  required={availableDepartments.length > 0}
+                  value={formData.department}
+                  onChange={handleChange}
+                  className="w-full pl-11 pr-10 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs appearance-none cursor-pointer"
+                >
+                  {availableDepartments.length === 0 ? (
+                    <option value="" className="bg-[#1B1733] text-white">
+                      {institutions.length === 0 ? 'Loading departments...' : 'General / All Departments'}
+                    </option>
+                  ) : (
+                    <>
+                      <option value="" className="bg-[#1B1733] text-white">Select a department...</option>
+                      {availableDepartments.map((dept, idx) => (
+                        <option key={dept.id || idx} value={dept.name} className="bg-[#1B1733] text-white">
+                          {dept.name} {dept.code ? `(${dept.code})` : ''}
+                        </option>
+                      ))}
+                    </>
+                  )}
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-[var(--color-muted)]">
+                  <ChevronDown className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700">Roll Number</label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Hash className="h-5 w-5 text-slate-400" />
+                <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Roll Number</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <Hash className="h-5 w-5 text-[var(--color-muted)]" />
                   </div>
                   <input
                     name="rollNumber"
@@ -264,17 +374,17 @@ export const Register = () => {
                     required
                     value={formData.rollNumber}
                     onChange={handleChange}
-                    className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                     placeholder="21BCS001"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700">Section</label>
-                <div className="mt-1 relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-slate-400" />
+                <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Section</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                    <MapPin className="h-5 w-5 text-[var(--color-muted)]" />
                   </div>
                   <select
                     name="section"
@@ -282,21 +392,24 @@ export const Register = () => {
                     disabled={availableSections.length === 0}
                     value={formData.section}
                     onChange={handleChange}
-                    className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white disabled:bg-slate-100 disabled:text-slate-400"
+                    className="w-full pl-11 pr-10 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {availableSections.length === 0 ? (
-                      <option value="" disabled>
-                        {institutions.length === 0 ? 'Loading institutions...' : 'No sections available for this institution'}
+                      <option value="" disabled className="bg-[#1B1733] text-white">
+                        {institutions.length === 0 ? 'Loading...' : 'No sections available'}
                       </option>
                     ) : (
                       <>
-                        <option value="" disabled>Select a section...</option>
+                        <option value="" disabled className="bg-[#1B1733] text-white">Select a section...</option>
                         {availableSections.map(sec => (
-                          <option key={sec.id} value={sec.name}>{sec.name}</option>
+                          <option key={sec.id} value={sec.name} className="bg-[#1B1733] text-white">{sec.name}</option>
                         ))}
                       </>
                     )}
                   </select>
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-[var(--color-muted)]">
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
                 </div>
               </div>
             </div>

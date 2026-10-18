@@ -141,7 +141,7 @@ export const Login = () => {
                 <button
                   type="button"
                   onClick={handleBackToLogin}
-                  className="w-full flex justify-center py-3 px-4 border border-slate-300 rounded-xl shadow-sm text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 transition"
+                  className="w-full flex justify-center py-3 px-4 border border-[var(--color-border)] rounded-xl shadow-sm text-sm font-semibold text-[var(--color-text)] bg-[var(--glass-sub-surface)] hover:bg-white/10 transition"
                 >
                   Return to Sign in
                 </button>
@@ -149,17 +149,17 @@ export const Login = () => {
             ) : (
               <form className="space-y-6" onSubmit={handleResetPassword}>
                 {resetError && (
-                  <div className="p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
+                  <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 flex gap-3 text-rose-400 items-start">
                     <AlertCircle size={20} className="shrink-0 mt-0.5" />
                     <span className="text-sm font-medium">{resetError}</span>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">Registered Email address</label>
-                  <div className="mt-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-slate-400" />
+                  <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Registered Email address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-[var(--color-muted)]" />
                     </div>
                     <input
                       name="resetEmail"
@@ -168,7 +168,7 @@ export const Login = () => {
                       autoFocus
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
-                      className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                       placeholder="you@university.edu"
                     />
                   </div>
@@ -178,7 +178,11 @@ export const Login = () => {
                   <button
                     type="submit"
                     disabled={resetLoading}
-                    className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-primary hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] transition disabled:opacity-70"
+                    style={{
+                      background: 'var(--gradient-brand)',
+                      boxShadow: '0 4px 18px rgba(113, 64, 216, 0.35)',
+                    }}
+                    className="w-full flex justify-center items-center py-3.5 px-4 rounded-full text-sm font-bold text-white hover:scale-[1.01] hover:shadow-lg focus:outline-none transition disabled:opacity-70 cursor-pointer"
                   >
                     {resetLoading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                       <>Send Reset Link <ArrowRight className="ml-2 h-5 w-5" /></>
@@ -188,7 +192,7 @@ export const Login = () => {
                   <button
                     type="button"
                     onClick={handleBackToLogin}
-                    className="w-full flex justify-center py-2.5 px-4 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+                    className="w-full flex justify-center py-2.5 px-4 text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-text)] transition"
                   >
                     ← Back to Sign in
                   </button>
@@ -198,7 +202,7 @@ export const Login = () => {
           ) : (
             <>
               {error && (
-                <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-100 flex gap-3 text-rose-700 items-start">
+                <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 flex gap-3 text-rose-400 items-start">
                   <AlertCircle size={20} className="shrink-0 mt-0.5" />
                   <span className="text-sm font-medium">{error}</span>
                 </div>
@@ -206,10 +210,10 @@ export const Login = () => {
 
               <form className="space-y-6" onSubmit={handleLogin}>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">Email address</label>
-                  <div className="mt-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-slate-400" />
+                  <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Email address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-[var(--color-muted)]" />
                     </div>
                     <input
                       name="email"
@@ -217,17 +221,17 @@ export const Login = () => {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                       placeholder="you@university.edu"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">Password</label>
-                  <div className="mt-1 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-slate-400" />
+                  <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Password</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-[var(--color-muted)]" />
                     </div>
                     <input
                       name="password"
@@ -235,7 +239,7 @@ export const Login = () => {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="appearance-none block w-full pl-10 px-3 py-2.5 border border-slate-300 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] sm:text-sm"
+                      className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                       placeholder="••••••••"
                     />
                   </div>
@@ -247,9 +251,9 @@ export const Login = () => {
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                      className="h-4 w-4 text-[#8758F5] focus:ring-[#8758F5] border-[var(--color-border)] rounded bg-[var(--glass-sub-surface)]"
                     />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
+                    <label htmlFor="remember-me" className="ml-2 block text-xs sm:text-sm text-[var(--color-muted)]">
                       Remember me
                     </label>
                   </div>
@@ -258,7 +262,7 @@ export const Login = () => {
                     <button
                       type="button"
                       onClick={handleOpenReset}
-                      className="font-medium text-[var(--brand-blue)] hover:text-[var(--brand-purple)] transition cursor-pointer"
+                      className="font-medium text-xs sm:text-sm text-[#19A3E9] hover:text-[#D946A8] transition cursor-pointer"
                     >
                       Forgot your password?
                     </button>

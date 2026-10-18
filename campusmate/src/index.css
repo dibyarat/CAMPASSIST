@@ -244,6 +244,18 @@ select:focus {
   outline: none !important;
 }
 
+select option {
+  background-color: var(--color-card, #FFFFFF);
+  color: var(--color-text, #17181C);
+}
+
+@media (prefers-color-scheme: dark) {
+  select option {
+    background-color: var(--color-card, #1B1733) !important;
+    color: var(--color-text, #FFFFFF) !important;
+  }
+}
+
 /* Modal overlays and dialogs */
 [role="dialog"],
 .modal-content {

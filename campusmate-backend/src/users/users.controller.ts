@@ -19,6 +19,9 @@ export class UsersController {
     if (!userId) {
       throw new UnauthorizedException('User not authenticated');
     }
+    if (data.department) {
+      return this.usersService.onboardUser(userId, data.email, data.fullName, Role.STUDENT, data.rollNumber, data.section, data.institutionCode, data.department);
+    }
     return this.usersService.onboardUser(userId, data.email, data.fullName, Role.STUDENT, data.rollNumber, data.section, data.institutionCode);
   }
 

@@ -21,6 +21,7 @@ export class UsersService {
     rollNumber: string,
     section: string,
     institutionCode?: string,
+    department?: string,
   ) {
     let institutionId: string | null = null;
     let institutionName: string | null = null;
@@ -44,6 +45,8 @@ export class UsersService {
         })
       : null;
 
+    const resolvedDepartment = department || sectionRecord?.department?.name || null;
+
     // Enforce least privilege: normal self-service onboarding MUST always assign STUDENT role.
     // Privileged roles (CR, DEVELOPER) are strictly assigned via dedicated administrative workflows.
     const assignedRole = Role.STUDENT;
@@ -63,8 +66,8 @@ export class UsersService {
 
     const profile = await this.prisma.profile.upsert({
       where: { userId: id },
-      update: { fullName, rollNumber, section },
-      create: { userId: id, studentId: student.id, fullName, rollNumber, section },
+      update: { fullName, rollNumber, section, ...(resolvedDepartment ? { department: resolvedDepartment } : {}) },
+      create: { userId: id, studentId: student.id, fullName, rollNumber, section, ...(resolvedDepartment ? { department: resolvedDepartment } : {}) },
     });
 
     // 2. Write to Firestore `users` collection
@@ -79,6 +82,7 @@ export class UsersService {
           fullName,
           rollNumber,
           section,
+          department: resolvedDepartment,
           studentType: 'DAY_SCHOLAR',
         },
         student: {
