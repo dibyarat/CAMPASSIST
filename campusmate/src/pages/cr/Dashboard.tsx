@@ -50,16 +50,16 @@ export const Dashboard = () => {
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       
       {/* Header section */}
-      <div className="flex justify-between items-center bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100 mb-6">
+      <div className="flex justify-between items-center bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] mb-6 text-[var(--color-text)]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-[var(--color-text)] flex items-center gap-2">
             CR Dashboard, {(profile?.profile?.fullName || '').split(' ')[0] || 'CR'}
           </h1>
-          <p className="text-slate-500 mt-1">Class representative command center.</p>
+          <p className="text-[var(--color-muted)] mt-1">Class representative command center.</p>
         </div>
-        <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-          <Calendar size={18} className="text-slate-400" />
-          <span className="font-semibold text-slate-700">{new Date().toDateString()}</span>
+        <div className="flex items-center gap-2 bg-[var(--glass-sub-surface)] px-4 py-2 rounded-xl border border-[var(--color-border)] shadow-xs">
+          <Calendar size={18} className="text-[#19A3E9]" />
+          <span className="font-semibold text-xs sm:text-sm text-[var(--color-text)]">{new Date().toDateString()}</span>
         </div>
       </div>
 
@@ -70,62 +70,62 @@ export const Dashboard = () => {
           
           {/* Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                <Users size={24} />
+            <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-[var(--color-text)]">
+              <div className="w-12 h-12 rounded-full bg-[#19A3E9]/15 text-[#19A3E9] border border-[#19A3E9]/25 flex items-center justify-center shrink-0 shadow-xs">
+                <Users size={22} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Class Size</p>
-                <h3 className="text-xl font-bold text-slate-900">42</h3>
+                <p className="text-xs font-semibold text-[var(--color-muted)] mb-1">Class Size</p>
+                <h3 className="text-2xl font-extrabold text-[#19A3E9]">42</h3>
               </div>
             </div>
             
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
-                <BarChart2 size={24} />
+            <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-[var(--color-text)]">
+              <div className="w-12 h-12 rounded-full bg-[#8758F5]/15 text-[#8758F5] border border-[#8758F5]/25 flex items-center justify-center shrink-0 shadow-xs">
+                <BarChart2 size={22} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Active Polls</p>
-                <h3 className="text-xl font-bold text-slate-900">{polls.length}</h3>
+                <p className="text-xs font-semibold text-[var(--color-muted)] mb-1">Active Polls</p>
+                <h3 className="text-2xl font-extrabold text-[#8758F5]">{polls.length}</h3>
               </div>
             </div>
 
-            <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                <CheckCircle2 size={24} />
+            <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center gap-4 hover:-translate-y-0.5 transition-all text-[var(--color-text)]">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/25 flex items-center justify-center shrink-0 shadow-xs">
+                <CheckCircle2 size={22} />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Today's Classes</p>
-                <h3 className="text-xl font-bold text-slate-900">{timetable.length}</h3>
+                <p className="text-xs font-semibold text-[var(--color-muted)] mb-1">Today's Classes</p>
+                <h3 className="text-2xl font-extrabold text-emerald-500">{timetable.length}</h3>
               </div>
             </div>
           </div>
 
           {/* Today's Timetable */}
-          <div className="bg-white/60 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-slate-900">Today's Timetable</h3>
-              <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">Edit Schedule</button>
+          <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl shadow-[var(--card-shadow)] overflow-hidden text-[var(--color-text)]">
+            <div className="p-5 border-b border-[var(--color-border)] flex justify-between items-center">
+              <h3 className="font-bold text-[var(--color-text)]">Today's Timetable</h3>
+              <button className="text-xs font-semibold text-[#19A3E9] hover:underline">Edit Schedule</button>
             </div>
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 border-b border-slate-100">
-                  <th className="font-medium p-4">Time</th>
-                  <th className="font-medium p-4">Subject</th>
-                  <th className="font-medium p-4">Class/Room</th>
-                  <th className="font-medium p-4">Status</th>
+                <tr className="bg-[var(--glass-sub-surface)] text-[var(--color-muted)] border-b border-[var(--color-border)]">
+                  <th className="font-semibold p-4 text-xs uppercase tracking-wider">Time</th>
+                  <th className="font-semibold p-4 text-xs uppercase tracking-wider">Subject</th>
+                  <th className="font-semibold p-4 text-xs uppercase tracking-wider">Class/Room</th>
+                  <th className="font-semibold p-4 text-xs uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[var(--color-border)]">
                 {timetable.length === 0 ? (
-                  <tr><td colSpan={4} className="py-6 text-center text-slate-500 font-medium">No classes scheduled for today.</td></tr>
+                  <tr><td colSpan={4} className="py-6 text-center text-[var(--color-muted)] font-medium">No classes scheduled for today.</td></tr>
                 ) : timetable.map((row, i) => (
-                  <tr key={i} className="hover:bg-slate-50">
-                    <td className="p-4 text-slate-600 font-medium">{row.startTime} - {row.endTime}</td>
-                    <td className="p-4 font-bold text-slate-900">{row.subject?.name}</td>
-                    <td className="p-4 text-slate-600">{row.room?.roomNumber || 'TBA'}</td>
+                  <tr key={i} className="hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-[var(--color-muted)] font-medium">{row.startTime} - {row.endTime}</td>
+                    <td className="p-4 font-bold text-[var(--color-text)]">{row.subject?.name}</td>
+                    <td className="p-4 text-[var(--color-muted)]">{row.room?.roomNumber || 'TBA'}</td>
                     <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${row.status === 'CANCELLED' ? 'text-rose-600 bg-rose-50' : 'text-slate-600 bg-slate-100'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${row.status === 'CANCELLED' ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'}`}>
                         {row.status}
                       </span>
                     </td>
@@ -136,24 +136,24 @@ export const Dashboard = () => {
           </div>
 
           {/* Submission Tracker */}
-          <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-slate-900">Submission Tracker</h3>
-              <button className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
+          <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl border border-[var(--color-border)] shadow-[var(--card-shadow)] overflow-hidden text-[var(--color-text)]">
+            <div className="p-5 border-b border-[var(--color-border)] flex justify-between items-center">
+              <h3 className="font-bold text-[var(--color-text)]">Submission Tracker</h3>
+              <button className="text-xs font-semibold text-white bg-gradient-brand px-3 py-1.5 rounded-lg hover:opacity-95 transition flex items-center gap-1 shadow-xs">
                 <Plus size={14} /> Add Deadline
               </button>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-[var(--color-border)]">
               {submissions.length === 0 ? (
-                <div className="p-6 text-center text-slate-500">No submissions found</div>
+                <div className="p-6 text-center text-[var(--color-muted)]">No submissions found</div>
               ) : submissions.map((sub, i) => (
-                <div key={i} className="p-4 flex items-center justify-between">
+                <div key={i} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div>
-                    <p className="font-bold text-slate-900 text-sm">{sub.subject?.name || 'Task'}</p>
-                    <p className="text-xs text-slate-500 mt-1">Due: {new Date(sub.deadline).toLocaleDateString()}</p>
+                    <p className="font-bold text-[var(--color-text)] text-sm">{sub.subject?.name || 'Task'}</p>
+                    <p className="text-xs text-[var(--color-muted)] mt-1">Due: {new Date(sub.deadline).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
-                    <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${sub.status === 'SUBMITTED_DIGITALLY' || sub.status === 'SUBMITTED_PHYSICALLY' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                    <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${sub.status === 'SUBMITTED_DIGITALLY' || sub.status === 'SUBMITTED_PHYSICALLY' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
                       {sub.status.replace(/_/g, ' ')}
                     </span>
                   </div>
@@ -167,62 +167,78 @@ export const Dashboard = () => {
         <div className="space-y-6">
 
           {/* Quick Actions */}
-          <div className="bg-white/60 backdrop-blur-xl border border-slate-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4">Quick Actions</h3>
+          <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">
+            <h3 className="font-bold text-[var(--color-text)] mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <Link to="/cr/announcements" className="w-full flex items-center justify-between p-4 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 hover:bg-blue-100 transition group">
-                <span className="font-semibold text-sm">Post Announcement</span>
-                <Megaphone size={18} className="group-hover:scale-110 transition-transform" />
+              <Link to="/cr/announcements" className="w-full flex items-center justify-between p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-white/10 transition group backdrop-blur-md shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#19A3E9]/15 text-[#19A3E9] flex items-center justify-center border border-[#19A3E9]/25">
+                    <Megaphone size={16} />
+                  </div>
+                  <span className="font-semibold text-sm">Post Announcement</span>
+                </div>
               </Link>
-              <Link to="/cr/cancellations" className="w-full flex items-center justify-between p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700 hover:bg-rose-100 transition group">
-                <span className="font-semibold text-sm">Report Cancellation</span>
-                <XCircle size={18} className="group-hover:scale-110 transition-transform" />
+              <Link to="/cr/cancellations" className="w-full flex items-center justify-between p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-white/10 transition group backdrop-blur-md shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center border border-rose-500/25">
+                    <XCircle size={16} />
+                  </div>
+                  <span className="font-semibold text-sm">Report Cancellation</span>
+                </div>
               </Link>
-              <Link to="/cr/find-room" className="w-full flex items-center justify-between p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 hover:bg-emerald-100 transition group">
-                <span className="font-semibold text-sm">Room Availability & Status</span>
-                <MapPin size={18} className="group-hover:scale-110 transition-transform" />
+              <Link to="/cr/find-room" className="w-full flex items-center justify-between p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-white/10 transition group backdrop-blur-md shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/25">
+                    <MapPin size={16} />
+                  </div>
+                  <span className="font-semibold text-sm">Room Availability & Status</span>
+                </div>
               </Link>
-              <Link to="/cr/polls" className="w-full flex items-center justify-between p-4 rounded-xl bg-purple-50 border border-purple-100 text-purple-700 hover:bg-purple-100 transition group">
-                <span className="font-semibold text-sm">Create Poll</span>
-                <BarChart2 size={18} className="group-hover:scale-110 transition-transform" />
+              <Link to="/cr/polls" className="w-full flex items-center justify-between p-3.5 rounded-xl bg-[var(--glass-sub-surface)] border border-[var(--color-border)] text-[var(--color-text)] hover:bg-white/10 transition group backdrop-blur-md shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#8758F5]/15 text-[#8758F5] flex items-center justify-center border border-[#8758F5]/25">
+                    <BarChart2 size={16} />
+                  </div>
+                  <span className="font-semibold text-sm">Create Poll</span>
+                </div>
               </Link>
             </div>
           </div>
 
           {/* Recent Announcements */}
-          <div className="bg-white/60 backdrop-blur-xl border border-slate-100 rounded-2xl p-6 shadow-sm">
+          <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-slate-900">Recent Announcements</h3>
-              <Link to="/cr/announcements" className="text-xs font-semibold text-blue-600">+ New</Link>
+              <h3 className="font-bold text-[var(--color-text)]">Recent Announcements</h3>
+              <Link to="/cr/announcements" className="text-xs font-semibold text-[#19A3E9] hover:underline">+ New</Link>
             </div>
             <div className="space-y-3">
               {announcements.length === 0 ? (
-                <div className="text-sm text-slate-500">No recent announcements</div>
+                <div className="text-sm text-[var(--color-muted)]">No recent announcements</div>
               ) : announcements.map((a, i) => (
-                <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className="flex items-start justify-between">
-                    <p className="text-sm font-semibold text-slate-800">{a.title}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${a.type === 'CANCELLATION' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'}`}>{a.type}</span>
+                <div key={i} className="p-3 bg-[var(--glass-sub-surface)] rounded-xl border border-[var(--color-border)]">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{a.title}</p>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${a.type === 'CANCELLATION' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>{a.type}</span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">{new Date(a.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-[var(--color-muted)] mt-1">{new Date(a.createdAt).toLocaleString()}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Active Polls */}
-          <div className="bg-white/60 backdrop-blur-xl border border-slate-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-4">Active Polls</h3>
+          <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">
+            <h3 className="font-bold text-[var(--color-text)] mb-4">Active Polls</h3>
             <div className="space-y-3">
               {polls.length === 0 ? (
-                <div className="text-sm text-slate-500">No active polls</div>
+                <div className="text-sm text-[var(--color-muted)]">No active polls</div>
               ) : polls.map((p, i) => {
                 const totalVotes = p.options?.reduce((acc: number, opt: any) => acc + (opt._count?.votes || 0), 0) || 0;
                 return (
-                  <div key={i} className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                    <p className="text-sm font-semibold text-slate-800">{p.title}</p>
+                  <div key={i} className="p-3 bg-[var(--glass-sub-surface)] rounded-xl border border-[var(--color-border)]">
+                    <p className="text-sm font-semibold text-[var(--color-text)]">{p.title}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs font-bold text-slate-600">{totalVotes} Votes</span>
+                      <span className="text-xs font-bold text-[#8758F5]">{totalVotes} Votes</span>
                     </div>
                   </div>
                 );

@@ -11,7 +11,8 @@
   --color-accent: #D946A8;
   --color-blue: #19A3E9;
   --gradient-brand: linear-gradient(120deg, #087DB7, #7140D8 50%, #B92A88);
-  --glass-surface: color-mix(in srgb, #FFFFFF 82%, transparent);
+  --glass-surface: rgba(255, 255, 255, 0.68);
+  --glass-sub-surface: rgba(255, 255, 255, 0.45);
   --card-shadow: 0 30px 60px -30px rgb(113 64 216 / 20%);
   --glow-blue: rgba(25, 163, 233, 0.22);
   --glow-pink: rgba(217, 70, 168, 0.20);
@@ -48,12 +49,13 @@
     --color-text: #FFFFFF;
     --color-card: #1B1733;
     --color-muted: #A9A4C4;
-    --color-border: rgb(255 255 255 / 13%);
+    --color-border: rgba(255, 255, 255, 0.12);
     --color-primary: #8758F5;
     --color-accent: #D946A8;
     --color-blue: #19A3E9;
     --gradient-brand: linear-gradient(120deg, #19A3E9, #8758F5 50%, #D946A8);
-    --glass-surface: color-mix(in srgb, #FFFFFF 7%, transparent);
+    --glass-surface: rgba(255, 255, 255, 0.06);
+    --glass-sub-surface: rgba(255, 255, 255, 0.04);
     --card-shadow: 0 30px 60px -30px rgb(0 0 0 / 55%);
     --glow-blue: rgba(25, 163, 233, 0.28);
     --glow-pink: rgba(217, 70, 168, 0.25);
@@ -171,4 +173,163 @@ body {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(7px); }
 }
+
+/* ==========================================================================
+   Universal Translucent Glass Tiles & Component Elevation
+   ========================================================================== */
+
+/* Universal translucent card surfaces across all pages */
+[class*="bg-white/50"],
+[class*="bg-white/60"],
+[class*="bg-white/70"],
+[class*="bg-white/80"],
+[class*="bg-white/90"],
+div[class*="rounded-"][class*="bg-white"],
+section[class*="rounded-"][class*="bg-white"],
+article[class*="rounded-"][class*="bg-white"],
+main [class*="rounded-2xl"][class*="border"],
+main [class*="rounded-3xl"][class*="border"] {
+  background-color: var(--glass-surface) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+/* Translucent sub-surfaces (inner chips, nested items, secondary buttons) */
+div[class*="bg-slate-50"],
+div[class*="bg-slate-100"],
+div[class*="bg-gray-50"],
+button[class*="bg-slate-50"],
+button[class*="bg-slate-100"],
+tr[class*="bg-slate-50"] {
+  background-color: var(--glass-sub-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Tables inside cards */
+table {
+  border-color: var(--color-border) !important;
+}
+thead tr {
+  background-color: var(--glass-sub-surface) !important;
+  border-bottom: 1px solid var(--color-border) !important;
+}
+th {
+  color: var(--color-muted) !important;
+}
+td {
+  border-color: var(--color-border) !important;
+}
+tr:hover {
+  background-color: rgba(113, 64, 216, 0.04) !important;
+}
+
+/* Form inputs & controls: clean translucent look with high contrast */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+textarea,
+select {
+  background-color: var(--glass-sub-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(113, 64, 216, 0.25) !important;
+  outline: none !important;
+}
+
+/* Modal overlays and dialogs */
+[role="dialog"],
+.modal-content {
+  background-color: var(--glass-surface) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.45) !important;
+  color: var(--color-text) !important;
+}
+
+/* Dark mode specific high-contrast text and border overrides */
+@media (prefers-color-scheme: dark) {
+  /* Foreground text legibility */
+  .text-slate-900,
+  .text-slate-800,
+  .text-slate-700,
+  .text-gray-900,
+  .text-gray-800,
+  .text-gray-700,
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text) !important;
+  }
+
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400,
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-400 {
+    color: var(--color-muted) !important;
+  }
+
+  /* Structural borders */
+  .border-slate-100,
+  .border-slate-200,
+  .border-slate-300,
+  .border-gray-100,
+  .border-gray-200,
+  .border-gray-300,
+  .divide-slate-100 > * + *,
+  .divide-slate-200 > * + * {
+    border-color: var(--color-border) !important;
+  }
+
+  /* Translucent sub-action badges and links */
+  .bg-blue-50,
+  .bg-blue-100 {
+    background-color: rgba(25, 163, 233, 0.12) !important;
+    border-color: rgba(25, 163, 233, 0.25) !important;
+    color: #38bdf8 !important;
+  }
+
+  .bg-purple-50,
+  .bg-purple-100,
+  .bg-indigo-50,
+  .bg-indigo-100 {
+    background-color: rgba(135, 88, 245, 0.12) !important;
+    border-color: rgba(135, 88, 245, 0.25) !important;
+    color: #c084fc !important;
+  }
+
+  .bg-emerald-50,
+  .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    border-color: rgba(16, 185, 129, 0.25) !important;
+    color: #34d399 !important;
+  }
+
+  .bg-rose-50,
+  .bg-rose-100,
+  .bg-red-50,
+  .bg-red-100 {
+    background-color: rgba(244, 63, 94, 0.12) !important;
+    border-color: rgba(244, 63, 94, 0.25) !important;
+    color: #fb7185 !important;
+  }
+
+  .bg-amber-50,
+  .bg-amber-100,
+  .bg-yellow-50,
+  .bg-yellow-100 {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    border-color: rgba(245, 158, 11, 0.25) !important;
+    color: #fbbf24 !important;
+  }
+}
+
 
