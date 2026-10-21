@@ -3,7 +3,8 @@ import { ThrottlerGuard, ThrottlerLimitDetail } from '@nestjs/throttler';
 
 /**
  * AppThrottlerGuard extends NestJS ThrottlerGuard to enforce:
- * 1. Safe IP resolution behind Render's single-hop reverse proxy load balancer (via req.ip).
+ * 1. Composite tracking: resolves authenticated user ID when present, falling back to client IP.
+ *    Protects against NAT collisions for campus networks and prevents IP rotation bypasses.
  * 2. Guaranteed exemption for health monitoring endpoints (/api/v1/health, @SkipThrottle()).
  * 3. Consistent, non-sensitive JSON error response for HTTP 429 across all endpoints.
  * 4. Prevention of internal stack trace or credential leakage.
@@ -38,6 +39,19 @@ export class AppThrottlerGuard extends ThrottlerGuard {
     }
 
     return false;
+  }
+
+  /**
+   * Resolves composite tracking key:
+   * Uses authenticated user id (user_{id}) when present, otherwise falls back to client IP.
+   * Isolates legitimate students on shared campus Wi-Fi / NAT gateways.
+   */
+  protected async getTracker(req: Record<string, any>): Promise<string> {
+    const userId = req.user?.id || req.user?.uid;
+    if (userId) {
+      return `user_${userId}`;
+    }
+    return req.ip || req.ips?.[0] || 'unknown';
   }
 
   /**

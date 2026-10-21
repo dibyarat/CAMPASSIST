@@ -531,6 +531,202 @@ export class UsersService {
     });
   }
 
+  private async executeCascadeUserDeletion(tx: any, userId: string) {
+    // 1. Student & child records
+    if (tx.student) {
+      const student = await tx.student.findUnique({ where: { userId } }).catch(() => null);
+      if (student) {
+        if (tx.academicRecord) {
+          const academicRecords = await tx.academicRecord
+            .findMany({
+              where: { studentId: student.id },
+              select: { id: true },
+            })
+            .catch(() => []);
+          if (academicRecords.length > 0 && tx.grade) {
+            await tx.grade
+              .deleteMany({
+                where: { academicRecordId: { in: academicRecords.map((a: any) => a.id) } },
+              })
+              .catch(() => {});
+          }
+          await tx.academicRecord.deleteMany({ where: { studentId: student.id } }).catch(() => {});
+        }
+        if (tx.attendanceRecord) {
+          await tx.attendanceRecord.deleteMany({ where: { studentId: student.id } }).catch(() => {});
+        }
+        if (tx.attendanceRequest) {
+          await tx.attendanceRequest.deleteMany({ where: { studentId: student.id } }).catch(() => {});
+        }
+        if (tx.submission) {
+          await tx.submission.deleteMany({ where: { studentId: student.id } }).catch(() => {});
+        }
+        await tx.student.delete({ where: { id: student.id } }).catch(() => {});
+      }
+    }
+
+    // 2. Attendance requests where user was the reviewer
+    if (tx.attendanceRequest) {
+      await tx.attendanceRequest
+        .updateMany({
+          where: { reviewerId: userId },
+          data: { reviewerId: null },
+        })
+        .catch(() => {});
+    }
+
+    // 3. Virtual Study Classes & Topics created by user
+    if (tx.virtualStudyClass) {
+      const userClasses = await tx.virtualStudyClass
+        .findMany({
+          where: { creatorId: userId },
+          select: { id: true },
+        })
+        .catch(() => []);
+      if (userClasses.length > 0) {
+        const classIds = userClasses.map((c: any) => c.id);
+        if (tx.virtualStudyTopic) {
+          const topics = await tx.virtualStudyTopic
+            .findMany({
+              where: { classId: { in: classIds } },
+              select: { id: true },
+            })
+            .catch(() => []);
+          if (topics.length > 0 && tx.virtualStudyResource) {
+            await tx.virtualStudyResource
+              .deleteMany({
+                where: { topicId: { in: topics.map((t: any) => t.id) } },
+              })
+              .catch(() => {});
+          }
+          await tx.virtualStudyTopic.deleteMany({ where: { classId: { in: classIds } } }).catch(() => {});
+        }
+        await tx.virtualStudyClass.deleteMany({ where: { creatorId: userId } }).catch(() => {});
+      }
+    }
+
+    // 4. Resources created by user
+    if (tx.resource) {
+      const userResources = await tx.resource
+        .findMany({
+          where: { creatorId: userId },
+          select: { id: true },
+        })
+        .catch(() => []);
+      if (userResources.length > 0) {
+        const resIds = userResources.map((r: any) => r.id);
+        if (tx.virtualStudyResource) {
+          await tx.virtualStudyResource
+            .deleteMany({
+              where: { resourceId: { in: resIds } },
+            })
+            .catch(() => {});
+        }
+        if (tx.resourceFile) await tx.resourceFile.deleteMany({ where: { resourceId: { in: resIds } } }).catch(() => {});
+        if (tx.resourceLink) await tx.resourceLink.deleteMany({ where: { resourceId: { in: resIds } } }).catch(() => {});
+        if (tx.resourceRating) await tx.resourceRating.deleteMany({ where: { resourceId: { in: resIds } } }).catch(() => {});
+        if (tx.resourceReport) await tx.resourceReport.deleteMany({ where: { resourceId: { in: resIds } } }).catch(() => {});
+        if (tx.resourceSave) await tx.resourceSave.deleteMany({ where: { resourceId: { in: resIds } } }).catch(() => {});
+        if (tx.resourceTag) await tx.resourceTag.deleteMany({ where: { resourceId: { in: resIds } } }).catch(() => {});
+        await tx.resource.deleteMany({ where: { id: { in: resIds } } }).catch(() => {});
+      }
+    }
+
+    // 5. Projects created by user
+    if (tx.project) {
+      const userProjects = await tx.project
+        .findMany({
+          where: { creatorId: userId },
+          select: { id: true },
+        })
+        .catch(() => []);
+      if (userProjects.length > 0) {
+        const projIds = userProjects.map((p: any) => p.id);
+        if (tx.projectFile) await tx.projectFile.deleteMany({ where: { projectId: { in: projIds } } }).catch(() => {});
+        if (tx.projectTag) await tx.projectTag.deleteMany({ where: { projectId: { in: projIds } } }).catch(() => {});
+        await tx.project.deleteMany({ where: { id: { in: projIds } } }).catch(() => {});
+      }
+    }
+
+    // 6. Help Services & Requests
+    if (tx.helpService) {
+      const userServices = await tx.helpService
+        .findMany({
+          where: { providerId: userId },
+          select: { id: true },
+        })
+        .catch(() => []);
+      if (userServices.length > 0) {
+        const servIds = userServices.map((s: any) => s.id);
+        if (tx.serviceReview) await tx.serviceReview.deleteMany({ where: { serviceId: { in: servIds } } }).catch(() => {});
+        if (tx.helpRequest) await tx.helpRequest.deleteMany({ where: { serviceId: { in: servIds } } }).catch(() => {});
+        await tx.helpService.deleteMany({ where: { id: { in: servIds } } }).catch(() => {});
+      }
+    }
+    if (tx.serviceReview) {
+      await tx.serviceReview
+        .deleteMany({
+          where: { OR: [{ reviewerId: userId }, { providerId: userId }] },
+        })
+        .catch(() => {});
+    }
+    if (tx.helpRequest) {
+      await tx.helpRequest
+        .deleteMany({
+          where: { OR: [{ requesterId: userId }, { providerId: userId }] },
+        })
+        .catch(() => {});
+    }
+
+    // 7. Teams
+    if (tx.teamPost) {
+      const userTeams = await tx.teamPost
+        .findMany({
+          where: { creatorId: userId },
+          select: { id: true },
+        })
+        .catch(() => []);
+      if (userTeams.length > 0) {
+        const teamIds = userTeams.map((t: any) => t.id);
+        if (tx.teamJoinRequest) await tx.teamJoinRequest.deleteMany({ where: { teamId: { in: teamIds } } }).catch(() => {});
+        if (tx.teamMembership) await tx.teamMembership.deleteMany({ where: { teamId: { in: teamIds } } }).catch(() => {});
+        await tx.teamPost.deleteMany({ where: { id: { in: teamIds } } }).catch(() => {});
+      }
+    }
+    if (tx.teamJoinRequest) await tx.teamJoinRequest.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.teamMembership) await tx.teamMembership.deleteMany({ where: { userId } }).catch(() => {});
+
+    // 8. User-level child tables
+    if (tx.resourceRating) await tx.resourceRating.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.resourceReport) await tx.resourceReport.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.resourceSave) await tx.resourceSave.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.studentSkill) await tx.studentSkill.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.academicIdentity) await tx.academicIdentity.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.crAssignment) await tx.crAssignment.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.profile) await tx.profile.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.notification) await tx.notification.deleteMany({ where: { recipientId: userId } }).catch(() => {});
+    if (tx.pollVote) await tx.pollVote.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.auditLog) await tx.auditLog.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.message) await tx.message.deleteMany({ where: { senderId: userId } }).catch(() => {});
+    if (tx.conversationMember) await tx.conversationMember.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.feedback) await tx.feedback.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.eventRegistration) await tx.eventRegistration.deleteMany({ where: { userId } }).catch(() => {});
+    if (tx.offerClaim) await tx.offerClaim.deleteMany({ where: { userId } }).catch(() => {});
+
+    // 9. Finally delete the user
+    return tx.user.delete({ where: { id: userId } });
+  }
+
+  private async cleanupUserDatabaseRecords(userId: string) {
+    if (typeof this.prisma.$transaction === 'function') {
+      return this.prisma.$transaction(
+        async (tx) => this.executeCascadeUserDeletion(tx, userId),
+        { maxWait: 10000, timeout: 30000 }
+      );
+    }
+    return this.prisma.user.delete({ where: { id: userId } });
+  }
+
   async deleteUser(id: string) {
     try {
       await this.firebase.firestore.collection('users').doc(id).delete();
@@ -539,7 +735,7 @@ export class UsersService {
       this.logger.warn(`Failed deleting user from Firebase: ${err?.message}`);
     }
 
-    return this.prisma.user.delete({ where: { id } });
+    return this.cleanupUserDatabaseRecords(id);
   }
 
   async deleteSelfAccount(userId: string) {
@@ -575,7 +771,7 @@ export class UsersService {
 
     // 2. Delete PostgreSQL records (cascades via Prisma foreign keys)
     try {
-      await this.prisma.user.delete({ where: { id: userId } });
+      await this.cleanupUserDatabaseRecords(userId);
       result.steps.database = 'deleted';
     } catch (err: any) {
       result.steps.database = 'failed';

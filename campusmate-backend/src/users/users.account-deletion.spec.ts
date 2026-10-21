@@ -127,5 +127,49 @@ describe('CampusAssist Account Deletion & Auth Security Suite', () => {
       expect(res.errors.some((e: string) => e.includes('Database deletion'))).toBe(true);
     });
   });
-});
+  describe('UsersService — deleteUser & cascade deletion', () => {
+    it('9. Cascades all student and child records when  is present', async () => {
+      const mockTx = {
+        student: {
+          findUnique: vi.fn().mockResolvedValue({ id: 'student-123' }),
+          delete: vi.fn().mockResolvedValue({ id: 'student-123' }),
+        },
+        academicRecord: {
+          findMany: vi.fn().mockResolvedValue([{ id: 'ar-1' }]),
+          deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+        },
+        grade: {
+          deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+        },
+        attendanceRecord: {
+          deleteMany: vi.fn().mockResolvedValue({ count: 2 }),
+        },
+        attendanceRequest: {
+          deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+          updateMany: vi.fn().mockResolvedValue({ count: 0 }),
+        },
+        submission: {
+          deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+        },
+        user: {
+          delete: vi.fn().mockResolvedValue({ id: 'user-with-relations' }),
+        },
+      };
+      mockPrisma.$transaction = vi.fn().mockImplementation(async (cb) => cb(mockTx));
 
+      const deleted = await service.deleteUser('user-with-relations');
+
+      expect(mockPrisma.$transaction).toHaveBeenCalled();
+      expect(mockTx.student.findUnique).toHaveBeenCalledWith({ where: { userId: 'user-with-relations' } });
+      expect(mockTx.attendanceRecord.deleteMany).toHaveBeenCalledWith({ where: { studentId: 'student-123' } });
+      expect(mockTx.attendanceRequest.deleteMany).toHaveBeenCalledWith({ where: { studentId: 'student-123' } });
+      expect(mockTx.attendanceRequest.updateMany).toHaveBeenCalledWith({ where: { reviewerId: 'user-with-relations' }, data: { reviewerId: null } });
+      expect(mockTx.submission.deleteMany).toHaveBeenCalledWith({ where: { studentId: 'student-123' } });
+      expect(mockTx.grade.deleteMany).toHaveBeenCalledWith({ where: { academicRecordId: { in: ['ar-1'] } } });
+      expect(mockTx.academicRecord.deleteMany).toHaveBeenCalledWith({ where: { studentId: 'student-123' } });
+      expect(mockTx.student.delete).toHaveBeenCalledWith({ where: { id: 'student-123' } });
+      expect(mockTx.user.delete).toHaveBeenCalledWith({ where: { id: 'user-with-relations' } });
+      expect(deleted.id).toBe('user-with-relations');
+    });
+  });
+});

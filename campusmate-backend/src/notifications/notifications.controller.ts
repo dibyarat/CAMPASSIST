@@ -20,7 +20,7 @@ export class NotificationsController {
     );
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
   @Post('announcement')
   @UseGuards(RolesGuard)
   @Roles('CR')

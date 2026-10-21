@@ -77,11 +77,12 @@ export const Login = () => {
     try {
       await sendPasswordResetEmail(auth, targetEmail);
       trackEvent('password_reset_request', { method: 'email' });
-      setResetSuccess(`Password reset link sent to ${targetEmail}! Please check your inbox (and spam folder).`);
+      setResetSuccess(`If an account exists with this email address, a password reset link has been sent to ${targetEmail}. Please check your inbox (and spam folder).`);
     } catch (err: any) {
       const code = err?.code || '';
       if (code === 'auth/user-not-found') {
-        setResetError('No account found with this email address. Please check your spelling or register.');
+        // Prevent account enumeration: return uniform success message
+        setResetSuccess(`If an account exists with this email address, a password reset link has been sent to ${targetEmail}. Please check your inbox (and spam folder).`);
       } else if (code === 'auth/invalid-email') {
         setResetError('Please enter a valid email address.');
       } else if (code === 'auth/too-many-requests') {

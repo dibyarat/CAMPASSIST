@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { FirebaseAdminService } from '../common/firebase/firebase-admin.service';
 
@@ -128,8 +128,33 @@ export class NotificationsService {
   }
 
   async createAnnouncement(crUserId: string, title: string, message: string) {
+    const trimmedTitle = String(title || '').trim();
+    const trimmedMessage = String(message || '').trim();
+
+    if (!trimmedTitle || trimmedTitle.length > 200) {
+      throw new BadRequestException('Announcement title is required and must be 200 characters or fewer');
+    }
+    if (!trimmedMessage || trimmedMessage.length > 2000) {
+      throw new BadRequestException('Announcement message is required and must be 2000 characters or fewer');
+    }
+
     const cr = await this.prisma.user.findUnique({ where: { id: crUserId }, include: { crAssignment: true } });
-    if (!cr || !cr.crAssignment || !cr.crAssignment.isActive) throw new Error('Not an active CR');
+    if (!cr || !cr.crAssignment || !cr.crAssignment.isActive) throw new ForbiddenException('Not an active CR');
+
+    // Duplicate announcement suppression within 2 minutes
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    const existingRecent = await this.prisma.notification.findFirst({
+      where: {
+        recipientId: crUserId,
+        title: trimmedTitle,
+        message: trimmedMessage,
+        type: 'GENERAL_ANNOUNCEMENT',
+        createdAt: { gte: twoMinutesAgo },
+      },
+    });
+    if (existingRecent) {
+      throw new BadRequestException('An identical announcement was recently posted. Please wait before reposting.');
+    }
 
     const studentsInSection = await this.prisma.student.findMany({
       where: { sectionId: cr.crAssignment.sectionId },
@@ -139,14 +164,14 @@ export class NotificationsService {
     const notifications = [
       ...studentsInSection.map((student: { userId: string }) => ({
         recipientId: student.userId,
-        title,
-        message,
+        title: trimmedTitle,
+        message: trimmedMessage,
         type: 'GENERAL_ANNOUNCEMENT',
       })),
       {
         recipientId: crUserId,
-        title,
-        message,
+        title: trimmedTitle,
+        message: trimmedMessage,
         type: 'GENERAL_ANNOUNCEMENT',
       },
     ];
