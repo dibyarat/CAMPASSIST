@@ -14,6 +14,7 @@ declare global {
       triggerHapticFeedback: () => void;
       getAppVersion: () => string;
       postMessage: (jsonString: string) => void;
+      setPullToRefreshEnabled: (enabled: boolean) => void;
     };
     Android?: Window['AndroidBridge'];
     __onNativeSearch?: (query: string) => void;
@@ -86,6 +87,13 @@ export const androidBridge = {
     return bridge?.getAppVersion ? bridge.getAppVersion() : null;
   },
 
+  setPullToRefreshEnabled(enabled: boolean): void {
+    const bridge = getBridge();
+    if (bridge?.setPullToRefreshEnabled) {
+      bridge.setPullToRefreshEnabled(enabled);
+    }
+  },
+
   onNativeSearch(callback: (query: string) => void): () => void {
     window.__onNativeSearch = callback;
     return () => {
@@ -104,4 +112,3 @@ export const androidBridge = {
     };
   }
 };
-
