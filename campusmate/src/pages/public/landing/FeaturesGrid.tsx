@@ -9,12 +9,14 @@ import {
   GraduationCap,
   ArrowRight,
 } from 'lucide-react';
+import studyosMark from '../../../assets/studyos-mark.png';
 
 interface FeatureItem {
   title: string;
   desc: string;
   route: string;
-  icon: React.ComponentType<{ size: number; className?: string }>;
+  icon?: React.ComponentType<{ size: number; className?: string }>;
+  iconImg?: string;
   tileBg: string;
   iconColor: string;
 }
@@ -50,6 +52,7 @@ export const FeaturesGrid: React.FC = () => {
       desc: 'Access lab records, notes, and academic PDFs in one unified workspace.',
       route: '/student/studyos',
       icon: BookOpen,
+      iconImg: studyosMark,
       tileBg: 'bg-sky-500/15',
       iconColor: 'text-[#19A3E9]',
     },
@@ -100,9 +103,13 @@ export const FeaturesGrid: React.FC = () => {
                 <div>
                   {/* Tinted Icon Tile */}
                   <div
-                    className={`w-14 h-14 rounded-2xl ${feature.tileBg} ${feature.iconColor} flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 shadow-xs border border-[var(--color-border)]`}
+                    className={`w-14 h-14 rounded-2xl ${feature.tileBg} ${feature.iconColor} flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110 shadow-xs border border-[var(--color-border)] p-2.5`}
                   >
-                    <Icon size={26} />
+                    {feature.iconImg ? (
+                      <img src={feature.iconImg} alt={feature.title} className="w-full h-full object-contain" />
+                    ) : (
+                      Icon && <Icon size={26} />
+                    )}
                   </div>
 
                   <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--color-text)] mb-3">
@@ -132,4 +139,3 @@ export const FeaturesGrid: React.FC = () => {
     </section>
   );
 };
-

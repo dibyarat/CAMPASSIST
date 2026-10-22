@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, FileText, BookOpen, Layers } from 'lucide-react';
+import studyosMark from '../../../assets/studyos-mark.png';
 
 export const StudyOSBand: React.FC = () => {
   const sampleFiles = [
@@ -32,9 +33,12 @@ export const StudyOSBand: React.FC = () => {
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
             {/* Left Content Column */}
             <div className="lg:col-span-6 text-left">
-              <span className="text-sm font-bold text-[#19A3E9] uppercase tracking-wider block mb-3 font-wordmark">
-                Study<span className="text-[#D946A8]">OS</span>
-              </span>
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 mb-4 shadow-sm">
+                <img src={studyosMark} alt="StudyOS Logo" className="w-5 h-5 object-contain" />
+                <span className="text-xs sm:text-sm font-bold text-[#19A3E9] uppercase tracking-wider font-wordmark">
+                  Study<span className="text-[#D946A8]">OS</span>
+                </span>
+              </div>
 
               <h2 className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold text-white tracking-tight leading-tight mb-5">
                 Your academic<br />workspace.
@@ -124,7 +128,10 @@ export const StudyOSBand: React.FC = () => {
 
                     <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400">
                       <span>Sample files</span>
-                      <span className="text-[#38BDF8] font-semibold">StudyOS v2.0</span>
+                      <span className="text-[#38BDF8] font-semibold flex items-center gap-1.5">
+                        <img src={studyosMark} alt="" className="w-3.5 h-3.5 object-contain inline-block" />
+                        StudyOS v2.0
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -136,4 +143,3 @@ export const StudyOSBand: React.FC = () => {
     </section>
   );
 };
-
