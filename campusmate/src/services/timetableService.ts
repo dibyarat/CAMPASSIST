@@ -7,6 +7,10 @@ export const timetableService = {
     method: 'POST',
     body: JSON.stringify(payload)
   }),
+  createDynamic: (payload: Record<string, any>) => apiClient('/timetable/cr', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  }),
   createForCr: (payload: Record<string, any>) => apiClient('/timetable/cr', {
     method: 'POST',
     body: JSON.stringify(payload)
@@ -16,7 +20,7 @@ export const timetableService = {
     body: JSON.stringify(payload)
   }),
   deleteForCr: (entryId: string) => apiClient(`/timetable/${entryId}/cr-delete`, { method: 'DELETE' }),
-  importCsvForCr: (payload: { entries: any[]; termId: string; replaceExisting?: boolean }) => apiClient('/timetable/cr/import-csv', {
+  importCsvForCr: (payload: { entries: any[]; termId: string; replaceExisting?: boolean; sectionId?: string }) => apiClient('/timetable/cr/import-csv', {
     method: 'POST',
     body: JSON.stringify(payload)
   })

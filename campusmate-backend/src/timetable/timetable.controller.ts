@@ -31,12 +31,22 @@ export class TimetableController {
   }
 
   @Post('cr')
-  @Roles('CR')
+  @Roles('CR', 'DEVELOPER')
   async crCreate(@Body() data: any, @CurrentUser() user: any) {
-    if (!user.crAssignment || !user.crAssignment.isActive) {
-      throw new ForbiddenException('No active CR assignment found');
+    let crSectionId = user.crAssignment?.isActive ? user.crAssignment.sectionId : null;
+    if (!crSectionId && user.id) {
+      const dbCr = await this.timetableService.findCrAssignment(user.id);
+      if (dbCr?.isActive) {
+        crSectionId = dbCr.sectionId;
+      }
     }
-    const crSectionId = user.crAssignment.sectionId;
+    if (!crSectionId) {
+      if ((user.roles?.includes('DEVELOPER') || user.role === 'DEVELOPER') && data.sectionId) {
+        crSectionId = data.sectionId;
+      } else {
+        throw new ForbiddenException('No active CR assignment found');
+      }
+    }
     return this.timetableService.createDynamic(data, crSectionId);
   }
 
@@ -68,35 +78,49 @@ export class TimetableController {
   }
 
   @Patch(':id/cr-update')
-  @Roles('CR')
+  @Roles('CR', 'DEVELOPER')
   async crUpdateEntry(@Param('id') entryId: string, @Body() data: any, @CurrentUser() user: any) {
-    if (!user.crAssignment || !user.crAssignment.isActive) {
+    let crSectionId = user.crAssignment?.isActive ? user.crAssignment.sectionId : null;
+    if (!crSectionId && (user.roles?.includes('DEVELOPER') || user.role === 'DEVELOPER')) {
+      const entry = await this.timetableService.findById(entryId);
+      crSectionId = entry?.sectionId;
+    }
+    if (!crSectionId) {
       throw new ForbiddenException('No active CR assignment found');
     }
     // Need to verify it belongs to their section
-    return this.timetableService.updateForCr(entryId, user.crAssignment.sectionId, data);
+    return this.timetableService.updateForCr(entryId, crSectionId, data);
   }
 
   @Delete(':id/cr-delete')
-  @Roles('CR')
+  @Roles('CR', 'DEVELOPER')
   async crDeleteEntry(@Param('id') entryId: string, @CurrentUser() user: any) {
-    if (!user.crAssignment || !user.crAssignment.isActive) {
+    let crSectionId = user.crAssignment?.isActive ? user.crAssignment.sectionId : null;
+    if (!crSectionId && (user.roles?.includes('DEVELOPER') || user.role === 'DEVELOPER')) {
+      const entry = await this.timetableService.findById(entryId);
+      crSectionId = entry?.sectionId;
+    }
+    if (!crSectionId) {
       throw new ForbiddenException('No active CR assignment found');
     }
-    return this.timetableService.deleteForCr(entryId, user.crAssignment.sectionId);
+    return this.timetableService.deleteForCr(entryId, crSectionId);
   }
 
   @Patch(':id/cancel')
-  @Roles('CR')
+  @Roles('CR', 'DEVELOPER')
   async crReportCancellation(
     @Param('id') entryId: string,
     @Body('note') note: string,
     @CurrentUser() user: any
   ) {
-    if (!user.crAssignment || !user.crAssignment.isActive) {
+    let crSectionId = user.crAssignment?.isActive ? user.crAssignment.sectionId : null;
+    if (!crSectionId && (user.roles?.includes('DEVELOPER') || user.role === 'DEVELOPER')) {
+      const entry = await this.timetableService.findById(entryId);
+      crSectionId = entry?.sectionId;
+    }
+    if (!crSectionId) {
       throw new ForbiddenException('No active CR assignment found');
     }
-    const crSectionId = user.crAssignment.sectionId;
     return this.timetableService.reportCancellation(entryId, crSectionId, note);
   }
 

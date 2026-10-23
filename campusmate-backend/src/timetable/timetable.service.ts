@@ -116,6 +116,10 @@ export class TimetableService {
   }
 
 
+  async findById(entryId: string) {
+    return this.prisma.timetableEntry.findUnique({ where: { id: entryId } });
+  }
+
   async getSubjects() {
     try {
       const snap = await this.firebase.firestore.collection('subjects').get();
