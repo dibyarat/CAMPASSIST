@@ -206,11 +206,88 @@ export class UsersService {
       this.logger.warn(`Prisma getProfile error: ${err?.message}`);
     }
 
-    // Fallback to Firestore if Prisma failed
+    // Fallback to Firestore if Prisma failed or user is not in Prisma yet
     try {
       const doc = await this.firebase.firestore.collection('users').doc(userId).get();
       if (doc.exists) {
-        return doc.data();
+        const firestoreData = doc.data() || {};
+        
+        // Auto-provision user into Prisma if missing so future operations work seamlessly
+        try {
+          const email = firestoreData.email;
+          const rawName = firestoreData.name || firestoreData.fullName || firestoreData.profile?.fullName || (email ? email.split('@')[0] : 'Student');
+          const rollMatch = email ? email.match(/^(\d{8,16})@/) : null;
+          const rollNumber = rollMatch ? rollMatch[1] : (firestoreData.profile?.rollNumber || null);
+
+          const institution = await this.prisma.institution.findFirst({
+            where: { code: 'CUTM' },
+          }) || await this.prisma.institution.findFirst();
+
+          const section = await this.prisma.section.findFirst({
+            where: {
+              ...(institution ? { institutionId: institution.id } : {}),
+              name: { equals: 'CT-A', mode: 'insensitive' },
+            },
+          }) || await this.prisma.section.findFirst({
+            where: institution ? { institutionId: institution.id } : {},
+          }) || await this.prisma.section.findFirst();
+
+          const dbUser = await this.prisma.user.upsert({
+            where: { id: userId },
+            update: { email: email || undefined },
+            create: {
+              id: userId,
+              email: email || `${userId}@campusmate.local`,
+              role: (firestoreData.role as any) || 'STUDENT',
+              institutionId: institution?.id || null,
+            },
+          });
+
+          const student = await this.prisma.student.upsert({
+            where: { userId },
+            update: { sectionId: section?.id || null },
+            create: {
+              userId,
+              sectionId: section?.id || null,
+            },
+          });
+
+          const profile = await this.prisma.profile.upsert({
+            where: { userId },
+            update: {
+              fullName: rawName,
+              rollNumber,
+              section: section?.name || null,
+            },
+            create: {
+              userId,
+              studentId: student.id,
+              fullName: rawName,
+              rollNumber,
+              section: section?.name || null,
+              studentType: 'DAY_SCHOLAR',
+            },
+          });
+
+          return {
+            ...dbUser,
+            profile,
+            student: { ...student, section },
+            Institution: institution,
+            institution,
+            crAssignment: null,
+          };
+        } catch (provErr: any) {
+          this.logger.warn(`Failed inline auto-provision from Firestore doc: ${provErr?.message}`);
+        }
+
+        return {
+          id: userId,
+          role: 'STUDENT',
+          ...firestoreData,
+          profile: firestoreData.profile || { fullName: firestoreData.name || 'Student' },
+          student: firestoreData.student || null,
+        };
       }
     } catch (err: any) {
       this.logger.warn(`Firestore getProfile error: ${err?.message}`);
