@@ -36,6 +36,11 @@ export class ExamsService {
     return exam;
   }
 
+  async deleteExam(id: string) {
+    await this.prisma.examSeating.deleteMany({ where: { examId: id } });
+    return this.prisma.exam.delete({ where: { id } });
+  }
+
   async getAllExamsForTerm(termId: string) {
     try {
       const snap = await this.firebase.firestore

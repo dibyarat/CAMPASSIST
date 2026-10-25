@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit2, Trash2, Loader2, RefreshCw, Save, X } from 'lucide-react';
+import { Edit2, Trash2, Loader2, RefreshCw, Save, X, Search, AlertTriangle, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { adminService, type AdminInstitution, type AdminSection, type AdminUser } from '../../services/adminService';
 
@@ -48,6 +48,13 @@ export const Users = () => {
   const [editError, setEditError] = useState('');
   const [saving, setSaving] = useState(false);
   const [loadingSections, setLoadingSections] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterRole, setFilterRole] = useState('ALL');
+  const [filterInstitution, setFilterInstitution] = useState('ALL');
+  const [filterSection, setFilterSection] = useState('ALL');
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -106,14 +113,18 @@ export const Users = () => {
       portfolio: user.profile?.portfolio || '',
     });
   };
-
-    const handleDeleteUser = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setDeleting(true);
+    setDeleteError('');
     try {
-      await adminService.deleteUser(id);
+      await adminService.deleteUser(userToDelete.id);
+      setUserToDelete(null);
       await fetchData();
     } catch (e: any) {
-      alert(e.message);
+      setDeleteError(e?.message || 'Failed to delete user. Please check database constraints or retry.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -158,6 +169,25 @@ export const Users = () => {
     }
   };
 
+  const filteredUsers = users.filter((u) => {
+    const q = searchQuery.trim().toLowerCase();
+    const name = (u.profile?.fullName || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const roll = (u.profile?.rollNumber || '').toLowerCase();
+    const role = (u.role || '').toLowerCase();
+
+    const matchesSearch = !q || name.includes(q) || email.includes(q) || roll.includes(q) || role.includes(q);
+    const matchesRole = filterRole === 'ALL' || u.role === filterRole;
+
+    const userInstId = u.institutionId || u.Institution?.id || (u as any).institution?.id || '';
+    const matchesInstitution = filterInstitution === 'ALL' || userInstId === filterInstitution;
+
+    const userSecId = u.crAssignment?.sectionId || u.student?.sectionId || '';
+    const matchesSection = filterSection === 'ALL' || userSecId === filterSection;
+
+    return matchesSearch && matchesRole && matchesInstitution && matchesSection;
+  });
+
   if (loading) {
     return <div className="flex justify-center p-20"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>;
   }
@@ -190,7 +220,13 @@ export const Users = () => {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-sm text-[var(--color-muted)]">
+                    No users match your search and filter criteria.
+                  </td>
+                </tr>
+              ) : filteredUsers.map((user) => (
                 <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition">
                   <td className="py-4 px-4 font-medium text-slate-800">{user.profile?.fullName || 'N/A'}</td>
                   <td className="py-4 px-4 text-slate-600">{user.email}</td>
@@ -207,7 +243,7 @@ export const Users = () => {
                     <button onClick={() => startEditing(user)} aria-label={`Edit ${user.profile?.fullName || user.email}`} className="p-2 text-slate-400 hover:text-blue-600 transition bg-slate-50 rounded-lg hover:bg-blue-50">
                        <Edit2 size={16} />
                      </button>
-                     <button onClick={() => handleDeleteUser(user.id)} aria-label={`Delete ${user.profile?.fullName || user.email}`} className="p-2 text-slate-400 hover:text-rose-600 transition bg-slate-50 rounded-lg hover:bg-rose-50">
+                     <button onClick={() => { setUserToDelete(user); setDeleteError(''); }} aria-label={`Delete ${user.profile?.fullName || user.email}`} className="p-2 text-slate-400 hover:text-rose-600 transition bg-slate-50 rounded-lg hover:bg-rose-50">
                        <Trash2 size={16} />
                      </button>
                   </td>
@@ -217,6 +253,80 @@ export const Users = () => {
           </table>
         </div>
       </div>
+
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl border border-[var(--color-border)] p-6 space-y-4">
+            <div className="flex items-center gap-3 text-rose-600 dark:text-rose-400">
+              <div className="p-3 bg-rose-500/10 rounded-xl">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white">Confirm User Deletion</h3>
+                <p className="text-xs text-slate-500">Permanent account removal</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+              <p>
+                Are you sure you want to permanently delete the account for{' '}
+                <strong className="text-slate-900 dark:text-white">{userToDelete.profile?.fullName || userToDelete.email}</strong>?
+              </p>
+
+              {userToDelete.role === 'CR' && (
+                <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-xs text-purple-700 dark:text-purple-300 flex items-start gap-2">
+                  <ShieldAlert size={16} className="shrink-0 mt-0.5" />
+                  <span>
+                    <strong>CR Assignment Impact:</strong> This user is currently the Class Representative for section{' '}
+                    <strong>{userToDelete.crAssignment?.section?.name || 'Assigned Section'}</strong>. Deleting will vacate the CR seat for this section.
+                  </span>
+                </div>
+              )}
+
+              {userToDelete.role === 'DEVELOPER' && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+                  <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Administrative Impact:</strong> This user holds Developer administrative access.
+                  </span>
+                </div>
+              )}
+
+              <p className="text-xs text-slate-500">
+                All associated personal attendance logs, course submissions, and profile metadata will be unlinked.
+              </p>
+            </div>
+
+            {deleteError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/25 rounded-xl text-xs text-rose-500 font-medium">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => setUserToDelete(null)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={confirmDeleteUser}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-semibold transition flex items-center gap-2 disabled:opacity-50"
+              >
+                {deleting && <Loader2 size={14} className="animate-spin" />}
+                {deleting ? 'Deleting User…' : 'Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editUser && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

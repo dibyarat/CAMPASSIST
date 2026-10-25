@@ -27,6 +27,12 @@ export class RoomsController {
     return this.roomsService.getAvailableRooms();
   }
 
+  @Patch(':id')
+  @Roles('DEVELOPER')
+  update(@Param('id') id: string, @Body() updateRoomDto: any) {
+    return this.roomsService.update(id, updateRoomDto);
+  }
+
   @Delete(':id')
   @Roles('DEVELOPER')
   remove(@Param('id') id: string) {

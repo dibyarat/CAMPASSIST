@@ -6,6 +6,9 @@ export const examService = {
     method: 'POST',
     body: JSON.stringify(payload)
   }),
+  delete: (id: string) => apiClient(`/exams/${id}`, {
+    method: 'DELETE'
+  }),
   mySeat: (examId: string) => apiClient(`/exams/${examId}/my-seat`) as Promise<any>,
   importSeating: (examId: string, seatingData: any[]) => apiClient(`/exams/${examId}/seating-import`, {
     method: 'POST',

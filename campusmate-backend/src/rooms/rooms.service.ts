@@ -70,6 +70,40 @@ export class RoomsService {
     return prismaRooms;
   }
 
+  async update(id: string, data: any) {
+    const room = await this.prisma.room.findUnique({ where: { id } });
+    if (!room) throw new NotFoundException('Room not found');
+
+    const updatePayload: any = {};
+    if (data.roomNumber !== undefined) updatePayload.roomNumber = data.roomNumber;
+    if (data.building !== undefined) updatePayload.building = data.building;
+    if (data.block !== undefined) updatePayload.block = data.block;
+    if (data.floor !== undefined) updatePayload.floor = data.floor;
+    if (data.capacity !== undefined) updatePayload.capacity = Number(data.capacity);
+    if (data.isAC !== undefined) updatePayload.isAC = Boolean(data.isAC);
+    if (data.isLab !== undefined) updatePayload.isLab = Boolean(data.isLab);
+    if (data.equipment !== undefined) updatePayload.equipment = data.equipment;
+    if (data.status !== undefined) updatePayload.status = data.status;
+    if (data.notes !== undefined) updatePayload.notes = data.notes;
+
+    const updated = await this.prisma.room.update({
+      where: { id },
+      data: updatePayload,
+    });
+
+    try {
+      await this.firebase.firestore.collection('rooms').doc(id).set(
+        {
+          ...updated,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true },
+      );
+    } catch {}
+
+    return updated;
+  }
+
   async remove(id: string) {
     try {
       this.firebase.firestore.collection('rooms').doc(id).delete().catch(() => {});

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, ForbiddenException } from '@nestjs/common';
 import { ExamsService } from './exams.service';
 import { FirebaseAuthGuard } from '../common/guards/firebase-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -23,6 +23,12 @@ export class ExamsController {
   }
 
   // --- SEATING ROUTES ---
+
+  @Delete(':id')
+  @Roles('DEVELOPER')
+  deleteExam(@Param('id') id: string) {
+    return this.examsService.deleteExam(id);
+  }
 
   @Post(':id/seating-import')
   @Roles('DEVELOPER')
