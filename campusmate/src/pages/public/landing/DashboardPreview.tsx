@@ -42,7 +42,7 @@ export const DashboardPreview: React.FC = () => {
         </div>
         <div>
           <div className="text-[13px] font-bold text-[#0B1020]">Free room found</div>
-          <div className="text-[12px] text-[#4A5270] font-medium">Room 118 · open now</div>
+          <div className="text-[12px] text-[#334155] font-medium">Room 118 · open now</div>
         </div>
       </div>
 
@@ -56,7 +56,7 @@ export const DashboardPreview: React.FC = () => {
         </div>
         <div>
           <div className="text-[13px] font-bold text-[#0B1020]">SGPA calculator</div>
-          <div className="text-[12px] text-[#4A5270] font-medium">Sample · 8.7</div>
+          <div className="text-[12px] text-[#334155] font-medium">Sample · 8.7</div>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export const DashboardPreview: React.FC = () => {
         </div>
         <div>
           <div className="text-[13px] font-bold text-[#0B1020]">Submission due</div>
-          <div className="text-[12px] text-[#4A5270] font-medium">Tomorrow, 11:59 PM</div>
+          <div className="text-[12px] text-[#334155] font-medium">Tomorrow, 11:59 PM</div>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export const DashboardPreview: React.FC = () => {
             <span className="text-xs uppercase tracking-wider font-bold text-[#1A86E0]">Overview</span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-[#0B1020] mt-0.5">Good morning</h3>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-[#4A5270] border border-slate-200/80 shadow-xs">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white/90 text-[#334155] border border-slate-200/80 shadow-xs">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Dashboard preview
           </span>
@@ -95,7 +95,7 @@ export const DashboardPreview: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-base font-bold text-[#0B1020]">Today&apos;s timetable</h4>
-                <span className="text-xs font-medium text-[#4A5270]">3 classes scheduled</span>
+                <span className="text-xs font-medium text-[#334155]">3 classes scheduled</span>
               </div>
 
               <div className="space-y-3">
@@ -110,7 +110,7 @@ export const DashboardPreview: React.FC = () => {
                       </span>
                       <div>
                         <div className="text-sm font-bold text-[#0B1020]">{item.subject}</div>
-                        <div className="text-xs text-[#4A5270] font-medium">{item.room}</div>
+                        <div className="text-xs text-[#334155] font-medium">{item.room}</div>
                       </div>
                     </div>
                     {/* Status Chip carrying both text and color label */}
@@ -167,7 +167,7 @@ export const DashboardPreview: React.FC = () => {
               </div>
 
               <div>
-                <div className="text-xs uppercase tracking-wider font-semibold text-[#4A5270]">Attendance</div>
+                <div className="text-xs uppercase tracking-wider font-semibold text-[#334155]">Attendance</div>
                 <div className="text-sm font-extrabold text-[#0B1020] mt-0.5">Above your target</div>
                 <div className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
                   <CheckCircle2 size={13} /> Target: 75%
@@ -178,7 +178,7 @@ export const DashboardPreview: React.FC = () => {
             {/* Reminders Card */}
             <div className="bg-white/70 border border-slate-100/90 rounded-2xl p-5 shadow-2xs">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs uppercase tracking-wider font-semibold text-[#4A5270] flex items-center gap-1.5">
+                <span className="text-xs uppercase tracking-wider font-semibold text-[#334155] flex items-center gap-1.5">
                   <Bell size={13} className="text-[#D23AA0]" />
                   Reminders
                 </span>
@@ -187,7 +187,7 @@ export const DashboardPreview: React.FC = () => {
                 </span>
               </div>
               <div className="text-sm font-bold text-[#0B1020]">DBMS assignment</div>
-              <div className="text-xs font-medium text-[#4A5270] mt-1 flex items-center gap-1">
+              <div className="text-xs font-medium text-[#334155] mt-1 flex items-center gap-1">
                 <Clock size={12} className="text-amber-500" />
                 Due tomorrow
               </div>

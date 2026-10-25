@@ -12,7 +12,7 @@ export const LandingFooter: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-14 border-b border-[var(--color-border)]">
           {/* Brand Info */}
           <div className="md:col-span-5">
-            <Link to="/" className="inline-flex items-center gap-3 mb-4 focus-visible:rounded-lg">
+            <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="inline-flex items-center gap-3 mb-4 focus-visible:rounded-lg">
               <img
                 src={logoIcon}
                 alt="CampAssist logo"

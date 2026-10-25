@@ -7,7 +7,7 @@ export const LandingHeader: React.FC = () => {
     <header className="sticky top-0 z-50 glass border-b border-[var(--color-border)] transition-all">
       <div className="max-w-[1200px] mx-auto px-3 sm:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 sm:gap-3 group focus-visible:rounded-lg shrink-0">
+        <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 sm:gap-3 group focus-visible:rounded-lg shrink-0">
           <img
             src={logoIcon}
             alt="CampAssist logo"

@@ -15,6 +15,7 @@ export const Register = () => {
   const [institutions, setInstitutions] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
+  const [loadingAcademicData, setLoadingAcademicData] = useState(true);
 
   useEffect(() => {
     const fetchInstitutions = async () => {

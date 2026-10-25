@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Loader2, MapPin, AlertCircle, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Clock, Loader2, MapPin, AlertCircle, Info, MessageSquare } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 import { academicTermService } from '../../services/academicTermService';
 
@@ -70,7 +71,21 @@ export const Timetable = () => {
               </div>
             );
           })}
-          {timetable.length === 0 && <p className="text-[var(--color-muted)] text-center py-10">No classes have been scheduled for your section yet. Your CR is probably building it now!</p>}
+          {timetable.length === 0 && (
+            <div className="glass p-10 rounded-2xl text-center border border-[var(--color-border)] my-6">
+              <Info className="w-10 h-10 text-[var(--color-primary)] mx-auto mb-3 opacity-80" />
+              <h3 className="text-lg font-bold text-[var(--color-text)]">No classes published yet</h3>
+              <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto mt-1 mb-5">
+                No classes have been scheduled for your section yet. Class schedules are published and maintained by your Section Class Representative.
+              </p>
+              <Link
+                to="/student/contacts"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#19A3E9] text-white font-semibold text-sm hover:opacity-90 transition shadow-sm"
+              >
+                <MessageSquare size={16} /> Contact Class Representative
+              </Link>
+            </div>
+          )}
          </div>
       </div>
     </div>

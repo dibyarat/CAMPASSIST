@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag, MessageSquare } from 'lucide-react';
+import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Building, Layers, BookOpen, Contact, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag, MessageSquare } from 'lucide-react';
 
 // Public
 import { AnalyticsTracker } from './utils/AnalyticsTracker';

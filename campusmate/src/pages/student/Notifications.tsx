@@ -66,7 +66,11 @@ export const Notifications = () => {
           <div className="flex justify-center py-10"><Loader2 className="animate-spin text-[#19A3E9] w-10 h-10" /></div>
         ) : filteredNotifs.length === 0 ? (
           <div className="glass p-10 rounded-2xl text-center border border-[var(--color-border)]">
-            <p className="text-[var(--color-muted)]">No {activeTab.toLowerCase()} notifications found.</p>
+            <p className="text-[var(--color-muted)]">
+              {activeTab === 'All' 
+                ? 'You have no notifications yet.' 
+                : 'You’re all caught up — no unread notifications.'}
+            </p>
           </div>
         ) : filteredNotifs.map((notif) => {
           const { icon, bg } = getIconAndColor(notif.type);
