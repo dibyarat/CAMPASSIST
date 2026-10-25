@@ -5,6 +5,7 @@ import { apiClient } from '../../services/apiClient';
 export const Submissions = () => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'SUBMITTED' | 'OVERDUE'>('ALL');
 
   useEffect(() => {
     const fetchSubmissions = async () => {

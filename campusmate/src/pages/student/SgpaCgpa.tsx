@@ -141,7 +141,21 @@ export const SgpaCgpa = () => {
                 </table>
               </div>
             )}
-            {!loading && records.length === 0 && <p className="py-8 text-center text-sm text-[var(--color-muted)]">No academic records found.</p>}
+            {!loading && records.length === 0 && (
+              <div className="glass p-8 rounded-2xl text-center border border-[var(--color-border)] my-6">
+                <h3 className="font-bold text-base text-[var(--color-text)]">No Cumulative Record Available</h3>
+                <p className="text-sm text-[var(--color-muted)] max-w-md mx-auto mt-1 mb-4">
+                  Cumulative GPA calculations reflect official term results published by your university.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('Grade Calculator')}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#19A3E9] text-white font-semibold text-sm hover:opacity-90 transition shadow-sm cursor-pointer"
+                >
+                  Estimate SGPA / CGPA Manually
+                </button>
+              </div>
+            )}
           </section>
         )}
 

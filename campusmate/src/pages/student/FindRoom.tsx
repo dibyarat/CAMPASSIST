@@ -13,6 +13,9 @@ export const FindRoom = () => {
   const [reportingId, setReportingId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [userRole, setUserRole] = useState<string>(() => (localStorage.getItem('userRole') || '').toUpperCase());
+  const [selectedBuilding, setSelectedBuilding] = useState('ALL');
+  const [selectedType, setSelectedType] = useState('ALL');
+  const [selectedAvailability, setSelectedAvailability] = useState('ALL');
 
   useEffect(() => {
     authService.me().then(profile => {
@@ -179,7 +182,7 @@ export const FindRoom = () => {
                       <div className="flex items-center gap-4 mt-3">
                         <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted)]">
                           <Users size={14} className="opacity-70" />
-                          Capacity: {room.capacity}
+                          Capacity: {room.capacity && room.capacity > 0 ? room.capacity : 'Capacity unknown'}
                         </div>
                         {room.hasProjector && (
                           <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-muted)]">
