@@ -207,7 +207,7 @@ export const Users = () => {
                     <button onClick={() => startEditing(user)} aria-label={`Edit ${user.profile?.fullName || user.email}`} className="p-2 text-slate-400 hover:text-blue-600 transition bg-slate-50 rounded-lg hover:bg-blue-50">
                        <Edit2 size={16} />
                      </button>
-                     <button onClick={() => handleDeleteUser(user.id)} className="p-2 text-slate-400 hover:text-rose-600 transition bg-slate-50 rounded-lg hover:bg-rose-50">
+                     <button onClick={() => handleDeleteUser(user.id)} aria-label={`Delete ${user.profile?.fullName || user.email}`} className="p-2 text-slate-400 hover:text-rose-600 transition bg-slate-50 rounded-lg hover:bg-rose-50">
                        <Trash2 size={16} />
                      </button>
                   </td>

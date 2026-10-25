@@ -23,10 +23,14 @@ export class HealthController {
       firestoreStatus = 'error';
     }
 
+    let dbLatencyMs: number | null = null;
+    const dbStartTime = Date.now();
+
     if (this.prisma) {
       try {
         await this.prisma.$queryRaw`SELECT 1`;
         postgresStatus = 'connected';
+        dbLatencyMs = Date.now() - dbStartTime;
       } catch {
         postgresStatus = 'error';
       }
@@ -46,6 +50,7 @@ export class HealthController {
       timestamp: new Date().toISOString(),
       services: {
         database: overallDb,
+        databaseLatencyMs: dbLatencyMs,
         firestore: firestoreStatus,
         postgres: postgresStatus,
         api: 'running',

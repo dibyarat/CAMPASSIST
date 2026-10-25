@@ -592,6 +592,87 @@ export class UsersService {
     return user;
   }
 
+  async getClassRepresentatives(requestingUser?: { id: string; role?: string; institutionId?: string | null }) {
+    const isDeveloper = requestingUser?.role === 'DEVELOPER';
+    let institutionScope = requestingUser?.institutionId;
+
+    if (!isDeveloper && !institutionScope && requestingUser?.id) {
+      try {
+        const caller = await this.prisma.user.findUnique({
+          where: { id: requestingUser.id },
+          select: { institutionId: true },
+        });
+        institutionScope = caller?.institutionId || null;
+      } catch {}
+    }
+
+    try {
+      const crUsers = await this.prisma.user.findMany({
+        where: {
+          role: 'CR',
+          ...(!isDeveloper && institutionScope ? { institutionId: institutionScope } : {}),
+        },
+        include: {
+          profile: {
+            select: {
+              fullName: true,
+              section: true,
+              department: true,
+            },
+          },
+          crAssignment: {
+            where: { isActive: true },
+            include: {
+              section: {
+                select: {
+                  id: true,
+                  name: true,
+                  department: { select: { id: true, name: true, code: true } },
+                },
+              },
+            },
+          },
+          Institution: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return crUsers.map((user) => {
+        const activeAssignment = Array.isArray(user.crAssignment) ? user.crAssignment[0] : user.crAssignment;
+        const sectionName = activeAssignment?.section?.name || user.profile?.section || null;
+
+        return {
+          id: user.id,
+          email: user.email,
+          role: 'CR',
+          institutionId: user.institutionId,
+          Institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
+          profile: {
+            fullName: user.profile?.fullName || null,
+            section: sectionName,
+            department: activeAssignment?.section?.department?.name || user.profile?.department || null,
+          },
+          crAssignment: activeAssignment
+            ? {
+                id: activeAssignment.id,
+                sectionId: activeAssignment.sectionId,
+                section: activeAssignment.section ? { id: activeAssignment.section.id, name: activeAssignment.section.name } : null,
+              }
+            : null,
+        };
+      });
+    } catch (err: any) {
+      this.logger.warn(`Failed reading scoped CRs from Prisma: ${err?.message}`);
+      return [];
+    }
+  }
+
   async getAllUsersByRole(role: Role | string) {
     try {
       const snapshot = await this.firebase.firestore.collection('users').where('role', '==', role).get();

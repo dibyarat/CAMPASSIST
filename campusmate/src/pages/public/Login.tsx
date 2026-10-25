@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { trackEvent } from '../../utils/analytics';
-import { Loader2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Loader2, Mail, Lock, AlertCircle, ArrowRight, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
@@ -14,6 +14,7 @@ export const Login = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Password reset state
   const [isResetMode, setIsResetMode] = useState(false);
@@ -98,12 +99,12 @@ export const Login = () => {
   return (
     <div className="min-h-screen bg-transparent flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative z-10 overflow-hidden">
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="flex items-center justify-center gap-3">
-          <img src={logoIcon} alt="CampAssist Logo" className="h-12 w-12 object-contain" />
+        <Link to="/" className="flex items-center justify-center gap-3 group" aria-label="CampAssist Home">
+          <img src={logoIcon} alt="CampAssist Logo" className="h-12 w-12 object-contain group-hover:scale-105 transition-transform" />
           <span className="font-wordmark text-3xl font-extrabold flex items-center">
             <span className="text-[#19A3E9]">Camp</span><span className="text-[#D946A8]">Assist</span>
           </span>
-        </div>
+        </Link>
         <h1 className="mt-6 text-center text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
           {isResetMode ? 'Reset your password' : 'Sign in to CampAssist'}
         </h1>
@@ -153,14 +154,16 @@ export const Login = () => {
                 )}
 
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Registered Email address</label>
+                  <label htmlFor="reset-email" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Registered Email address</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-[var(--color-muted)]" />
                     </div>
                     <input
+                      id="reset-email"
                       name="resetEmail"
                       type="email"
+                      autoComplete="email"
                       required
                       autoFocus
                       value={resetEmail}
@@ -207,14 +210,16 @@ export const Login = () => {
 
               <form className="space-y-6" onSubmit={handleLogin}>
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Email address</label>
+                  <label htmlFor="login-email" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Email address</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Mail className="h-5 w-5 text-[var(--color-muted)]" />
                     </div>
                     <input
+                      id="login-email"
                       name="email"
                       type="email"
+                      autoComplete="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -225,20 +230,30 @@ export const Login = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Password</label>
+                  <label htmlFor="login-password" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Password</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                       <Lock className="h-5 w-5 text-[var(--color-muted)]" />
                     </div>
                     <input
+                      id="login-password"
                       name="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
+                      className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                       placeholder="••••••••"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition cursor-pointer"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
 

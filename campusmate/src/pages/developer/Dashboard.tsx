@@ -6,7 +6,7 @@ import { apiClient } from '../../services/apiClient';
 export const Dashboard = () => {
   const [stats, setStats] = useState({ users: 0, sections: 0, institutions: 0 });
     const [loading, setLoading] = useState(true);
-  const [health, setHealth] = useState({ responseTime: 0, dbStatus: 'Optimal' });
+  const [health, setHealth] = useState<{ loadTimeMs: number; dbLatencyMs: number | null; dbStatus: string; firestoreStatus: string; lastUpdated: string }>({ loadTimeMs: 0, dbLatencyMs: null, dbStatus: 'Connected', firestoreStatus: 'Connected', lastUpdated: '' });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -20,7 +20,13 @@ export const Dashboard = () => {
         ]);
         
         const endTime = performance.now();
-        setHealth({ responseTime: Math.round(endTime - startTime), dbStatus: healthData.services.database === 'connected' ? 'Optimal' : 'Critical' });
+        setHealth({
+          loadTimeMs: Math.round(endTime - startTime),
+          dbLatencyMs: healthData?.metrics?.dbLatencyMs ?? null,
+          dbStatus: healthData?.services?.database === 'connected' ? 'Connected' : 'Unavailable',
+          firestoreStatus: healthData?.services?.firestore === 'connected' ? 'Connected' : 'Unavailable',
+          lastUpdated: new Date().toLocaleTimeString(),
+        });
         setStats({
           users: usersData.length || 0,
           sections: sectionsData.length || 0,
@@ -120,27 +126,37 @@ export const Dashboard = () => {
           </div>
 
           <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">
-            <h3 className="font-bold mb-4 flex items-center gap-2 text-[var(--color-text)]">
-              <Activity size={18} className="text-emerald-400" /> System Health
-            </h3>
-            <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold flex items-center gap-2 text-[var(--color-text)]">
+                <Activity size={18} className="text-emerald-400" /> System Health
+              </h3>
+              {health.lastUpdated && <span className="text-[11px] text-[var(--color-muted)] font-medium">Checked: {health.lastUpdated}</span>}
+            </div>
+            <div className="space-y-3.5">
               <div>
-                <div className="flex justify-between text-xs font-semibold mb-1.5 text-[var(--color-muted)]">
-                  <span>API Response Time</span>
-                  <span className="text-emerald-400 font-bold">{health.responseTime}ms</span>
+                <div className="flex justify-between text-xs font-semibold mb-1 text-[var(--color-muted)]">
+                  <span>Dashboard data load time</span>
+                  <span className="text-emerald-400 font-bold">{health.loadTimeMs}ms</span>
                 </div>
-                <div className="w-full h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden border border-[var(--color-border)]">
-                  <div className="w-1/4 h-full bg-emerald-400 rounded-full"></div>
-                </div>
+                <p className="text-[11px] text-[var(--color-muted)]">Batch fetch time for live admin dashboard view.</p>
               </div>
               <div>
-                <div className="flex justify-between text-xs font-semibold mb-1.5 text-[var(--color-muted)]">
-                  <span>Database Load</span>
-                  <span className="text-emerald-400 font-bold">{health.dbStatus}</span>
+                <div className="flex justify-between text-xs font-semibold mb-1 text-[var(--color-muted)]">
+                  <span>Database Connection</span>
+                  <span className={`font-bold ${health.dbStatus === 'Connected' ? 'text-emerald-400' : 'text-rose-500'}`}>
+                    {health.dbStatus}{health.dbLatencyMs !== null ? ` (${health.dbLatencyMs}ms ping)` : ''}
+                  </span>
                 </div>
-                <div className="w-full h-2 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden border border-[var(--color-border)]">
-                  <div className="w-[12%] h-full bg-emerald-400 rounded-full"></div>
+                <p className="text-[11px] text-[var(--color-muted)]">PostgreSQL primary query ping & connection status.</p>
+              </div>
+              <div>
+                <div className="flex justify-between text-xs font-semibold mb-1 text-[var(--color-muted)]">
+                  <span>Firestore Auxiliary Store</span>
+                  <span className={`font-bold ${health.firestoreStatus === 'Connected' ? 'text-emerald-400' : 'text-rose-500'}`}>
+                    {health.firestoreStatus}
+                  </span>
                 </div>
+                <p className="text-[11px] text-[var(--color-muted)]">Secondary document cache & notification sync.</p>
               </div>
             </div>
           </div>

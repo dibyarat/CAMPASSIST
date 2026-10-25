@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { trackEvent } from '../../utils/analytics';
-import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2, BookOpen, ChevronDown } from 'lucide-react';
+import { Loader2, Mail, Lock, User, Hash, MapPin, AlertCircle, ArrowRight, Building2, BookOpen, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
 import { apiClient } from '../../services/apiClient';
@@ -11,6 +11,7 @@ export const Register = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [institutions, setInstitutions] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [sections, setSections] = useState<any[]>([]);
@@ -215,12 +216,12 @@ export const Register = () => {
   return (
     <div className="min-h-screen bg-transparent flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative z-10 overflow-hidden">
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
-        <div className="flex items-center justify-center gap-3">
-          <img src={logoIcon} alt="CampAssist Logo" className="h-12 w-12 object-contain" />
+        <Link to="/" className="flex items-center justify-center gap-3 group" aria-label="CampAssist Home">
+          <img src={logoIcon} alt="CampAssist Logo" className="h-12 w-12 object-contain group-hover:scale-105 transition-transform" />
           <span className="font-wordmark text-3xl font-extrabold flex items-center">
             <span className="text-[#19A3E9]">Camp</span><span className="text-[#D946A8]">Assist</span>
           </span>
-        </div>
+        </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-[var(--color-text)] tracking-tight">
           Create your account
         </h2>
@@ -244,14 +245,16 @@ export const Register = () => {
 
           <form className="space-y-4 sm:space-y-5" onSubmit={handleRegister}>
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Full Name</label>
+              <label htmlFor="reg-fullname" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Full Name</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <input
+                  id="reg-fullname"
                   name="fullName"
                   type="text"
+                  autoComplete="name"
                   required
                   value={formData.fullName}
                   onChange={handleChange}
@@ -262,14 +265,16 @@ export const Register = () => {
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Email address</label>
+              <label htmlFor="reg-email" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Email address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <input
+                  id="reg-email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   value={formData.email}
                   onChange={handleChange}
@@ -280,30 +285,41 @@ export const Register = () => {
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Password</label>
+              <label htmlFor="reg-password" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <input
+                  id="reg-password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
+                  className="w-full pl-11 pr-11 py-2.5 rounded-xl border border-[var(--color-border)] bg-[var(--glass-sub-surface)] text-[var(--color-text)] placeholder-[var(--color-muted)] focus:outline-none focus:border-[#19A3E9] focus:ring-2 focus:ring-[#19A3E9]/20 transition text-sm shadow-xs"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--color-muted)] hover:text-[var(--color-text)] transition cursor-pointer"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Institution Code</label>
+              <label htmlFor="reg-institution" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Institution Code</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <Building2 className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <select
+                  id="reg-institution"
                   name="institutionCode"
                   required
                   value={formData.institutionCode}
@@ -324,12 +340,13 @@ export const Register = () => {
             </div>
 
             <div>
-              <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Department</label>
+              <label htmlFor="reg-department" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Department</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                   <BookOpen className="h-5 w-5 text-[var(--color-muted)]" />
                 </div>
                 <select
+                  id="reg-department"
                   name="department"
                   required={availableDepartments.length > 0}
                   value={formData.department}
@@ -359,12 +376,13 @@ export const Register = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Roll Number</label>
+                <label htmlFor="reg-rollnumber" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Roll Number</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <Hash className="h-5 w-5 text-[var(--color-muted)]" />
                   </div>
                   <input
+                    id="reg-rollnumber"
                     name="rollNumber"
                     type="text"
                     required
@@ -377,12 +395,13 @@ export const Register = () => {
               </div>
 
               <div>
-                <label className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Section</label>
+                <label htmlFor="reg-section" className="block text-xs sm:text-sm font-semibold text-[var(--color-text)] mb-1.5">Section</label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                     <MapPin className="h-5 w-5 text-[var(--color-muted)]" />
                   </div>
                   <select
+                    id="reg-section"
                     name="section"
                     required={availableSections.length > 0}
                     disabled={availableSections.length === 0}

@@ -77,8 +77,8 @@ export class UsersController {
 
   @Get('cr')
   @Roles('DEVELOPER', 'STUDENT', 'CR')
-  getAllCrs() {
-    return this.usersService.getAllUsersByRole('CR');
+  getAllCrs(@Req() req: any) {
+    return this.usersService.getClassRepresentatives(req.user);
   }
 
   @Delete(':id')
