@@ -64,8 +64,10 @@ export const StudyOSBand: React.FC = () => {
                 </li>
               </ul>
 
-              <Link
-                to="/student/studyos"
+              <a
+                href={import.meta.env.VITE_STUDYOS_URL || 'https://studyos.website'}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   background: 'var(--gradient-brand)',
                   boxShadow: '0 4px 20px rgba(113, 64, 216, 0.4)',
@@ -74,7 +76,7 @@ export const StudyOSBand: React.FC = () => {
               >
                 <span>Open StudyOS</span>
                 <ArrowRight size={18} />
-              </Link>
+              </a>
             </div>
 
             {/* Right Mockup Card */}

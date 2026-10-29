@@ -44,9 +44,14 @@ export const LandingFooter: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/student/studyos" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
+                  <a
+                    href={import.meta.env.VITE_STUDYOS_URL || 'https://studyos.website'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block"
+                  >
                     StudyOS
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>

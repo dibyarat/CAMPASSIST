@@ -376,7 +376,7 @@ export class StudyosService {
         myHelpServices,
         totalHelpServices,
       },
-      studyosUrl: process.env.STUDYOS_URL || 'https://studyos-nu-three.vercel.app',
+      studyosUrl: process.env.STUDYOS_URL || 'https://studyos.website',
     };
   }
 

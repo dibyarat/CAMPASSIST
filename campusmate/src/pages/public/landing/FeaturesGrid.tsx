@@ -15,6 +15,7 @@ interface FeatureItem {
   title: string;
   desc: string;
   route: string;
+  external?: boolean;
   icon?: React.ComponentType<{ size: number; className?: string }>;
   iconImg?: string;
   tileBg: string;
@@ -50,7 +51,8 @@ export const FeaturesGrid: React.FC = () => {
     {
       title: 'StudyOS',
       desc: 'Access lab records, notes, and academic PDFs in one unified workspace.',
-      route: '/student/studyos',
+      route: import.meta.env.VITE_STUDYOS_URL || 'https://studyos.website',
+      external: true,
       icon: BookOpen,
       iconImg: studyosMark,
       tileBg: 'bg-sky-500/15',
@@ -121,16 +123,31 @@ export const FeaturesGrid: React.FC = () => {
                   </p>
                 </div>
 
-                <Link
-                  to={feature.route}
-                  className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors pt-2 min-h-[44px]"
-                >
-                  <span>Open {feature.title}</span>
-                  <ArrowRight
-                    size={16}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
-                </Link>
+                {feature.external ? (
+                  <a
+                    href={feature.route}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors pt-2 min-h-[44px]"
+                  >
+                    <span>Open {feature.title}</span>
+                    <ArrowRight
+                      size={16}
+                      className="transition-transform group-hover:translate-x-1"
+                    />
+                  </a>
+                ) : (
+                  <Link
+                    to={feature.route}
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[var(--color-text)] group-hover:text-[var(--color-primary)] transition-colors pt-2 min-h-[44px]"
+                  >
+                    <span>Open {feature.title}</span>
+                    <ArrowRight
+                      size={16}
+                      className="transition-transform group-hover:translate-x-1"
+                    />
+                  </Link>
+                )}
               </div>
             );
           })}

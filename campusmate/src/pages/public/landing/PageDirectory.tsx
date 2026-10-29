@@ -2,11 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
+interface DirectoryItem {
+  label: string;
+  to: string;
+  href?: string;
+}
+
 interface DirectoryCard {
   title: string;
   bg: string;
   borderColor: string;
-  items: { label: string; to: string }[];
+  items: DirectoryItem[];
 }
 
 export const PageDirectory: React.FC = () => {
@@ -20,7 +26,7 @@ export const PageDirectory: React.FC = () => {
         { label: 'Timetable', to: '/student/timetable' },
         { label: 'Attendance', to: '/student/attendance' },
         { label: 'Find Room', to: '/student/find-room' },
-        { label: 'StudyOS', to: '/student/studyos' },
+        { label: 'StudyOS', to: '/student/studyos', href: import.meta.env.VITE_STUDYOS_URL || 'https://studyos.website' },
       ],
     },
     {
@@ -72,17 +78,33 @@ export const PageDirectory: React.FC = () => {
 
               <div className="flex-1 flex flex-col divide-y divide-[var(--color-border)]">
                 {card.items.map((item, itemIdx) => (
-                  <Link
-                    key={itemIdx}
-                    to={item.to}
-                    className="group flex items-center justify-between min-h-[46px] px-2 py-2 text-sm sm:text-base font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors rounded-lg"
-                  >
-                    <span>{item.label}</span>
-                    <ArrowRight
-                      size={16}
-                      className="text-[var(--color-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all"
-                    />
-                  </Link>
+                  item.href ? (
+                    <a
+                      key={itemIdx}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center justify-between min-h-[46px] px-2 py-2 text-sm sm:text-base font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors rounded-lg"
+                    >
+                      <span>{item.label}</span>
+                      <ArrowRight
+                        size={16}
+                        className="text-[var(--color-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all"
+                      />
+                    </a>
+                  ) : (
+                    <Link
+                      key={itemIdx}
+                      to={item.to}
+                      className="group flex items-center justify-between min-h-[46px] px-2 py-2 text-sm sm:text-base font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors rounded-lg"
+                    >
+                      <span>{item.label}</span>
+                      <ArrowRight
+                        size={16}
+                        className="text-[var(--color-muted)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all"
+                      />
+                    </Link>
+                  )
                 ))}
               </div>
             </div>

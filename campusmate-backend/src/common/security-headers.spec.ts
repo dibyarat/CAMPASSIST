@@ -28,3 +28,4 @@ describe('Security Headers Middleware', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 });
+
