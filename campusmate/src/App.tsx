@@ -50,7 +50,9 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
   const normalizedAccountRole = actualRole.toUpperCase();
   const accountHome = normalizedAccountRole === 'DEVELOPER' ? '/developer' : normalizedAccountRole === 'CR' ? '/cr' : '/student';
   const canAccessRole = role.toUpperCase() === normalizedAccountRole || (normalizedAccountRole === 'CR' && role === 'student');
-  const [authState, setAuthState] = React.useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
+  const [authState, setAuthState] = React.useState<'checking' | 'authenticated' | 'unauthenticated'>(() => {
+    return localStorage.getItem('userRole') ? 'authenticated' : 'checking';
+  });
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const location = useLocation();
@@ -99,6 +101,9 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
         }
 
         if (activeUser) {
+          // Instant display for returning users
+          setAuthState('authenticated');
+
           // Immediately sync latest user profile from backend so role promotions take effect dynamically!
           try {
             const profile = await authService.me();

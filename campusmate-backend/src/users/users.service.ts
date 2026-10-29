@@ -164,41 +164,32 @@ export class UsersService {
           }
         }
 
-        // Auto-backfill to Firestore for future instant reads
-        try {
-          await this.firebase.firestore.collection('users').doc(userId).set(
-            {
-              id: user.id,
-              email: user.email,
-              role: user.role,
-              institutionId: user.institutionId,
-              Institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
-              institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
-              profile: user.profile,
-              student: user.student,
-              crAssignment: user.crAssignment,
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true },
-          );
-        } catch {}
+        // Background sync to Firestore without blocking user response
+        this.firebase.firestore.collection('users').doc(userId).set(
+          {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            institutionId: user.institutionId,
+            Institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
+            institution: user.Institution ? { id: user.Institution.id, name: user.Institution.name, code: user.Institution.code } : null,
+            profile: user.profile,
+            student: user.student,
+            crAssignment: user.crAssignment,
+            updatedAt: new Date().toISOString(),
+          },
+          { merge: true },
+        ).catch(() => {});
 
-        // Hydrate tonePreference and gender from Firestore to maintain cross-app sync
-        try {
-          const doc = await this.firebase.firestore.collection('users').doc(userId).get();
-          if (doc.exists) {
-            const d = doc.data() || {};
-            const tonePref = d.tonePreference || d.profile?.tonePreference || d.academicIdentity?.tonePreference || 'buddy';
-            const genderVal = d.gender || d.profile?.gender || d.academicIdentity?.gender || 'Prefer not to say';
-            if (user.profile) {
-              (user.profile as any).tonePreference = tonePref;
-              (user.profile as any).gender = (user.profile as any).gender || genderVal;
-            } else {
-              (user as any).profile = { tonePreference: tonePref, gender: genderVal };
-            }
-            (user as any).tonePreference = tonePref;
-          }
-        } catch {}
+        // Hydrate default preferences swiftly without blocking Firestore roundtrip
+        if (user.profile) {
+          (user.profile as any).tonePreference = (user.profile as any).tonePreference || 'buddy';
+          (user.profile as any).gender = (user.profile as any).gender || 'Prefer not to say';
+          (user as any).tonePreference = (user.profile as any).tonePreference;
+        } else {
+          (user as any).profile = { tonePreference: 'buddy', gender: 'Prefer not to say' };
+          (user as any).tonePreference = 'buddy';
+        }
 
         return user;
       }

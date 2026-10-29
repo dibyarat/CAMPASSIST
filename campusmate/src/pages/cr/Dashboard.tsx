@@ -15,24 +15,23 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [userProfile, currentTerm] = await Promise.all([apiClient('/users/me'), academicTermService.getCurrent()]);
+        const [userProfile, currentTerm, notifs, p, subs] = await Promise.all([
+          apiClient('/users/me'),
+          academicTermService.getCurrent(),
+          apiClient('/notifications').catch(() => []),
+          apiClient('/polls').catch(() => []),
+          apiClient('/submissions/mine').catch(() => []),
+        ]);
         setProfile(userProfile);
+        setAnnouncements(Array.isArray(notifs) ? notifs.slice(0, 3) : []);
+        setPolls(Array.isArray(p) ? p.filter((poll: any) => poll.status === 'ACTIVE').slice(0, 2) : []);
+        setSubmissions(Array.isArray(subs) ? subs.slice(0, 3) : []);
 
-        if (userProfile.crAssignment?.sectionId) {
-          const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/${currentTerm.id}`);
+        if (userProfile?.crAssignment?.sectionId && currentTerm?.id) {
+          const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/${currentTerm.id}`).catch(() => []);
           const todayInt = new Date().getDay();
-          setTimetable(tt.filter((t: any) => t.dayOfWeek === todayInt));
+          setTimetable(Array.isArray(tt) ? tt.filter((t: any) => t.dayOfWeek === todayInt) : []);
         }
-
-        const notifs = await apiClient('/notifications');
-        setAnnouncements(notifs.slice(0, 3));
-
-        const p = await apiClient('/polls');
-        setPolls(p.filter((poll: any) => poll.status === 'ACTIVE').slice(0, 2));
-
-        const subs = await apiClient('/submissions/mine');
-        setSubmissions(subs.slice(0, 3));
-
       } catch (error) {
         console.error("Failed to load dashboard data", error);
       } finally {

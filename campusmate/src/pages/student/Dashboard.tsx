@@ -14,19 +14,19 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [userProfile, currentTerm] = await Promise.all([apiClient('/users/me'), academicTermService.getCurrent()]);
+        const [userProfile, currentTerm, att] = await Promise.all([
+          apiClient('/users/me'),
+          academicTermService.getCurrent(),
+          apiClient('/attendance/my-attendance').catch(() => null),
+        ]);
         setProfile(userProfile);
+        if (att) setAttendanceStats(att);
 
-        if (userProfile.student?.sectionId) {
-          const tt = await apiClient(`/timetable/section/${userProfile.student.sectionId}/term/${currentTerm.id}`);
-          // Filter for today only
+        if (userProfile?.student?.sectionId && currentTerm?.id) {
+          const tt = await apiClient(`/timetable/section/${userProfile.student.sectionId}/term/${currentTerm.id}`).catch(() => []);
           const todayInt = new Date().getDay(); // 1=Mon, 5=Fri
-          setTimetable(tt.filter((t: any) => t.dayOfWeek === todayInt));
+          setTimetable(Array.isArray(tt) ? tt.filter((t: any) => t.dayOfWeek === todayInt) : []);
         }
-
-        const att = await apiClient('/attendance/my-attendance');
-        setAttendanceStats(att);
-
       } catch (error) {
         console.error("Failed to load dashboard data", error);
       } finally {
