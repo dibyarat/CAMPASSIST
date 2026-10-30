@@ -203,8 +203,18 @@ export const Users = () => {
 
       <div className="bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
         {errorMsg && (
-          <div className="p-4 bg-red-100 text-red-700 font-bold rounded-xl mb-4">
-            API Error: {errorMsg}
+          <div className="p-4 bg-red-100 text-red-700 font-bold rounded-xl mb-4 flex items-center justify-between gap-3">
+            <span>API Error: {errorMsg}</span>
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                fetchData();
+              }}
+              className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition shrink-0"
+            >
+              Retry
+            </button>
           </div>
         )}
         <div className="overflow-x-auto">

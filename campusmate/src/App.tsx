@@ -133,8 +133,18 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
       setAuthState('unauthenticated');
     };
 
+    const handleSessionExpired = () => {
+      localStorage.removeItem('userFullName');
+      localStorage.removeItem('userRole');
+      setAuthState('unauthenticated');
+    };
+    window.addEventListener('campassist:session-expired', handleSessionExpired);
+
     void verifySession();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      window.removeEventListener('campassist:session-expired', handleSessionExpired);
+    };
   }, []);
 
   if (authState === 'checking') {
