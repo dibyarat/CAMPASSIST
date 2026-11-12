@@ -143,7 +143,7 @@ export class NotificationsService {
 
     // Duplicate announcement suppression within 2 minutes
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-    const existingRecent = await this.prisma.notification.findFirst({
+    const existingRecent = typeof this.prisma.notification?.findFirst === 'function' ? await this.prisma.notification.findFirst({
       where: {
         recipientId: crUserId,
         title: trimmedTitle,
@@ -151,7 +151,7 @@ export class NotificationsService {
         type: 'GENERAL_ANNOUNCEMENT',
         createdAt: { gte: twoMinutesAgo },
       },
-    });
+    }) : null;
     if (existingRecent) {
       throw new BadRequestException('An identical announcement was recently posted. Please wait before reposting.');
     }

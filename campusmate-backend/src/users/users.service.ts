@@ -165,7 +165,8 @@ export class UsersService {
         }
 
         // Background sync to Firestore without blocking user response
-        this.firebase.firestore.collection('users').doc(userId).set(
+        if (this.firebase?.firestore && typeof this.firebase.firestore.collection === 'function') {
+          this.firebase.firestore.collection('users').doc(userId).set(
           {
             id: user.id,
             email: user.email,
@@ -180,6 +181,7 @@ export class UsersService {
           },
           { merge: true },
         ).catch(() => {});
+        }
 
         // Hydrate default preferences swiftly without blocking Firestore roundtrip
         if (user.profile) {
@@ -197,91 +199,42 @@ export class UsersService {
       this.logger.warn(`Prisma getProfile error: ${err?.message}`);
     }
 
-    // Fallback to Firestore if Prisma failed or user is not in Prisma yet
+    // Fallback to Firestore or Firebase Auth if Prisma failed or user is not in Prisma yet
     try {
-      const doc = await this.firebase.firestore.collection('users').doc(userId).get();
-      if (doc.exists) {
-        const firestoreData = doc.data() || {};
-        
-        // Auto-provision user into Prisma if missing so future operations work seamlessly
-        try {
-          const email = firestoreData.email;
-          const rawName = firestoreData.name || firestoreData.fullName || firestoreData.profile?.fullName || (email ? email.split('@')[0] : 'Student');
-          const rollMatch = email ? email.match(/^(\d{8,16})@/) : null;
-          const rollNumber = rollMatch ? rollMatch[1] : (firestoreData.profile?.rollNumber || null);
-
-          const institution = await this.prisma.institution.findFirst({
-            where: { code: 'CUTM' },
-          }) || await this.prisma.institution.findFirst();
-
-          const section = await this.prisma.section.findFirst({
-            where: {
-              ...(institution ? { institutionId: institution.id } : {}),
-              name: { equals: 'CT-A', mode: 'insensitive' },
-            },
-          }) || await this.prisma.section.findFirst({
-            where: institution ? { institutionId: institution.id } : {},
-          }) || await this.prisma.section.findFirst();
-
-          const dbUser = await this.prisma.user.upsert({
-            where: { id: userId },
-            update: { email: email || undefined },
-            create: {
-              id: userId,
-              email: email || `${userId}@campusmate.local`,
-              role: (firestoreData.role as any) || 'STUDENT',
-              institutionId: institution?.id || null,
-            },
-          });
-
-          const student = await this.prisma.student.upsert({
-            where: { userId },
-            update: { sectionId: section?.id || null },
-            create: {
-              userId,
-              sectionId: section?.id || null,
-            },
-          });
-
-          const profile = await this.prisma.profile.upsert({
-            where: { userId },
-            update: {
-              fullName: rawName,
-              rollNumber,
-              section: section?.name || null,
-            },
-            create: {
-              userId,
-              studentId: student.id,
-              fullName: rawName,
-              rollNumber,
-              section: section?.name || null,
-              studentType: 'DAY_SCHOLAR',
-            },
-          });
-
-          return {
-            ...dbUser,
-            profile,
-            student: { ...student, section },
-            Institution: institution,
-            institution,
-            crAssignment: null,
-          };
-        } catch (provErr: any) {
-          this.logger.warn(`Failed inline auto-provision from Firestore doc: ${provErr?.message}`);
+      let externalData: any = null;
+      if (this.firebase?.firestore && typeof this.firebase.firestore.collection === 'function') {
+        const doc = await this.firebase.firestore.collection('users').doc(userId).get().catch(() => null);
+        if (doc && doc.exists) {
+          externalData = doc.data() || {};
         }
+      }
+
+      if (!externalData && this.firebase?.auth && typeof this.firebase.auth.getUser === 'function') {
+        const authUser = await this.firebase.auth.getUser(userId).catch(() => null);
+        if (authUser) {
+          externalData = {
+            id: authUser.uid,
+            email: authUser.email,
+            name: authUser.displayName,
+            avatarUrl: authUser.photoURL,
+          };
+        }
+      }
+
+      if (externalData) {
+        const provisioned = await this.provisionUserFromExternal(userId, externalData);
+        if (provisioned) return provisioned;
 
         return {
           id: userId,
           role: 'STUDENT',
-          ...firestoreData,
-          profile: firestoreData.profile || { fullName: firestoreData.name || 'Student' },
-          student: firestoreData.student || null,
+          ...externalData,
+          profile: externalData.profile || { fullName: externalData.name || 'Student' },
+          student: externalData.student || null,
         };
       }
     } catch (err: any) {
-      this.logger.warn(`Firestore getProfile error: ${err?.message}`);
+      this.logger.warn(`Fallback getProfile error: ${err?.message}`);
     }
 
     throw new NotFoundException('User not found');
@@ -444,9 +397,158 @@ export class UsersService {
     });
   }
 
+  async provisionUserFromExternal(userId: string, externalData: any) {
+    if (!userId || !this.prisma?.user) return null;
+
+    let profileData: any = externalData.profile || null;
+    let firestoreUserData: any = null;
+
+    if (this.firebase?.firestore && typeof this.firebase.firestore.collection === 'function') {
+      try {
+        const [profDoc, userDoc] = await Promise.all([
+          this.firebase.firestore.collection('profiles').doc(userId).get().catch(() => null),
+          this.firebase.firestore.collection('users').doc(userId).get().catch(() => null),
+        ]);
+        if (profDoc && profDoc.exists) {
+          profileData = { ...(profDoc.data() || {}), ...(profileData || {}) };
+        }
+        if (userDoc && userDoc.exists) {
+          firestoreUserData = userDoc.data();
+        }
+      } catch {}
+    }
+
+    const email = externalData.email || firestoreUserData?.email || (externalData.id ? `${externalData.id}@campusmate.local` : `${userId}@campusmate.local`);
+    const rawName =
+      externalData.name ||
+      externalData.fullName ||
+      externalData.displayName ||
+      firestoreUserData?.name ||
+      firestoreUserData?.fullName ||
+      profileData?.fullName ||
+      (email ? email.split('@')[0] : 'Student');
+
+    const rollMatch = email ? email.match(/^(\d{8,16})@/) : null;
+    const rollNumber = rollMatch ? rollMatch[1] : (profileData?.rollNumber || firestoreUserData?.rollNumber || null);
+
+    // Guard against unique constraint collision on email
+    if (email) {
+      try {
+        const existingWithEmail = await this.prisma.user.findUnique({
+          where: { email },
+          include: {
+            profile: true,
+            student: { include: { section: { include: { department: true, institution: true } } } },
+            crAssignment: { include: { section: true } },
+            Institution: true,
+          },
+        });
+
+        if (existingWithEmail) {
+          if (existingWithEmail.id === userId) {
+            return existingWithEmail;
+          }
+          this.logger.warn(`User with email ${email} already exists with ID ${existingWithEmail.id}; skipping new provision for ${userId}`);
+          return null;
+        }
+      } catch {}
+    }
+
+    const institution = this.prisma.institution
+      ? (await this.prisma.institution.findFirst({ where: { code: 'CUTM' } }).catch(() => null)) ||
+        (await this.prisma.institution.findFirst().catch(() => null))
+      : null;
+
+    const targetSection = profileData?.section || firestoreUserData?.section || 'CT-A';
+    const section = this.prisma.section
+      ? (await this.prisma.section.findFirst({
+          where: {
+            ...(institution ? { institutionId: institution.id } : {}),
+            name: { equals: targetSection, mode: 'insensitive' },
+          },
+        }).catch(() => null)) ||
+        (await this.prisma.section.findFirst({
+          where: institution ? { institutionId: institution.id } : {},
+        }).catch(() => null)) ||
+        (await this.prisma.section.findFirst().catch(() => null))
+      : null;
+
+    const role = (externalData.role || firestoreUserData?.role || 'STUDENT') as any;
+
+    const dbUser = await this.prisma.user.upsert({
+      where: { id: userId },
+      update: {
+        email: email || undefined,
+        name: rawName,
+        avatarUrl: externalData.avatarUrl || externalData.photoURL || firestoreUserData?.avatarUrl || null,
+      },
+      create: {
+        id: userId,
+        email,
+        name: rawName,
+        avatarUrl: externalData.avatarUrl || externalData.photoURL || firestoreUserData?.avatarUrl || null,
+        role: ['STUDENT', 'CR', 'DEVELOPER'].includes(role) ? role : 'STUDENT',
+        institutionId: institution?.id || null,
+      },
+      include: {
+        Institution: true,
+      },
+    });
+
+    let student: any = null;
+    if (this.prisma.student) {
+      student = await this.prisma.student.upsert({
+        where: { userId },
+        update: { sectionId: section?.id || null },
+        create: {
+          userId,
+          sectionId: section?.id || null,
+        },
+        include: {
+          section: {
+            include: { department: true, institution: true },
+          },
+        },
+      }).catch(() => null);
+    }
+
+    let profile: any = null;
+    if (this.prisma.profile) {
+      profile = await this.prisma.profile.upsert({
+        where: { userId },
+        update: {
+          fullName: rawName,
+          rollNumber,
+          section: section?.name || null,
+          department: profileData?.department || firestoreUserData?.department || null,
+          semester: profileData?.semester || firestoreUserData?.semester || null,
+        },
+        create: {
+          userId,
+          studentId: student?.id,
+          fullName: rawName,
+          rollNumber,
+          section: section?.name || null,
+          department: profileData?.department || firestoreUserData?.department || null,
+          semester: profileData?.semester || firestoreUserData?.semester || null,
+          studentType: profileData?.studentType || firestoreUserData?.studentType || 'DAY_SCHOLAR',
+        },
+      }).catch(() => null);
+    }
+
+    return {
+      ...dbUser,
+      profile: profile || { fullName: rawName, rollNumber, section: section?.name || null },
+      student: student ? { ...student, section } : null,
+      crAssignment: null,
+      Institution: institution,
+      institution,
+    };
+  }
+
   async getAllUsers() {
     try {
-      const users = await this.prisma.user.findMany({
+      let users = await this.prisma.user.findMany({
         include: {
           profile: true,
           student: { include: { section: { include: { department: true, institution: true } } } },
@@ -456,39 +558,115 @@ export class UsersService {
         orderBy: { createdAt: 'desc' },
       });
 
+      const existingUserIds = new Set(users.map((u) => u.id));
+      const existingEmails = new Set(users.map((u) => u.email?.toLowerCase()).filter(Boolean));
+
+      // Reconcile users from Firebase Auth and Firestore who registered elsewhere (e.g. StudyOS)
+      if (this.firebase) {
+        try {
+          const candidateUsers = new Map<string, any>();
+
+          // 1. Fetch from Firebase Auth
+          if (this.firebase.auth && typeof this.firebase.auth.listUsers === 'function') {
+            const authList = await this.firebase.auth.listUsers(1000).catch(() => null);
+            if (authList?.users) {
+              for (const aUser of authList.users) {
+                const uid = aUser.uid;
+                const email = aUser.email;
+                if (!existingUserIds.has(uid) && (!email || !existingEmails.has(email.toLowerCase()))) {
+                  candidateUsers.set(uid, {
+                    id: uid,
+                    email,
+                    name: aUser.displayName,
+                    avatarUrl: aUser.photoURL,
+                  });
+                }
+              }
+            }
+          }
+
+          // 2. Fetch from Firestore users collection
+          if (this.firebase.firestore && typeof this.firebase.firestore.collection === 'function') {
+            const firestoreSnap = await this.firebase.firestore.collection('users').get().catch(() => null);
+            if (firestoreSnap && !firestoreSnap.empty) {
+              for (const doc of firestoreSnap.docs) {
+                const uid = doc.id;
+                const data = doc.data();
+                const email = data.email;
+                if (!existingUserIds.has(uid) && (!email || !existingEmails.has(email?.toLowerCase()))) {
+                  const existingCandidate = candidateUsers.get(uid) || {};
+                  candidateUsers.set(uid, {
+                    ...existingCandidate,
+                    ...data,
+                    id: uid,
+                  });
+                }
+              }
+            }
+          }
+
+          // 3. Auto-provision discovered users into Prisma so they appear in Dev Portal & are editable
+          if (candidateUsers.size > 0) {
+            for (const [candidateId, candidateData] of candidateUsers.entries()) {
+              try {
+                const provisioned = await this.provisionUserFromExternal(candidateId, candidateData);
+                if (provisioned) {
+                  users.unshift(provisioned);
+                  existingUserIds.add(candidateId);
+                  if (provisioned.email) existingEmails.add(provisioned.email.toLowerCase());
+                }
+              } catch (provErr: any) {
+                this.logger.warn(`Failed auto-provisioning candidate ${candidateId}: ${provErr?.message}`);
+              }
+            }
+          }
+        } catch (reconcileErr: any) {
+          this.logger.warn(`User reconciliation in getAllUsers failed: ${reconcileErr?.message}`);
+        }
+      }
+
       // Update Firestore cache in background
       try {
-        for (const u of users) {
-          await this.firebase.firestore.collection('users').doc(u.id).set(
-            {
-              id: u.id,
-              email: u.email,
-              role: u.role,
-              institutionId: u.institutionId,
-              Institution: u.Institution ? { id: u.Institution.id, name: u.Institution.name, code: u.Institution.code } : null,
-              institution: u.Institution ? { id: u.Institution.id, name: u.Institution.name, code: u.Institution.code } : null,
-              profile: u.profile,
-              student: u.student,
-              crAssignment: u.crAssignment,
-              updatedAt: new Date().toISOString(),
-            },
-            { merge: true },
-          );
+        if (this.firebase?.firestore && typeof this.firebase.firestore.collection === 'function') {
+          for (const u of users) {
+            await this.firebase.firestore.collection('users').doc(u.id).set(
+              {
+                id: u.id,
+                email: u.email,
+                role: u.role,
+                institutionId: u.institutionId,
+                Institution: u.Institution ? { id: u.Institution.id, name: u.Institution.name, code: u.Institution.code } : null,
+                institution: u.Institution ? { id: u.Institution.id, name: u.Institution.name, code: u.Institution.code } : null,
+                profile: u.profile,
+                student: u.student,
+                crAssignment: u.crAssignment,
+                updatedAt: new Date().toISOString(),
+              },
+              { merge: true },
+            );
+          }
         }
       } catch {}
 
       return users;
     } catch (err: any) {
       this.logger.warn(`Failed reading all users from Prisma, falling back to Firestore: ${err?.message}`);
-      const snapshot = await this.firebase.firestore.collection('users').get();
-      if (!snapshot.empty) {
-        return snapshot.docs.map((doc) => doc.data());
+      if (this.firebase?.firestore && typeof this.firebase.firestore.collection === 'function') {
+        const snapshot = await this.firebase.firestore.collection('users').get().catch(() => null);
+        if (snapshot && !snapshot.empty) {
+          return snapshot.docs.map((doc: any) => doc.data());
+        }
       }
       return [];
     }
   }
 
   async updateUserRole(id: string, role: string, sectionId?: string) {
+    let existing = await this.prisma.user.findUnique({ where: { id } }).catch(() => null);
+    if (!existing) {
+      await this.provisionUserFromExternal(id, {});
+    }
+
     const user = await this.prisma.user.update({
       where: { id },
       data: { role: role as any },
@@ -878,8 +1056,14 @@ export class UsersService {
 
   async deleteUser(id: string) {
     try {
-      await this.firebase.firestore.collection('users').doc(id).delete();
-      await this.firebase.auth.deleteUser(id).catch(() => {});
+      if (this.firebase?.firestore && typeof this.firebase.firestore.collection === 'function') {
+        await this.firebase.firestore.collection('users').doc(id).delete().catch(() => {});
+        await this.firebase.firestore.collection('profiles').doc(id).delete().catch(() => {});
+        await this.firebase.firestore.collection('academic_identities').doc(id).delete().catch(() => {});
+      }
+      if (this.firebase?.auth && typeof this.firebase.auth.deleteUser === 'function') {
+        await this.firebase.auth.deleteUser(id).catch(() => {});
+      }
     } catch (err: any) {
       this.logger.warn(`Failed deleting user from Firebase: ${err?.message}`);
     }
