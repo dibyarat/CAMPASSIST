@@ -34,10 +34,9 @@ export const PageDirectory: React.FC = () => {
       bg: 'bg-[#F7F2FF]',
       borderColor: 'border-purple-100',
       items: [
-        { label: 'Submissions', to: '/student/submissions' },
         { label: 'SGPA/CGPA', to: '/student/sgpa-cgpa' },
-        { label: 'Exam Schedule', to: '/student/exam-schedule' },
-        { label: 'Exam Seating', to: '/student/exam-seat' },
+        { label: 'Examination', to: '/student/examination' },
+        { label: 'Exam Settings', to: '/student/examination?tab=settings' },
       ],
     },
     {
@@ -46,7 +45,6 @@ export const PageDirectory: React.FC = () => {
       borderColor: 'border-pink-100',
       items: [
         { label: 'Events', to: '/student/events' },
-        { label: 'College Map', to: '/student/college-map' },
         { label: 'Student Offers', to: '/student/offers' },
       ],
     },

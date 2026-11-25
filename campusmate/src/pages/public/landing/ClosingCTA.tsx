@@ -21,8 +21,8 @@ export const ClosingCTA: React.FC = () => {
               <Link
                 to="/student"
                 style={{
-                  background: 'var(--gradient-brand)',
-                  boxShadow: '0 10px 24px -8px var(--color-primary)',
+                  background: '#2563EB',
+                  boxShadow: '0 10px 24px -8px #2563EB',
                 }}
                 className="w-full sm:w-auto px-8 py-3.5 rounded-full text-white text-[15px] font-semibold transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
@@ -31,7 +31,7 @@ export const ClosingCTA: React.FC = () => {
               </Link>
               <Link
                 to="/register"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full glass border border-[var(--color-border)] text-[var(--color-text)] text-[15px] font-semibold hover:border-[var(--color-primary)] transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full glass border border-[var(--color-border)] text-[var(--color-text)] text-[15px] font-semibold hover:border-[#2563EB] transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center"
               >
                 Create an account
               </Link>

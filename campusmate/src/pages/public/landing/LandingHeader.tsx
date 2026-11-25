@@ -64,15 +64,15 @@ export const LandingHeader: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               to="/login"
-              className="hidden sm:inline-flex text-sm font-semibold text-[var(--color-text)] hover:text-[var(--color-primary)] transition-colors px-3.5 py-2 rounded-full hover:bg-[var(--glass-surface)]"
+              className="hidden sm:inline-flex text-sm font-semibold text-[var(--color-text)] hover:text-[#2563EB] transition-colors px-3.5 py-2 rounded-full hover:bg-[var(--glass-surface)]"
             >
               Login
             </Link>
             <Link
               to="/register"
               style={{
-                background: 'var(--gradient-brand)',
-                boxShadow: '0 10px 24px -8px var(--color-primary)',
+                background: '#2563EB',
+                boxShadow: '0 10px 24px -8px #2563EB',
               }}
               className="text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-200 hover:-translate-y-0.5 inline-flex items-center justify-center gap-1.5"
             >
@@ -139,7 +139,7 @@ export const LandingHeader: React.FC = () => {
           <Link
             to="/register"
             onClick={() => setMobileMenuOpen(false)}
-            style={{ background: 'var(--gradient-brand)' }}
+            style={{ background: '#2563EB' }}
             className="w-full py-2.5 text-center rounded-full text-white font-semibold"
           >
             Get started

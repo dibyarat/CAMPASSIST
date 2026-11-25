@@ -12,6 +12,9 @@ export interface RegisterSubject {
   id: string;
   name: string;
   code?: string;
+  source?: 'timetable' | 'manual';
+  timetableSubjectId?: string;
+  isActiveTimetable?: boolean;
   components: RegisterComponent[];
   createdAt: string;
 }
@@ -48,14 +51,179 @@ export class AttendanceService {
     private firebase: FirebaseAdminService,
   ) {}
 
-  // --- Attendance Register Methods (matching AttendanceRegister.apk logic) ---
+  // --- Attendance Register Methods (with automatic Timetable Synchronization) ---
+  private normalizeSubjectKey(value?: string | null): string {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  private async fetchStudentTimetableSubjects(studentId: string): Promise<Array<{ subjectId?: string; name: string; code?: string }>> {
+    try {
+      const student = this.prisma?.student
+        ? await this.prisma.student.findUnique({ where: { userId: studentId } }).catch(() => null)
+        : null;
+      const sectionId = student?.sectionId;
+      if (!sectionId) return [];
+
+      const currentTerm = this.prisma?.academicTerm
+        ? await this.prisma.academicTerm.findFirst({ where: { isCurrent: true } }).catch(() => null)
+        : null;
+
+      let entries: any[] = [];
+      if (this.prisma?.timetableEntry) {
+        entries = await this.prisma.timetableEntry.findMany({
+          where: {
+            sectionId,
+            ...(currentTerm ? { termId: currentTerm.id } : {}),
+            status: 'ACTIVE',
+          },
+          include: { subject: true },
+        }).catch(() => []);
+
+        if (entries.length === 0 && currentTerm) {
+          entries = await this.prisma.timetableEntry.findMany({
+            where: { sectionId, status: 'ACTIVE' },
+            include: { subject: true },
+          }).catch(() => []);
+        }
+      }
+
+      if (entries.length === 0 && this.firebase?.firestore) {
+        const snap = await this.firebase.firestore
+          .collection('timetable')
+          .where('sectionId', '==', sectionId)
+          .where('status', '==', 'ACTIVE')
+          .get()
+          .catch(() => null);
+        if (snap && !snap.empty) {
+          entries = snap.docs.map((d: any) => d.data());
+        }
+      }
+
+      const uniqueMap = new Map<string, { subjectId?: string; name: string; code?: string }>();
+      for (const entry of entries) {
+        const name = String(entry.subject?.name || entry.subjectName || entry.subjectRef || '').trim();
+        const code = String(entry.subject?.code || entry.subjectCode || '').trim() || undefined;
+        const subjectId = entry.subjectId || entry.subject?.id || undefined;
+        if (!name) continue;
+        const dedupeKey = this.normalizeSubjectKey(code || name);
+        if (!uniqueMap.has(dedupeKey)) {
+          uniqueMap.set(dedupeKey, { subjectId, name, code });
+        }
+      }
+      return Array.from(uniqueMap.values());
+    } catch (err: any) {
+      this.logger.warn(`Failed fetching timetable subjects for student ${studentId}: ${err?.message}`);
+      return [];
+    }
+  }
+
+  private mergeTimetableIntoRegister(
+    store: AttendanceRegisterStore,
+    timetableSubjects: Array<{ subjectId?: string; name: string; code?: string }>,
+  ): { merged: AttendanceRegisterStore; changed: boolean } {
+    if (!timetableSubjects || timetableSubjects.length === 0) {
+      return { merged: store, changed: false };
+    }
+
+    let changed = false;
+    const subjects = store.subjects.map((s) => ({ ...s }));
+    const logs = store.logs || [];
+
+    const activeNameKeys = new Set(timetableSubjects.map((ts) => this.normalizeSubjectKey(ts.name)));
+    const activeCodeKeys = new Set(
+      timetableSubjects.map((ts) => this.normalizeSubjectKey(ts.code)).filter(Boolean),
+    );
+    const activeSubjectIds = new Set(timetableSubjects.map((ts) => ts.subjectId).filter(Boolean));
+
+    // 1. Add or reactivate/link timetable subjects without duplicating or overwriting records
+    for (const ts of timetableSubjects) {
+      const tsNameKey = this.normalizeSubjectKey(ts.name);
+      const tsCodeKey = this.normalizeSubjectKey(ts.code);
+
+      const existing = subjects.find((s) => {
+        if (ts.subjectId && s.timetableSubjectId && s.timetableSubjectId === ts.subjectId) return true;
+        if (tsCodeKey && s.code && this.normalizeSubjectKey(s.code) === tsCodeKey) return true;
+        return this.normalizeSubjectKey(s.name) === tsNameKey;
+      });
+
+      if (existing) {
+        if (existing.name !== ts.name && existing.source === 'timetable') {
+          existing.name = ts.name;
+          changed = true;
+        }
+        if (ts.code && !existing.code) {
+          existing.code = ts.code;
+          changed = true;
+        }
+        if (ts.subjectId && existing.timetableSubjectId !== ts.subjectId) {
+          existing.timetableSubjectId = ts.subjectId;
+          changed = true;
+        }
+        if (existing.isActiveTimetable !== true) {
+          existing.isActiveTimetable = true;
+          changed = true;
+        }
+      } else {
+        subjects.push({
+          id: `tt-${ts.subjectId || tsCodeKey || tsNameKey.replace(/[^a-z0-9]/g, '-')}-${Date.now().toString(36)}`,
+          name: ts.name,
+          ...(ts.code ? { code: ts.code } : {}),
+          source: 'timetable',
+          ...(ts.subjectId ? { timetableSubjectId: ts.subjectId } : {}),
+          isActiveTimetable: true,
+          components: [{ key: 'TH', base: { p: 0, a: 0 } }],
+          createdAt: new Date().toISOString(),
+        });
+        changed = true;
+      }
+    }
+
+    // 2. Safely handle subjects previously synced from timetable that are no longer active
+    const finalSubjects: RegisterSubject[] = [];
+    for (const s of subjects) {
+      if (s.source !== 'timetable') {
+        finalSubjects.push(s);
+        continue;
+      }
+
+      const stillActive =
+        (s.timetableSubjectId && activeSubjectIds.has(s.timetableSubjectId)) ||
+        (s.code && activeCodeKeys.has(this.normalizeSubjectKey(s.code))) ||
+        activeNameKeys.has(this.normalizeSubjectKey(s.name));
+
+      if (stillActive) {
+        finalSubjects.push(s);
+      } else {
+        const hasLogs = logs.some((l) => l.sid === s.id);
+        const hasBase = (s.components || []).some(
+          (c) => (c.base?.p || 0) > 0 || (c.base?.a || 0) > 0,
+        );
+        if (hasLogs || hasBase) {
+          if (s.isActiveTimetable !== false) {
+            s.isActiveTimetable = false;
+            changed = true;
+          }
+          finalSubjects.push(s);
+        } else {
+          changed = true; // safe to prune unused removed timetable subject
+        }
+      }
+    }
+
+    return {
+      merged: { ...store, subjects: finalSubjects },
+      changed,
+    };
+  }
+
   async getAttendanceRegister(studentId: string): Promise<AttendanceRegisterStore> {
+    let store = seedAttendanceRegister();
     try {
       const doc = await this.firebase.firestore.collection('attendance_registers').doc(studentId).get();
       if (doc.exists) {
         const data = doc.data() as AttendanceRegisterStore;
         if (data && Array.isArray(data.subjects) && Array.isArray(data.logs)) {
-          return {
+          store = {
             target: typeof data.target === 'number' ? data.target : 75,
             subjects: data.subjects,
             logs: data.logs,
@@ -66,7 +234,12 @@ export class AttendanceService {
       this.logger.warn(`Failed reading register from Firestore for student ${studentId}: ${err?.message}`);
     }
 
-    return seedAttendanceRegister();
+    const timetableSubjects = await this.fetchStudentTimetableSubjects(studentId);
+    const { merged, changed } = this.mergeTimetableIntoRegister(store, timetableSubjects);
+    if (changed) {
+      await this.saveAttendanceRegister(studentId, merged).catch(() => {});
+    }
+    return merged;
   }
 
   async saveAttendanceRegister(studentId: string, store: AttendanceRegisterStore) {

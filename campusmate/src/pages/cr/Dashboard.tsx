@@ -4,28 +4,29 @@ import { Link } from 'react-router-dom';
 import { apiClient } from '../../services/apiClient';
 import { academicTermService } from '../../services/academicTermService';
 
+import { useDashboardEntrance } from '../../hooks/useDashboardEntrance';
+
 export const Dashboard = () => {
+
+  const animateIntro = useDashboardEntrance('cr');
   const [profile, setProfile] = useState<any>(null);
   const [timetable, setTimetable] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [polls, setPolls] = useState<any[]>([]);
-  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [userProfile, currentTerm, notifs, p, subs] = await Promise.all([
+        const [userProfile, currentTerm, notifs, p] = await Promise.all([
           apiClient('/users/me'),
           academicTermService.getCurrent(),
           apiClient('/notifications').catch(() => []),
           apiClient('/polls').catch(() => []),
-          apiClient('/submissions/mine').catch(() => []),
         ]);
         setProfile(userProfile);
         setAnnouncements(Array.isArray(notifs) ? notifs.slice(0, 3) : []);
         setPolls(Array.isArray(p) ? p.filter((poll: any) => poll.status === 'ACTIVE').slice(0, 2) : []);
-        setSubmissions(Array.isArray(subs) ? subs.slice(0, 3) : []);
 
         if (userProfile?.crAssignment?.sectionId && currentTerm?.id) {
           const tt = await apiClient(`/timetable/section/${userProfile.crAssignment.sectionId}/term/${currentTerm.id}`).catch(() => []);
@@ -49,7 +50,7 @@ export const Dashboard = () => {
     <div className="space-y-6 max-w-6xl mx-auto pb-10">
       
       {/* Header section */}
-      <div className="flex justify-between items-center bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] mb-6 text-[var(--color-text)]">
+      <div className={`flex justify-between items-center ${animateIntro ? "dash-anim-top" : ""} bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] mb-6 text-[var(--color-text)]`}>
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text)] flex items-center gap-2">
             CR Dashboard, {(profile?.profile?.fullName || '').split(' ')[0] || 'CR'}
@@ -65,7 +66,7 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Main Column */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className={`lg:col-span-2 space-y-6 ${animateIntro ? "dash-anim-left" : ""}`}>
           
           {/* Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -134,36 +135,12 @@ export const Dashboard = () => {
             </table>
           </div>
 
-          {/* Submission Tracker */}
-          <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl border border-[var(--color-border)] shadow-[var(--card-shadow)] overflow-hidden text-[var(--color-text)]">
-            <div className="p-5 border-b border-[var(--color-border)] flex justify-between items-center">
-              <h3 className="font-bold text-[var(--color-text)]">Submission Tracker</h3>
-              <button className="text-xs font-semibold text-white bg-gradient-brand px-3 py-1.5 rounded-lg hover:opacity-95 transition flex items-center gap-1 shadow-xs">
-                <Plus size={14} /> Add Deadline
-              </button>
-            </div>
-            <div className="divide-y divide-[var(--color-border)]">
-              {submissions.length === 0 ? (
-                <div className="p-6 text-center text-[var(--color-muted)]">No submissions found</div>
-              ) : submissions.map((sub, i) => (
-                <div key={i} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
-                  <div>
-                    <p className="font-bold text-[var(--color-text)] text-sm">{sub.subject?.name || 'Task'}</p>
-                    <p className="text-xs text-[var(--color-muted)] mt-1">Due: {new Date(sub.deadline).toLocaleDateString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${sub.status === 'SUBMITTED_DIGITALLY' || sub.status === 'SUBMITTED_PHYSICALLY' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
-                      {sub.status.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
+
+
         {/* Right Column */}
-        <div className="space-y-6">
+        <div className={`space-y-6 ${animateIntro ? "dash-anim-right" : ""}`}>
 
           {/* Quick Actions */}
           <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl p-6 shadow-[var(--card-shadow)] text-[var(--color-text)]">

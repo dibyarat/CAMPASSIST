@@ -60,7 +60,7 @@ export const DashboardPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Card 3: Top Right (Submission due) */}
+      {/* Floating Card 3: Top Right (Next Exam) */}
       <div
         className="hidden xl:flex items-center gap-3 absolute -top-5 -right-5 z-20 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white shadow-[0_12px_30px_rgba(210,58,160,0.18)] transition-transform hover:scale-105"
         style={{ transform: 'rotate(3deg)' }}
@@ -69,8 +69,8 @@ export const DashboardPreview: React.FC = () => {
           <Bell size={20} />
         </div>
         <div>
-          <div className="text-[13px] font-bold text-[#0B1020]">Submission due</div>
-          <div className="text-[12px] text-[#334155] font-medium">Tomorrow, 11:59 PM</div>
+          <div className="text-[13px] font-bold text-[#0B1020]">Next Exam</div>
+          <div className="text-[12px] text-[#334155] font-medium">Mid-Term · LH-304</div>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export const DashboardPreview: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Attendance Ring & Reminders Card */}
+          {/* Right Column: Attendance Ring & Exam Schedule Card */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Attendance Ring Box */}
             <div className="bg-white/70 border border-slate-100/90 rounded-2xl p-5 shadow-2xs flex items-center gap-5">
@@ -175,12 +175,12 @@ export const DashboardPreview: React.FC = () => {
               </div>
             </div>
 
-            {/* Reminders Card */}
+            {/* Exam Schedule Card */}
             <div className="bg-white/70 border border-slate-100/90 rounded-2xl p-5 shadow-2xs">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs uppercase tracking-wider font-semibold text-[#334155] flex items-center gap-1.5">
                   <Bell size={13} className="text-[#D23AA0]" />
-                  Reminders
+                  Exam Schedule
                 </span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">
                   Priority

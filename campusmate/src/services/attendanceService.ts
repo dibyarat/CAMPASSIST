@@ -9,6 +9,9 @@ export interface RegisterSubject {
   id: string;
   name: string;
   code?: string;
+  source?: 'timetable' | 'manual';
+  timetableSubjectId?: string;
+  isActiveTimetable?: boolean;
   components: RegisterComponent[];
   createdAt: string;
 }

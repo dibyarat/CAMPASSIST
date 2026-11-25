@@ -134,7 +134,7 @@ export const AttendancePlannerWidget: React.FC = () => {
                       onClick={() => setTarget(t)}
                       className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-200 min-h-[44px] cursor-pointer ${
                         isSelected
-                          ? 'bg-[var(--gradient-brand)] text-white shadow-md'
+                          ? 'bg-[#2563EB] text-white shadow-md'
                           : 'glass text-[var(--color-muted)] border border-[var(--color-border)] hover:text-[var(--color-text)]'
                       }`}
                     >
@@ -178,7 +178,7 @@ export const AttendancePlannerWidget: React.FC = () => {
                   className="h-full rounded-full transition-all duration-300"
                   style={{
                     width: `${Math.min(pct, 100)}%`,
-                    background: 'var(--gradient-brand)',
+                    background: '#2563EB',
                   }}
                 />
               </div>

@@ -46,8 +46,8 @@ export const LandingFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/student/college-map" className="hover:text-[var(--color-text)] transition-colors">
-                  College Map
+                <Link to="/student/examination" className="hover:text-[var(--color-text)] transition-colors">
+                  Examination
                 </Link>
               </li>
               <li>

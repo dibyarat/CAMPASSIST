@@ -20,10 +20,13 @@ import {
   Sparkles,
   TrendingUp,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { attendanceService } from '../../services/attendanceService';
 import { authService } from '../../services/authService';
+import { timetableService } from '../../services/timetableService';
+import { academicTermService } from '../../services/academicTermService';
 import type {
   AttendanceRegisterStore,
   RegisterSubject,
@@ -356,6 +359,115 @@ function getSubjectAdviceMessage(
   return { text, colorClass: 'text-emerald-700' };
 }
 
+function normalizeSubjKey(val?: string | null): string {
+  return String(val || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function mergeTimetableIntoStore(
+  baseStore: AttendanceRegisterStore,
+  entries: any[],
+): { merged: AttendanceRegisterStore; changed: boolean } {
+  const uniqueMap = new Map<string, { subjectId?: string; name: string; code?: string }>();
+  for (const entry of entries) {
+    const name = String(entry.subject?.name || entry.subjectName || entry.subjectRef || '').trim();
+    const code = String(entry.subject?.code || entry.subjectCode || '').trim() || undefined;
+    const subjectId = entry.subjectId || entry.subject?.id || undefined;
+    if (!name) continue;
+    const key = normalizeSubjKey(code || name);
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, { subjectId, name, code });
+    }
+  }
+
+  const timetableSubjects = Array.from(uniqueMap.values());
+  if (timetableSubjects.length === 0) {
+    return { merged: baseStore, changed: false };
+  }
+
+  let changed = false;
+  const subjects = baseStore.subjects.map((s) => ({ ...s }));
+  const logs = baseStore.logs || [];
+
+  const activeNameKeys = new Set(timetableSubjects.map((ts) => normalizeSubjKey(ts.name)));
+  const activeCodeKeys = new Set(
+    timetableSubjects.map((ts) => normalizeSubjKey(ts.code)).filter(Boolean),
+  );
+  const activeSubjectIds = new Set(timetableSubjects.map((ts) => ts.subjectId).filter(Boolean));
+
+  for (const ts of timetableSubjects) {
+    const tsNameKey = normalizeSubjKey(ts.name);
+    const tsCodeKey = normalizeSubjKey(ts.code);
+    const existing = subjects.find((s) => {
+      if (ts.subjectId && s.timetableSubjectId && s.timetableSubjectId === ts.subjectId) return true;
+      if (tsCodeKey && s.code && normalizeSubjKey(s.code) === tsCodeKey) return true;
+      return normalizeSubjKey(s.name) === tsNameKey;
+    });
+
+    if (existing) {
+      if (existing.name !== ts.name && existing.source === 'timetable') {
+        existing.name = ts.name;
+        changed = true;
+      }
+      if (ts.code && !existing.code) {
+        existing.code = ts.code;
+        changed = true;
+      }
+      if (ts.subjectId && existing.timetableSubjectId !== ts.subjectId) {
+        existing.timetableSubjectId = ts.subjectId;
+        changed = true;
+      }
+      if (existing.isActiveTimetable !== true) {
+        existing.isActiveTimetable = true;
+        changed = true;
+      }
+    } else {
+      subjects.push({
+        id: `tt-${ts.subjectId || tsCodeKey || tsNameKey.replace(/[^a-z0-9]/g, '-')}-${Date.now().toString(36)}`,
+        name: ts.name,
+        ...(ts.code ? { code: ts.code } : {}),
+        source: 'timetable',
+        ...(ts.subjectId ? { timetableSubjectId: ts.subjectId } : {}),
+        isActiveTimetable: true,
+        components: [{ key: 'TH', base: { p: 0, a: 0 } }],
+        createdAt: new Date().toISOString(),
+      });
+      changed = true;
+    }
+  }
+
+  const finalSubjects: RegisterSubject[] = [];
+  for (const s of subjects) {
+    if (s.source !== 'timetable') {
+      finalSubjects.push(s);
+      continue;
+    }
+    const stillActive =
+      (s.timetableSubjectId && activeSubjectIds.has(s.timetableSubjectId)) ||
+      (s.code && activeCodeKeys.has(normalizeSubjKey(s.code))) ||
+      activeNameKeys.has(normalizeSubjKey(s.name));
+
+    if (stillActive) {
+      finalSubjects.push(s);
+    } else {
+      const hasLogs = logs.some((l) => l.sid === s.id);
+      const hasBase = (s.components || []).some(
+        (c) => (c.base?.p || 0) > 0 || (c.base?.a || 0) > 0,
+      );
+      if (hasLogs || hasBase) {
+        if (s.isActiveTimetable !== false) {
+          s.isActiveTimetable = false;
+          changed = true;
+        }
+        finalSubjects.push(s);
+      } else {
+        changed = true;
+      }
+    }
+  }
+
+  return { merged: { ...baseStore, subjects: finalSubjects }, changed };
+}
+
 export const Attendance: React.FC = () => {
   const [store, setStore] = useState<AttendanceRegisterStore>(loadInitialStore);
   const [undoBuffer, setUndoBuffer] = useState<RegisterLog | null>(null);
@@ -366,6 +478,7 @@ export const Attendance: React.FC = () => {
 
   // User Profile for Gender Preference
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [syncingTimetable, setSyncingTimetable] = useState(false);
 
   // Add subject state
   const [newSubjName, setNewSubjName] = useState('');
@@ -419,30 +532,63 @@ export const Attendance: React.FC = () => {
     });
   };
 
-  // On mount, check if cloud register has updates
+  const syncFromTimetable = async (baseStore?: AttendanceRegisterStore, showFeedback = true) => {
+    setSyncingTimetable(true);
+    try {
+      const me = userProfile || (await authService.me().catch(() => null));
+      const sectionId = me?.student?.sectionId || me?.crAssignment?.sectionId;
+      if (!sectionId) {
+        if (showFeedback) showToast('No section assigned to your profile yet');
+        return;
+      }
+      const term = await academicTermService.getCurrent().catch(() => null);
+      if (!term?.id) return;
+      const entries = await timetableService.listForSection(sectionId, term.id).catch(() => []);
+      if (!Array.isArray(entries)) return;
+
+      const targetStore = baseStore || store;
+      const { merged, changed } = mergeTimetableIntoStore(targetStore, entries);
+      if (changed) {
+        saveStore(merged);
+        if (showFeedback) showToast('Attendance subjects synced with your timetable');
+      } else if (showFeedback) {
+        showToast('Attendance subjects are already up to date with your timetable');
+      }
+    } catch (err) {
+      console.warn('Timetable sync error:', err);
+      if (showFeedback) showToast('Unable to sync timetable right now');
+    } finally {
+      setSyncingTimetable(false);
+    }
+  };
+
+  // On mount, check if cloud register has updates and synchronize timetable subjects
   useEffect(() => {
     let isMounted = true;
     attendanceService
       .getRegister()
       .then((remote) => {
         if (!isMounted) return;
+        let activeStore = loadInitialStore();
         if (remote && Array.isArray(remote.subjects)) {
           const cleanSubjects = remote.subjects.filter((s: any) => !isApkSeedSubject(s));
           const cleanSubjectIds = new Set(cleanSubjects.map((s: any) => s.id));
           const cleanLogs = (remote.logs || []).filter((l: any) => cleanSubjectIds.has(l.sid));
 
-          const cleanRemote: AttendanceRegisterStore = {
+          activeStore = {
             target: typeof remote.target === 'number' ? remote.target : 75,
             subjects: cleanSubjects,
             logs: cleanLogs,
           };
 
-          setStore(cleanRemote);
-          localStorage.setItem(LS_KEY, JSON.stringify(cleanRemote));
+          setStore(activeStore);
+          localStorage.setItem(LS_KEY, JSON.stringify(activeStore));
         }
+        void syncFromTimetable(activeStore, false);
       })
       .catch((err) => {
         console.warn('Could not sync with cloud register on mount:', err);
+        void syncFromTimetable(undefined, false);
       });
 
     return () => {
@@ -502,7 +648,18 @@ export const Attendance: React.FC = () => {
 
   const handleAddSubject = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSubjName.trim()) return;
+    const trimmedName = newSubjName.trim();
+    const trimmedCode = newSubjCode.trim().toUpperCase() || undefined;
+    if (!trimmedName) return;
+
+    const duplicate = store.subjects.find((s) => {
+      if (trimmedCode && s.code && normalizeSubjKey(s.code) === normalizeSubjKey(trimmedCode)) return true;
+      return normalizeSubjKey(s.name) === normalizeSubjKey(trimmedName);
+    });
+    if (duplicate) {
+      showToast(`"${duplicate.name}" is already in your attendance list`);
+      return;
+    }
 
     const comps: RegisterComponent[] = newSubjComps
       .split(',')
@@ -514,8 +671,9 @@ export const Attendance: React.FC = () => {
 
     const newSubject: RegisterSubject = {
       id: uid(),
-      name: newSubjName.trim(),
-      code: newSubjCode.trim().toUpperCase() || undefined,
+      name: trimmedName,
+      code: trimmedCode,
+      source: 'manual',
       components: comps,
       createdAt: new Date().toISOString(),
     };
@@ -727,7 +885,18 @@ export const Attendance: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative" ref={settingsRef}>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => void syncFromTimetable(undefined, true)}
+            disabled={syncingTimetable}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-blue-600/35 text-blue-600 hover:bg-blue-50 font-semibold text-sm shadow-2xs transition cursor-pointer disabled:opacity-60"
+            title="Synchronize subjects from your section timetable"
+          >
+            <RefreshCw size={15} className={syncingTimetable ? 'animate-spin' : ''} />
+            <span>{syncingTimetable ? 'Syncing…' : 'Sync Timetable'}</span>
+          </button>
+          <div className="relative" ref={settingsRef}>
           <button
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-border)] glass hover:border-[var(--color-primary)] text-[var(--color-text)] font-semibold text-sm shadow-2xs transition cursor-pointer"
@@ -806,6 +975,7 @@ export const Attendance: React.FC = () => {
             </div>
           </>
           )}
+          </div>
         </div>
       </div>
 

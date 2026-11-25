@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { User, Bell, Shield, Camera, Save, Sparkles, MessageSquare, Trash2, Mail, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { User, Bell, Shield, Camera, Save, Sparkles, MessageSquare, Trash2, Mail, Loader2, Send, AlertCircle } from 'lucide-react';
 
 import { updatePassword as fbUpdatePassword, sendPasswordResetEmail, signOut as fbSignOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseClient';
@@ -140,7 +141,42 @@ export const Settings = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteError, setDeleteError] = useState('');
-  const [activeTab, setActiveTab] = useState<'Profile' | 'Notifications' | 'Security'>('Profile');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab')?.toLowerCase() === 'feedback' ? 'Feedback' : 'Profile';
+  const [activeTab, setActiveTab] = useState<'Profile' | 'Notifications' | 'Security' | 'Feedback'>(initialTab);
+
+  useEffect(() => {
+    const t = searchParams.get('tab')?.toLowerCase();
+    if (t === 'feedback') setActiveTab('Feedback');
+    else if (t === 'notifications') setActiveTab('Notifications');
+    else if (t === 'security') setActiveTab('Security');
+  }, [searchParams]);
+
+  const [feedbackTitle, setFeedbackTitle] = useState('');
+  const [feedbackContent, setFeedbackContent] = useState('');
+  const [feedbackType, setFeedbackType] = useState('GENERAL');
+  const [feedbackStatus, setFeedbackStatus] = useState<{ text: string; type: '' | 'success' | 'error' }>({ text: '', type: '' });
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingFeedback(true);
+    setFeedbackStatus({ text: '', type: '' });
+    try {
+      await apiClient('/feedback', {
+        method: 'POST',
+        body: JSON.stringify({ title: feedbackTitle, content: feedbackContent, type: feedbackType }),
+      });
+      setFeedbackStatus({ text: 'Feedback submitted successfully!', type: 'success' });
+      setFeedbackTitle('');
+      setFeedbackContent('');
+      setFeedbackType('GENERAL');
+    } catch (error: any) {
+      setFeedbackStatus({ text: error?.message || 'Something went wrong', type: 'error' });
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
   const [notificationPreferences, setNotificationPreferences] = useState({
     classUpdates: true,
     attendance: true,
@@ -354,17 +390,98 @@ export const Settings = () => {
             <Bell size={18} /> Notifications
           </button>
           <button 
-            onClick={() => setActiveTab('Security')}
+            onClick={() => { setActiveTab('Security'); setSearchParams({}); }}
             className={`w-full flex items-center gap-3 p-3 rounded-xl transition font-semibold text-sm ${
-              activeTab === 'Security' ? 'bg-[rgba(25,163,233,0.15)] text-[#19A3E9] border border-[#19A3E9]/30' : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
+              activeTab === 'Security' ? 'bg-[rgba(37,99,235,0.12)] text-[#2563EB] border border-[#2563EB]/30' : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
             }`}
           >
             <Shield size={18} /> Security
+          </button>
+          <button 
+            onClick={() => { setActiveTab('Feedback'); setSearchParams({ tab: 'feedback' }); }}
+            className={`w-full flex items-center gap-3 p-3 rounded-xl transition font-semibold text-sm ${
+              activeTab === 'Feedback' ? 'bg-[rgba(37,99,235,0.12)] text-[#2563EB] border border-[#2563EB]/30' : 'text-[var(--color-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--color-text)]'
+            }`}
+          >
+            <MessageSquare size={18} /> Feedback
           </button>
         </div>
 
         {/* Form Content */}
         <div className="flex-1 glass rounded-2xl border border-[var(--color-border)] p-6 sm:p-8">
+          {activeTab === 'Feedback' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-[var(--color-text)]">Send Feedback</h2>
+                <p className="text-sm text-[var(--color-muted)] mt-1">
+                  Share bug reports, feature requests, or general suggestions with the CampAssist team.
+                </p>
+              </div>
+
+              {feedbackStatus.text && (
+                <div
+                  role="status"
+                  className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
+                    feedbackStatus.type === 'success'
+                      ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                      : 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
+                  }`}
+                >
+                  <AlertCircle size={18} />
+                  <span>{feedbackStatus.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleFeedbackSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Feedback Type</label>
+                  <select
+                    value={feedbackType}
+                    onChange={(e) => setFeedbackType(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:outline-none focus:border-[#2563EB] transition-all"
+                  >
+                    <option value="GENERAL">General Feedback</option>
+                    <option value="BUG">Report a Bug</option>
+                    <option value="FEATURE">Feature Request</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Title</label>
+                  <input
+                    type="text"
+                    value={feedbackTitle}
+                    onChange={(e) => setFeedbackTitle(e.target.value)}
+                    required
+                    placeholder="Brief summary of your feedback"
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:outline-none focus:border-[#2563EB] transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[var(--color-text)] mb-2">Details</label>
+                  <textarea
+                    value={feedbackContent}
+                    onChange={(e) => setFeedbackContent(e.target.value)}
+                    required
+                    rows={5}
+                    placeholder="Please provide as much detail as possible..."
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--color-border)] glass text-[var(--color-text)] focus:outline-none focus:border-[#2563EB] transition-all resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submittingFeedback}
+                  className="w-full sm:w-auto bg-[#2563EB] hover:bg-[#1D4ED8] active:bg-[#1E40AF] text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <span>{submittingFeedback ? 'Submitting...' : 'Submit Feedback'}</span>
+                  {!submittingFeedback && <Send size={16} />}
+                </button>
+              </form>
+            </div>
+          )}
+
           {activeTab === 'Profile' && (
             <div className="space-y-8">
               {loadingProfile && <p role="status" className="text-sm text-[var(--color-muted)]">Loading account details...</p>}

@@ -13,9 +13,9 @@ import { BrandBackdrop } from './components/BrandBackdrop';
 import { authService } from './services/authService';
 import {
   Landing, Login, Register,
-  StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentSubmissions, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentReminderCenter, StudentExamSchedule, StudentExamSeat, StudentEvents, StudentCollegeMap, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile, StudentFeedback,
-  CrDashboard, CrTimetable, CrAnnouncements, CrCancellations, CrReports, CrPolls, CrReminders, CrSubmissions,
-  DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevMap, DevContacts, DevExams, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters, DevFeedbacks
+  StudentDashboard, StudentTimetable, StudentAttendance, StudentAttendancePlanner, StudentSgpaCgpa, StudentFindRoom, StudentStudyOS, StudentContacts, StudentNotifications, StudentRequests, StudentPolls, StudentExamination, StudentEvents, StudentOffers, StudentSettings, StudentAcademicPdfs, StudentProfile,
+  CrDashboard, CrTimetable, CrAnnouncements, CrCancellations, CrReports, CrPolls,
+  DevDashboard, DevUsers, DevInstitutions, DevSections, DevSubjects, DevTimetable, DevRooms, DevAttendance, DevResources, DevEvents, DevOffers, DevContacts, DevExamination, DevPDFs, DevStudents, DevSettings, DevDepartments, DevSemesters, DevFeedbacks
 } from './lazyRoutes';
 import logoIcon from './assets/logo-icon.png';
 import { useAndroidAppShell } from './hooks/useAndroidAppShell';
@@ -201,22 +201,16 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/studyos`} icon={FileText}>StudyOS</SidebarLink>
               
               {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Academics</div>}
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/submissions`} icon={UploadCloud}>Submissions</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/sgpa-cgpa`} icon={GraduationCap}>SGPA/CGPA</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/exam-schedule`} icon={CalendarDays}>Exam Schedule</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/exam-seat`} icon={MapPin}>Exam Seating</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/examination`} icon={CalendarDays}>Examination</SidebarLink>
               
               {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Campus</div>}
-
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/college-map`} icon={MapPin}>College Map</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/offers`} icon={Tag}>Student Offers</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/notifications`} icon={Bell}>Notifications</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/requests`} icon={FileText}>Requests</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/polls`} icon={BarChart2}>Polls</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/reminder-center`} icon={Bookmark}>Reminder Center</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/contacts`} icon={Users}>Contacts</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/feedback`} icon={MessageSquare}>Feedback</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/settings`} icon={Settings}>Settings</SidebarLink>
             </>
           )}
@@ -235,8 +229,6 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">Other</div>}
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/reports`} icon={FileText}>Reports</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/polls`} icon={BarChart2}>Polls</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/reminders`} icon={Bookmark}>Reminders</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/submissions`} icon={UploadCloud}>Submissions</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/notifications`} icon={Bell}>Notifications</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/settings`} icon={Users}>Settings</SidebarLink>
             </>
@@ -257,8 +249,8 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/attendance`} icon={Clock}>Attendance</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/resources`} icon={UploadCloud}>Resources</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/events`} icon={Calendar}>Events</SidebarLink>
+              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/examination`} icon={CalendarDays}>Examination</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/offers`} icon={Tag}>Offers</SidebarLink>
-              <SidebarLink isCollapsed={isCollapsed} to={`/${role}/map`} icon={MapPin}>Map Moderation</SidebarLink>
               <SidebarLink isCollapsed={isCollapsed} to={`/${role}/feedbacks`} icon={MessageSquare}>Feedbacks</SidebarLink>
               
               {!isCollapsed && <div className="text-[10px] font-bold text-[var(--color-muted)] uppercase tracking-widest mb-2 px-4 mt-6">System</div>}
@@ -282,7 +274,8 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             </Link>
           )}
 
-          <Link to="/" onClick={async (event) => { event.preventDefault(); try { await signOut(auth); } catch {} localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-2.5 rounded-full text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all font-medium text-sm ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
+          <Link to="/" onClick={async (event) => { event.preventDefault(); try { try { sessionStorage.removeItem('campassist_dash_intro_student'); sessionStorage.removeItem('campassist_dash_intro_cr'); sessionStorage.removeItem('campassist_dash_intro_developer'); } catch {}
+      await signOut(auth); } catch {} localStorage.removeItem('userFullName'); localStorage.removeItem('userRole'); trackEvent('logout'); window.location.href = '/'; }} className={`flex items-center gap-3 py-2.5 rounded-full text-[var(--color-muted)] hover:bg-rose-500/10 hover:text-rose-500 transition-all font-medium text-sm ${isCollapsed ? 'justify-center px-0' : 'px-4'}`}>
             <LogOut size={18} className="shrink-0" />
             {!isCollapsed && <span>Logout</span>}
           </Link>
@@ -340,64 +333,55 @@ export default function App() {
         <Route path="/student/find-room" element={<MainLayout role="student"><StudentFindRoom /></MainLayout>} />
         <Route path="/student/sgpa-cgpa" element={<MainLayout role="student"><StudentSgpaCgpa /></MainLayout>} />
         <Route path="/student/studyos" element={<MainLayout role="student"><StudentStudyOS /></MainLayout>} />
-        <Route path="/student/submissions" element={<MainLayout role="student"><StudentSubmissions /></MainLayout>} />
         <Route path="/student/contacts" element={<MainLayout role="student"><StudentContacts /></MainLayout>} />
         <Route path="/student/notifications" element={<MainLayout role="student"><StudentNotifications /></MainLayout>} />
         <Route path="/student/requests" element={<MainLayout role="student"><StudentRequests /></MainLayout>} />
         <Route path="/student/polls" element={<MainLayout role="student"><StudentPolls /></MainLayout>} />
-        <Route path="/student/reminder-center" element={<MainLayout role="student"><StudentReminderCenter /></MainLayout>} />
-        <Route path="/student/exam-schedule" element={<MainLayout role="student"><StudentExamSchedule /></MainLayout>} />
-        <Route path="/student/exam-seat" element={<MainLayout role="student"><StudentExamSeat /></MainLayout>} />
+        <Route path="/student/examination" element={<MainLayout role="student"><StudentExamination /></MainLayout>} />
         <Route path="/student/events" element={<MainLayout role="student"><StudentEvents /></MainLayout>} />
-        <Route path="/student/college-map" element={<MainLayout role="student"><StudentCollegeMap /></MainLayout>} />
-
         <Route path="/student/offers" element={<MainLayout role="student"><StudentOffers /></MainLayout>} />
         <Route path="/student/settings" element={<MainLayout role="student"><StudentSettings /></MainLayout>} />
-        
         <Route path="/student/academic-pdfs" element={<MainLayout role="student"><StudentAcademicPdfs /></MainLayout>} />
         <Route path="/student/profile" element={<MainLayout role="student"><StudentProfile /></MainLayout>} />
-        <Route path="/student/feedback" element={<MainLayout role="student"><StudentFeedback /></MainLayout>} />
 
         {/* Student Route Aliases */}
         <Route path="/student/calculator" element={<Navigate to="/student/sgpa-cgpa" replace />} />
-        <Route path="/student/exams" element={<Navigate to="/student/exam-schedule" replace />} />
-        <Route path="/student/map" element={<Navigate to="/student/college-map" replace />} />
-        <Route path="/student/reminders" element={<Navigate to="/student/reminder-center" replace />} />
+        <Route path="/student/exams" element={<Navigate to="/student/examination" replace />} />
+        <Route path="/student/exam-schedule" element={<Navigate to="/student/examination" replace />} />
+        <Route path="/student/exam-seat" element={<Navigate to="/student/examination?tab=settings" replace />} />
+        <Route path="/student/feedback" element={<Navigate to="/student/settings?tab=feedback" replace />} />
 
         <Route path="/student/*" element={<Navigate to="/student" replace />} />
         
-                  {/* CR Routes */}
-          <Route path="/cr" element={<MainLayout role="cr"><CrDashboard /></MainLayout>} />
-          <Route path="/cr/timetable" element={<MainLayout role="cr"><CrTimetable /></MainLayout>} />
-          <Route path="/cr/find-room" element={<MainLayout role="cr"><StudentFindRoom /></MainLayout>} />
-          <Route path="/cr/announcements" element={<MainLayout role="cr"><CrAnnouncements /></MainLayout>} />
-          <Route path="/cr/cancellations" element={<MainLayout role="cr"><CrCancellations /></MainLayout>} />
-          <Route path="/cr/reports" element={<MainLayout role="cr"><CrReports /></MainLayout>} />
-          <Route path="/cr/polls" element={<MainLayout role="cr"><CrPolls /></MainLayout>} />
-          <Route path="/cr/reminders" element={<MainLayout role="cr"><CrReminders /></MainLayout>} />
-          <Route path="/cr/submissions" element={<MainLayout role="cr"><CrSubmissions /></MainLayout>} />
-          <Route path="/cr/notifications" element={<MainLayout role="cr"><StudentNotifications /></MainLayout>} />
-          <Route path="/cr/settings" element={<MainLayout role="cr"><StudentSettings /></MainLayout>} />
-          <Route path="/cr/events" element={<MainLayout role="cr"><StudentEvents /></MainLayout>} />
-          <Route path="/cr/map" element={<MainLayout role="cr"><StudentCollegeMap /></MainLayout>} />
+        {/* CR Routes */}
+        <Route path="/cr" element={<MainLayout role="cr"><CrDashboard /></MainLayout>} />
+        <Route path="/cr/timetable" element={<MainLayout role="cr"><CrTimetable /></MainLayout>} />
+        <Route path="/cr/find-room" element={<MainLayout role="cr"><StudentFindRoom /></MainLayout>} />
+        <Route path="/cr/announcements" element={<MainLayout role="cr"><CrAnnouncements /></MainLayout>} />
+        <Route path="/cr/cancellations" element={<MainLayout role="cr"><CrCancellations /></MainLayout>} />
+        <Route path="/cr/reports" element={<MainLayout role="cr"><CrReports /></MainLayout>} />
+        <Route path="/cr/polls" element={<MainLayout role="cr"><CrPolls /></MainLayout>} />
+        <Route path="/cr/notifications" element={<MainLayout role="cr"><StudentNotifications /></MainLayout>} />
+        <Route path="/cr/settings" element={<MainLayout role="cr"><StudentSettings /></MainLayout>} />
+        <Route path="/cr/events" element={<MainLayout role="cr"><StudentEvents /></MainLayout>} />
+        <Route path="/cr/*" element={<Navigate to="/cr" replace />} />
         
-                  {/* Developer Routes */}
-          <Route path="/developer" element={<MainLayout role="developer"><DevDashboard /></MainLayout>} />
-          <Route path="/developer/users" element={<MainLayout role="developer"><DevUsers /></MainLayout>} />
-          <Route path="/developer/institutions" element={<MainLayout role="developer"><DevInstitutions /></MainLayout>} />
-          <Route path="/developer/sections" element={<MainLayout role="developer"><DevSections /></MainLayout>} />
-          <Route path="/developer/subjects" element={<MainLayout role="developer"><DevSubjects /></MainLayout>} />
-          <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
-          <Route path="/developer/rooms" element={<MainLayout role="developer"><DevRooms /></MainLayout>} />
-          <Route path="/developer/attendance" element={<MainLayout role="developer"><DevAttendance /></MainLayout>} />
-                    <Route path="/developer/resources" element={<MainLayout role="developer"><DevResources /></MainLayout>} />
-                    <Route path="/developer/events" element={<MainLayout role="developer"><DevEvents /></MainLayout>} />
-                    <Route path="/developer/offers" element={<MainLayout role="developer"><DevOffers /></MainLayout>} />
-                    <Route path="/developer/map" element={<MainLayout role="developer"><DevMap /></MainLayout>} />
-                    <Route path="/developer/settings" element={<MainLayout role="developer"><DevSettings /></MainLayout>} />
-
-                    <Route path="/developer/contacts" element={<MainLayout role="developer"><DevContacts /></MainLayout>} />
-                    <Route path="/developer/exams" element={<MainLayout role="developer"><DevExams /></MainLayout>} />
+        {/* Developer Routes */}
+        <Route path="/developer" element={<MainLayout role="developer"><DevDashboard /></MainLayout>} />
+        <Route path="/developer/users" element={<MainLayout role="developer"><DevUsers /></MainLayout>} />
+        <Route path="/developer/institutions" element={<MainLayout role="developer"><DevInstitutions /></MainLayout>} />
+        <Route path="/developer/sections" element={<MainLayout role="developer"><DevSections /></MainLayout>} />
+        <Route path="/developer/subjects" element={<MainLayout role="developer"><DevSubjects /></MainLayout>} />
+        <Route path="/developer/timetable" element={<MainLayout role="developer"><DevTimetable /></MainLayout>} />
+        <Route path="/developer/rooms" element={<MainLayout role="developer"><DevRooms /></MainLayout>} />
+        <Route path="/developer/attendance" element={<MainLayout role="developer"><DevAttendance /></MainLayout>} />
+        <Route path="/developer/resources" element={<MainLayout role="developer"><DevResources /></MainLayout>} />
+        <Route path="/developer/events" element={<MainLayout role="developer"><DevEvents /></MainLayout>} />
+        <Route path="/developer/offers" element={<MainLayout role="developer"><DevOffers /></MainLayout>} />
+        <Route path="/developer/settings" element={<MainLayout role="developer"><DevSettings /></MainLayout>} />
+        <Route path="/developer/contacts" element={<MainLayout role="developer"><DevContacts /></MainLayout>} />
+        <Route path="/developer/examination" element={<MainLayout role="developer"><DevExamination /></MainLayout>} />
+        <Route path="/developer/exams" element={<Navigate to="/developer/examination" replace />} />
                     <Route path="/developer/notifications" element={<MainLayout role="developer"><StudentNotifications /></MainLayout>} />
                     <Route path="/developer/pdfs" element={<MainLayout role="developer"><DevPDFs /></MainLayout>} />
                     <Route path="/developer/students" element={<MainLayout role="developer"><DevStudents /></MainLayout>} />

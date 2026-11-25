@@ -435,8 +435,8 @@ export const Register = () => {
                 type="submit"
                 disabled={loading}
                 style={{
-                  background: 'var(--gradient-brand)',
-                  boxShadow: '0 4px 18px rgba(113, 64, 216, 0.35)',
+                  background: '#2563EB',
+                  boxShadow: '0 4px 18px rgba(37, 99, 235, 0.38)',
                 }}
                 className="w-full flex justify-center items-center py-3.5 px-4 rounded-full text-sm font-bold text-white hover:scale-[1.01] hover:shadow-lg focus:outline-none transition disabled:opacity-70 cursor-pointer"
               >

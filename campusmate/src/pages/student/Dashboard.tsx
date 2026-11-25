@@ -3,9 +3,13 @@ import { Calendar, Clock, MapPin, Bell, FileText, ChevronRight, GraduationCap, U
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../services/apiClient';
 import { academicTermService } from '../../services/academicTermService';
+
+import { useDashboardEntrance } from '../../hooks/useDashboardEntrance';
 import studyosMark from '../../assets/studyos-mark.png';
 
 export const Dashboard = () => {
+
+  const animateIntro = useDashboardEntrance('student');
   const [profile, setProfile] = useState<any>(null);
   const [timetable, setTimetable] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +65,7 @@ export const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Main Column */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className={`lg:col-span-2 space-y-6 ${animateIntro ? "dash-anim-left" : ""}`}>
           
           {/* Quick Stats / Next Class */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -121,7 +125,7 @@ export const Dashboard = () => {
           </div>
 
           {/* Today's Timetable */}
-          <div className="bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl shadow-[var(--card-shadow)] overflow-hidden">
+          <div className={`${animateIntro ? "dash-anim-up" : ""} bg-[var(--glass-surface)] backdrop-blur-xl border border-[var(--color-border)] rounded-2xl shadow-[var(--card-shadow)] overflow-hidden`}>
             <div className="p-5 border-b border-[var(--color-border)] flex justify-between items-center">
               <h3 className="font-bold text-[var(--color-text)]">Today's Timetable</h3>
               <Link to="/student/timetable" className="text-xs font-semibold text-[#19A3E9] hover:underline">View All &rarr;</Link>

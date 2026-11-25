@@ -13,7 +13,7 @@ export const LandingHero: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[0.92fr_1.08fr] items-center gap-12 lg:gap-14">
           {/* Left Column: Copy & CTAs */}
           <div className="flex flex-col items-start text-left">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-[var(--color-border)] text-[var(--color-primary)] text-xs font-bold tracking-wider uppercase mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-[var(--color-border)] text-[#2563EB] text-xs font-bold tracking-wider uppercase mb-6">
               <span className="text-[var(--color-accent)] text-sm" aria-hidden="true">✦</span>
               <span>THE ULTIMATE STUDENT COMPANION</span>
             </div>
@@ -30,8 +30,8 @@ export const LandingHero: React.FC = () => {
               <Link
                 to="/student"
                 style={{
-                  background: 'var(--gradient-brand)',
-                  boxShadow: '0 10px 24px -8px var(--color-primary)',
+                  background: '#2563EB',
+                  boxShadow: '0 10px 24px -8px #2563EB',
                 }}
                 className="w-full sm:w-auto px-7 py-3.5 rounded-full text-white text-[15px] font-semibold transition-all duration-200 hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
@@ -41,7 +41,7 @@ export const LandingHero: React.FC = () => {
 
               <Link
                 to="/login"
-                className="w-full sm:w-auto px-7 py-3.5 rounded-full glass border border-[var(--color-border)] text-[var(--color-text)] text-[15px] font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--color-primary)] flex items-center justify-center"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-full glass border border-[var(--color-border)] text-[var(--color-text)] text-[15px] font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:border-[#2563EB] flex items-center justify-center"
               >
                 <span>Student Login</span>
               </Link>

@@ -69,7 +69,7 @@ export const StudyOSBand: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  background: 'var(--gradient-brand)',
+                  background: '#2563EB',
                   boxShadow: '0 4px 20px rgba(113, 64, 216, 0.4)',
                 }}
                 className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-white font-bold text-base hover:scale-[1.02] transition-all duration-200 shadow-lg min-h-[44px]"

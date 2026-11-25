@@ -59,9 +59,9 @@ export const FeaturesGrid: React.FC = () => {
       iconColor: 'text-[#19A3E9]',
     },
     {
-      title: 'Reminder Center',
-      desc: 'Stay on top of deadlines, exams, and assignment submissions.',
-      route: '/student/submissions',
+      title: 'Examination Hub',
+      desc: 'View published exam schedules and verify your exam seating.',
+      route: '/student/examination',
       icon: Bell,
       tileBg: 'bg-pink-500/15',
       iconColor: 'text-[#D946A8]',

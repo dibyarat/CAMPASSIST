@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { Users, Layout, GraduationCap, Database, UserPlus, FilePlus, Server, Activity, HardDrive, Loader2, Building2 } from 'lucide-react';
 import { apiClient } from '../../services/apiClient';
 
+import { useDashboardEntrance } from '../../hooks/useDashboardEntrance';
+
 export const Dashboard = () => {
+
+  const animateIntro = useDashboardEntrance('developer');
   const [stats, setStats] = useState({ users: 0, sections: 0, institutions: 0 });
     const [loading, setLoading] = useState(true);
   const [health, setHealth] = useState<{ loadTimeMs: number; dbLatencyMs: number | null; dbStatus: string; firestoreStatus: string; lastUpdated: string }>({ loadTimeMs: 0, dbLatencyMs: null, dbStatus: 'Connected', firestoreStatus: 'Connected', lastUpdated: '' });
@@ -50,7 +54,7 @@ export const Dashboard = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-10">
-      <div className="flex justify-between items-center bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] text-[var(--color-text)]">
+      <div className={`flex justify-between items-center ${animateIntro ? "dash-anim-top" : ""} bg-[var(--glass-surface)] backdrop-blur-xl p-6 rounded-2xl shadow-[var(--card-shadow)] border border-[var(--color-border)] text-[var(--color-text)]`}>
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text)]">Developer Dashboard</h1>
           <p className="text-[var(--color-muted)] font-medium mt-1">System Administration & Monitoring</p>
@@ -60,7 +64,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 ${animateIntro ? "dash-anim-stagger-1" : ""}`}>
         <div className="bg-[var(--glass-surface)] backdrop-blur-xl rounded-2xl p-5 border border-[var(--color-border)] shadow-[var(--card-shadow)] flex items-center justify-between text-[var(--color-text)] hover:-translate-y-0.5 transition-all">
           <div>
             <p className="text-xs font-semibold text-[var(--color-muted)] mb-1">Active Users</p>
