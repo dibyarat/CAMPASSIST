@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Building, Layers, BookOpen, Contact, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag, MessageSquare } from 'lucide-react';
+import { Settings, ArrowRightLeft, Menu, ChevronLeft, ChevronRight, LayoutDashboard, Calendar, Clock, MapPin, GraduationCap, FileText, UploadCloud, Building2, Building, Layers, BookOpen, Contact, Users, Bell, Search, LogOut, BarChart2, CalendarDays, Bookmark, Tag, MessageSquare, Sun, Moon } from 'lucide-react';
 
 // Public
 import { AnalyticsTracker } from './utils/AnalyticsTracker';
@@ -45,6 +45,15 @@ const SidebarLink = ({ to, icon: Icon, children, isCollapsed = false }: { to: st
 };
 
 const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode, role?: string }) => {
+  const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('campassist-theme');
+    if (saved === 'light' || saved === 'dark') return saved;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('campassist-theme', theme);
+  }, [theme]);
   const [actualRole, setActualRole] = React.useState<string>(() => localStorage.getItem('userRole') || 'STUDENT');
   const [userName, setUserName] = React.useState<string>(() => localStorage.getItem('userFullName') || 'Student');
   const normalizedAccountRole = actualRole.toUpperCase();
@@ -294,6 +303,15 @@ const MainLayout = ({ children, role = 'student' }: { children: React.ReactNode,
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[var(--glass-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:shadow-xs transition cursor-pointer"
+              aria-label="Toggle day/night theme"
+              title={theme === 'dark' ? 'Switch to Day mode' : 'Switch to Night mode'}
+            >
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
             <Link to={`/${role}/notifications`} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[var(--glass-surface)] border border-[var(--color-border)] flex items-center justify-center text-[var(--color-muted)] hover:text-[var(--color-text)] hover:shadow-xs transition relative" title="Notifications">
               <Bell size={17} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#D946A8] rounded-full ring-2 ring-white dark:ring-[#1B1733]"></span>
