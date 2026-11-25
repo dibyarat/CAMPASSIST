@@ -31,11 +31,11 @@ export const DashboardPreview: React.FC = () => {
   ];
 
   return (
-    <div className="relative w-full max-w-[960px] mx-auto mt-14 sm:mt-16 text-left">
+    <div className="relative w-full max-w-[700px] mx-auto mt-4 lg:mt-0 text-left">
       {/* Floating Card 1: Top Left (Free room found) - hidden < 1100px */}
       <div
-        className="hidden min-[1100px]:flex items-center gap-3.5 absolute -top-8 -left-12 z-20 bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl border border-white shadow-[0_12px_30px_rgba(26,134,224,0.18)] transition-transform hover:scale-105"
-        style={{ transform: 'rotate(-4deg)' }}
+        className="hidden xl:flex items-center gap-3 absolute -top-5 -left-5 z-20 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white shadow-[0_12px_30px_rgba(26,134,224,0.18)] transition-transform hover:scale-105"
+        style={{ transform: 'rotate(-3deg)' }}
       >
         <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-[#1A86E0] flex items-center justify-center shrink-0">
           <MapPin size={20} />
@@ -46,10 +46,10 @@ export const DashboardPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Card 2: Bottom Left (SGPA calculator) - hidden < 1100px */}
+      {/* Floating Card 2: Bottom Left (SGPA calculator) */}
       <div
-        className="hidden min-[1100px]:flex items-center gap-3.5 absolute -bottom-6 -left-10 z-20 bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl border border-white shadow-[0_12px_30px_rgba(122,95,208,0.18)] transition-transform hover:scale-105"
-        style={{ transform: 'rotate(3deg)' }}
+        className="hidden xl:flex items-center gap-3 absolute -bottom-5 -left-5 z-20 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white shadow-[0_12px_30px_rgba(122,95,208,0.18)] transition-transform hover:scale-105"
+        style={{ transform: 'rotate(2.5deg)' }}
       >
         <div className="w-10 h-10 rounded-xl bg-purple-100/80 text-[#7A5FD0] flex items-center justify-center shrink-0">
           <BarChart2 size={20} />
@@ -60,10 +60,10 @@ export const DashboardPreview: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Card 3: Top Right (Submission due) - hidden < 1100px */}
+      {/* Floating Card 3: Top Right (Submission due) */}
       <div
-        className="hidden min-[1100px]:flex items-center gap-3.5 absolute -top-6 -right-10 z-20 bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl border border-white shadow-[0_12px_30px_rgba(210,58,160,0.18)] transition-transform hover:scale-105"
-        style={{ transform: 'rotate(5deg)' }}
+        className="hidden xl:flex items-center gap-3 absolute -top-5 -right-5 z-20 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white shadow-[0_12px_30px_rgba(210,58,160,0.18)] transition-transform hover:scale-105"
+        style={{ transform: 'rotate(3deg)' }}
       >
         <div className="w-10 h-10 rounded-xl bg-pink-100/80 text-[#D23AA0] flex items-center justify-center shrink-0">
           <Bell size={20} />
