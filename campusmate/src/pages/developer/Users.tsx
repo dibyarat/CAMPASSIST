@@ -196,7 +196,14 @@ export const Users = () => {
     <div className="max-w-6xl mx-auto space-y-6 pb-10">
       <div className="flex justify-between items-center bg-white/60 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-100">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">
+              {filteredUsers.length === users.length
+                ? `${users.length} ${users.length === 1 ? 'User' : 'Users'}`
+                : `${filteredUsers.length} / ${users.length} Users`}
+            </span>
+          </div>
           <p className="text-slate-500 font-medium mt-1">Manage Students, CRs, and Developer accounts.</p>
         </div>
       </div>
