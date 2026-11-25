@@ -31,7 +31,7 @@ export const DashboardPreview: React.FC = () => {
   ];
 
   return (
-    <div className="relative w-full max-w-[700px] mx-auto mt-4 lg:mt-0 text-left">
+    <div className="relative w-full max-w-[700px] mx-auto mt-4 lg:mt-0 text-left animate-float-1">
       {/* Floating Card 1: Top Left (Free room found) - hidden < 1100px */}
       <div
         className="hidden xl:flex items-center gap-3 absolute -top-5 -left-5 z-20 bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-2xl border border-white shadow-[0_12px_30px_rgba(26,134,224,0.18)] transition-transform hover:scale-105"
