@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import logoIcon from '../../../assets/logo-icon.png';
+import { DashboardPreview } from './DashboardPreview';
 
 export const LandingHero: React.FC = () => {
   return (
@@ -116,6 +117,9 @@ export const LandingHero: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Dashboard Preview Component Embedded Below Hero */}
+        <DashboardPreview />
       </div>
     </section>
   );
