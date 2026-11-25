@@ -575,3 +575,49 @@ body.in-android-shell .site-footer {
 
 
 
+
+/* HayonCampus Floating Mockup Animations & Nav Underline */
+@keyframes floatStagger1 {
+  0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+  50% { transform: translateY(-12px) rotate(0.5deg); }
+}
+
+@keyframes floatStagger2 {
+  0%, 100% { transform: translateY(0) rotate(0.5deg); }
+  50% { transform: translateY(12px) rotate(-0.5deg); }
+}
+
+.animate-float-1 {
+  animation: floatStagger1 6s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: floatStagger2 7s ease-in-out infinite 1.5s;
+}
+
+.nav-item-underline {
+  position: relative;
+}
+
+.nav-item-underline::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-brand);
+  transition: width 0.25s ease;
+  border-radius: 2px;
+}
+
+.nav-item-underline:hover::after {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-1,
+  .animate-float-2 {
+    animation: none !important;
+  }
+}

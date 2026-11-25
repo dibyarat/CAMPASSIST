@@ -3,109 +3,113 @@ import { Link } from 'react-router-dom';
 import logoIcon from '../../../assets/logo-icon.png';
 
 export const LandingFooter: React.FC = () => {
-  // TODO: Replace support@campassist.me with your final production contact email if different
   const contactEmail = 'support@campassist.me';
 
   return (
-    <footer id="contact" className="bg-transparent border-t border-[var(--color-border)] py-16 sm:py-20 px-5 sm:px-8">
-      <div className="max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-14 border-b border-[var(--color-border)]">
-          {/* Brand Info */}
-          <div className="md:col-span-5">
-            <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="inline-flex items-center gap-3 mb-4 focus-visible:rounded-lg">
-              <img
-                src={logoIcon}
-                alt="CampAssist logo"
-                className="h-9 w-9 object-contain drop-shadow-xs"
-              />
-              <span className="font-wordmark font-extrabold text-2xl tracking-tight flex items-center">
-                <span className="text-[#19A3E9]">Camp</span><span className="text-[#D946A8]">Assist</span>
+    <footer id="contact" className="site-footer border-t border-[var(--color-border)] py-16 sm:py-20 px-5 sm:px-8 mt-8 bg-transparent">
+      <div className="max-w-[1240px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr_1fr] gap-12 pb-14 border-b border-[var(--color-border)]">
+          {/* Brand Column */}
+          <div className="flex flex-col items-start">
+            <Link
+              to="/"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="inline-flex items-center gap-3 mb-4 focus-visible:rounded-lg"
+            >
+              <div className="w-10 h-10 flex items-center justify-center rounded-xl glass border border-[var(--color-border)] shadow-sm">
+                <img src={logoIcon} alt="CampAssist logo" className="h-7 w-7 object-contain" />
+              </div>
+              <span className="font-wordmark font-extrabold text-[1.65rem] leading-none tracking-tight flex items-center">
+                <span className="text-[#19A3E9]">Camp</span>
+                <span className="text-[#D946A8]">Assist</span>
               </span>
             </Link>
-            <p className="text-sm sm:text-base text-[var(--color-muted)] max-w-sm leading-relaxed">
-              Everything important about your college life in one place. Powered by Hayoncampus.
+            <p className="text-sm sm:text-base text-[var(--color-muted)] max-w-xs leading-relaxed">
+              Everything important about your college life in one place. Part of the HayonCampus student ecosystem.
             </p>
           </div>
 
-          {/* Links Columns */}
-          <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
-            {/* Column 1: Product */}
-            <div>
-              <h4 className="font-bold text-[var(--color-text)] mb-4">Product</h4>
-              <ul className="space-y-3 font-medium text-[var(--color-muted)]">
-                <li>
-                  <a href="#features" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <Link to="/student/timetable" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
-                    Timetable
-                  </Link>
-                </li>
-                <li>
-                  <a
-                    href={import.meta.env.VITE_STUDYOS_URL || 'https://studyos.website'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block"
-                  >
-                    StudyOS
-                  </a>
-                </li>
-              </ul>
-            </div>
+          {/* Column 1: Platform */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-5">
+              Platform
+            </h4>
+            <ul className="space-y-3 text-sm text-[var(--color-muted)]">
+              <li>
+                <a href="#features" className="hover:text-[var(--color-text)] transition-colors">
+                  Features
+                </a>
+              </li>
+              <li>
+                <Link to="/student/timetable" className="hover:text-[var(--color-text)] transition-colors">
+                  Timetable Engine
+                </Link>
+              </li>
+              <li>
+                <Link to="/student/college-map" className="hover:text-[var(--color-text)] transition-colors">
+                  College Map
+                </Link>
+              </li>
+              <li>
+                <Link to="/student/offers" className="hover:text-[var(--color-text)] transition-colors">
+                  Student Offers
+                </Link>
+              </li>
+            </ul>
+          </div>
 
-            {/* Column 2: Campus */}
-            <div>
-              <h4 className="font-bold text-[var(--color-text)] mb-4">Campus</h4>
-              <ul className="space-y-3 font-medium text-[var(--color-muted)]">
-                <li>
-                  <Link to="/student/events" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
-                    Events
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/student/college-map" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
-                    College Map
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/student/offers" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
-                    Student Offers
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Column 3: Contact */}
-            <div>
-              <h4 className="font-bold text-[var(--color-text)] mb-4">Contact</h4>
-              <ul className="space-y-3 font-medium text-[var(--color-muted)]">
-                <li>
-                  <a href="#about" className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={`mailto:${contactEmail}`}
-                    className="hover:text-[var(--color-primary)] transition-colors py-1 inline-block break-all"
-                  >
-                    {contactEmail}
-                  </a>
-                </li>
-              </ul>
-            </div>
+          {/* Column 2: Ecosystem & Contact */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-5">
+              Ecosystem
+            </h4>
+            <ul className="space-y-3 text-sm text-[var(--color-muted)]">
+              <li>
+                <a
+                  href="https://hayoncampus.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--color-text)] transition-colors"
+                >
+                  HayonCampus Parent
+                </a>
+              </li>
+              <li>
+                <a
+                  href={import.meta.env.VITE_STUDYOS_URL || 'https://studyos.website'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-[var(--color-text)] transition-colors"
+                >
+                  StudyOS Workspace
+                </a>
+              </li>
+              <li>
+                <a href="#about" className="hover:text-[var(--color-text)] transition-colors">
+                  About CampAssist
+                </a>
+              </li>
+              <li>
+                <a href={`mailto:${contactEmail}`} className="hover:text-[var(--color-text)] transition-colors break-all">
+                  {contactEmail}
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="pt-8 text-center sm:text-left text-xs sm:text-sm font-medium text-[var(--color-muted)]">
-          &copy; {new Date().getFullYear()} CampAssist. Part of the Hayoncampus student ecosystem.
+        {/* Bottom Copyright Bar */}
+        <div className="pt-8 flex flex-wrap items-center justify-between gap-4 text-xs sm:text-sm text-[var(--color-muted)]">
+          <div>
+            © {new Date().getFullYear()} CampAssist • HayonCampus. All rights reserved.
+          </div>
+          <div className="flex items-center gap-3">
+            <span>Designed for higher education</span>
+            <span>•</span>
+            <span>CampAssist &amp; StudyOS</span>
+          </div>
         </div>
       </div>
     </footer>
   );
 };
-
